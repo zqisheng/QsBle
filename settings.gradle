@@ -1,0 +1,5 @@
+rootProject.name = "QsBle"
+include ':ble_core'
+include ':ble'
+include ':app'
+include ':ble_coroutines'

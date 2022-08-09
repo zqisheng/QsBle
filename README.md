@@ -1,5 +1,7 @@
 **QsBle是一款Android Ble框架**
 
+[点击下载演示demo](https://raw.githubusercontent.com/zqisheng/QsBle/master/screen/app-debug.apk)
+
 **特点**
 * 相比老的Ble框架,更契合现在Android开发人员的代码风格
 * 完全函数式编程,所有的Ble回调都是函数式的
@@ -12,7 +14,7 @@
 * 完善的异常处理机制,让你出现异常能够及时的定位问题
 * 核心代码都是使用Java编写,使用Java开发的人也不需要为Java不能使用而担心,并且Kotlin调用Java代码也提供了各种判空机制,让你不用为Kotlin调用Java代码的空指针而担心
 * 其它Ble框架有的,QsBle也都有
-* **最重要的一个特点是,作者这段时间是会一直维护的[狗头]**
+* **最重要的一个特点是,作者这段时间是会一直维护的**
 
 ### 使用前
 添加蓝牙扫描需要添加的权限,并且在运行时申请权限

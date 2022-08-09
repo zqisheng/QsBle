@@ -104,8 +104,10 @@ class QsBleIndexActivity : AppCompatActivity() {
     private fun requestPermission(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION
-                ,Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ,"android.permission.BLUETOOTH_SCAN"
             ,"android.permission.BLUETOOTH_ADVERTISE"
             ,"android.permission.BLUETOOTH_CONNECT"),1)

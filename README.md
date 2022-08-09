@@ -16,6 +16,23 @@
 * 其它Ble框架有的,QsBle也都有
 * **最重要的一个特点是,作者这段时间是会一直维护的**
 
+### 添加依赖
+```json
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+
+
+dependencies {
+    //QsBle必须添加的依赖
+   implementation 'com.github.zqisheng.QsBle:ble:1.0.0'
+    //如果要使用kotlin协程功能的话,就要添加下面的依赖,非必须
+   //implementation 'com.github.zqisheng.QsBle:ble_coroutines:1.0.0'
+}
+```
+
 ### 使用前
 添加蓝牙扫描需要添加的权限,并且在运行时申请权限
 ```xml
@@ -108,7 +125,7 @@ public class BleGlobalConfig {
     public static int connectTimeout = 7000;
     //默认的重连次数
     public static int reconnectCount = 0;
-    //默认的单个mtu包的写特征值失败重写次数
+    //默认的单个mtu包的写特征值超时时间
     public static int singlePkgWriteTimeout = 200;
     //最大的连接数量,当连接的设备超过最大连接设备数时,会按照设备连接时间断开最远的设备
     public static int maxConnectCount = 7;

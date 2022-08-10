@@ -57,7 +57,7 @@ QsBle.getInstance().init(Context context,Handler handler);
 ```
 *注1:QsBle的所有对Ble的操作和回调都是在一个线程中执行的,方式1的初始化是默认使用框架实现的线程对Ble进行操作.但是如果你想让Ble的所有操作都在自己指定的线程中执行,你也可以传入Handler,这样所有Ble的操作和回调都会在这个指定的Handler中调用了<br/>比如你想让所有的操作都在主线程中回调,你可以传一个主线程的Handler,这样所有Ble的操作和回调都是在主线程中回调了,**但是作者强烈不建议这样做***
 
-*注2:QsBle的初始化获取任何用户手机的隐私信息,所以放心在任何时候初始化*
+*注2:QsBle的初始化没有获取任何用户手机的隐私信息,所以放心在任何时候初始化*
 
 
 ### 简单使用
@@ -253,6 +253,10 @@ bleLifeScope.launch ({
 **链式操作中作用**:
 ```java
 QsBle.getInstance().chain()
+    /**
+     *假设连接设备花费了5000ms,timeout=4000ms,那么这条链就会被判断执行失败,但是设备的状态是连接的
+     *只是这条链是执行失败的
+    **/
     .connect(mac1).connectTimeout(7000).timeout(4000)...
     .start()
 ```
@@ -261,7 +265,7 @@ QsBle.getInstance().chain()
 bleLifeScope.launch ({
     QsBle.getInstance().chain().apply{
         //该协程最长会等待多久?
-        //最长的情况下等待4000*3=12000ms
+        //最长的情况下等待4000ms,只要超过了timeout的时间,还没有结果,就判断执行失败
         connect(mac1).timeout(4000).retry(3).await()
     }
 },onError = {

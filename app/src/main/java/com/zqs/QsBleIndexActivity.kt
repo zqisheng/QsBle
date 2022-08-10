@@ -45,7 +45,7 @@ class QsBleIndexActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             scan_device_con.removeAllViews()
-            ble.chain().startScan().filterName("TT").distinct().setScanStatusCallback {
+            ble.chain().startScan().distinct().setScanStatusCallback {
                 runOnUiThread {
                     if (it){
                         Toast.makeText(this@QsBleIndexActivity, "扫描已经开始", Toast.LENGTH_SHORT).show()

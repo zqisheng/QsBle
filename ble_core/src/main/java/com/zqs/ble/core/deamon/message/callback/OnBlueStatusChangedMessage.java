@@ -36,6 +36,7 @@ public class OnBlueStatusChangedMessage extends AbsBleMessage implements ICallba
         if (!isOpen){
             getSimpleBle().clearMessageIf((msg)->true, null);
             getSimpleBle().clearConnectStatus();
+            getSimpleBle().setScanState(false);
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){

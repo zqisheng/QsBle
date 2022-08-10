@@ -27,9 +27,9 @@ allprojects {
 
 dependencies {
     //QsBle必须添加的依赖
-   implementation 'com.github.zqisheng.QsBle:ble:1.0.0'
+   implementation 'com.github.zqisheng.QsBle:ble:1.0.1'
     //如果要使用kotlin协程功能的话,就要添加下面的依赖,非必须
-   //implementation 'com.github.zqisheng.QsBle:ble_coroutines:1.0.0'
+   //implementation 'com.github.zqisheng.QsBle:ble_coroutines:1.0.1'
 }
 ```
 

@@ -105,6 +105,214 @@ bleLifeScope.launch ({
 })
 ```
 *注:bleLifeScope是Lifecycle对象的扩展对象,在Lifecycle销毁时,bleLifeScope会自动中断内部的蓝牙协程操作,并且将协程销毁*
+### 关于协程和链式操作几个公共操作符的说明
+**这几个操作符的特点是所有链式操作都支持的**
+
+**操作符1:dump(boolean dump)**<br/>
+**含义:当前的链式段在执行失败时是否结束整条执行链,默认是true,结束整条链**<br/>
+**链式操作中作用**:
+```java
+//直接通过链式连接5个设备
+QsBle.getInstance().chain()
+    .connect(mac1)...
+    .connect(mac2).dump(false)...
+    .connect(mac3).dump(true)...//默认就是true,可以不设置
+    .connect(mac4)
+    .connect(mac5)
+    .start()
+```
+**说明:mac1连接成功后会去连接mac2,如果mac2连接失败,比如连接超时或者系统返回错误,那么mac3是否是否会继续连接,答案是会继续连接,因为mac2这条链的dump=false,即使连接失败也不会中断整条链,mac3会在mac2连接失败后继续执行连接操作,如果mac3也连接失败了呢?因为dump=true,直接中断整条链的执行,后面mac4和mac5就不会执行连接操作了**<br/>
+**协程中的作用:**
+```kotlin
+bleLifeScope.launch ({
+    //直接通过链式连接5个设备
+    QsBle.getInstance().chain().apply{
+        connect(mac1).await()
+        connect(mac2).dump(false).await()
+        connect(mac3).dump(true).await()//默认就是true,可以不设置
+        connect(mac4).await()
+        connect(mac5).await()
+    }
+},onError = {
+    //协程执行错误会调用,回调在主线程中
+},onStart = {
+   //协程执行开始之前会调用,回调在主线程中
+},onFinally = {
+    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+})
+```
+**说明:和上面链式执行流程是一样的,在协程中唯一不一样的就是,当这条链的dump=true时,发生连接失败,协程中会直接抛出异常,所以在执行到mac3连接失败时,会回调onErro函数,想要执行失败不抛出异常,那执行设备dump=false即可**<br/>
+
+**操作符2:async())**<br/>
+**含义:用过kotlin协程的应该都清楚这个操作符的作用,这个操作符的作用和协程的很相似,它的作用是将当前链异步执行,执行这条链的时候立刻返回成功执行下一条链,而不等待这条链的返回结果**<br/>
+**链式操作中作用**:
+```java
+//通过链式同时连接5个设备
+QsBle.getInstance().chain()
+    .connect(mac1).async()...
+    .connect(mac2).async().dump(false)...
+    //由于async是直接返回成功的,不存在失败,故dump的值多少对整条链的执行没有任何影响
+    .connect(mac3).async().dump(true)...//默认就是true,可以不设置
+    .connect(mac4).async()
+    .connect(mac5).async()
+    .start()
+```
+**协程中的作用:**
+```kotlin
+bleLifeScope.launch ({
+    //协程中使用需要注意,即使你调用了async()操作符
+    //但是后面接着调用了await()
+    //那async()操作符将会失效
+    /**
+     * 所以执行流程是先等mac1连接成功
+     * 当然mac1连接失败会直接抛出异常,因为dump默认为true
+     * 接着同时连接后面的四个设备
+     * */
+    QsBle.getInstance().chain().apply{
+        connect(mac1).async().await()
+        connect(mac2).async().start()
+        connect(mac3).async().start()
+        connect(mac4).async().start()
+        connect(mac5).async().start()
+    }
+},onError = {
+    //协程执行错误会调用,回调在主线程中
+},onStart = {
+   //协程执行开始之前会调用,回调在主线程中
+},onFinally = {
+    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+})
+```
+**操作符3:delay(long delay)**<br/>
+**含义:当前的链式段会延迟delay ms执行,注意指是当前链**<br/>
+**链式操作中作用**:
+```java
+QsBle.getInstance().chain()
+    .connect(mac1)...
+    .connect(mac2).delay(1000).dump(false)...
+    .connect(mac3).delay(2000).dump(true)...//默认就是true,可以不设置
+    .connect(mac4).delay(3000)
+    .connect(mac5).delay(4000)
+    .start()
+```
+**协程中的作用:**
+```kotlin
+bleLifeScope.launch ({
+    QsBle.getInstance().chain().apply{
+        connect(mac1).await()
+        connect(mac2).await()
+        //这个用的是kotlin协程提供的阻塞函数
+        delay(1000)
+        //这个使用的是框架自己实现的delay()操作符
+        //虽然它们执行的结果和时间都是一样的,但是要区分
+        connect(mac3).delay(2000).await()
+        connect(mac4).await()
+        delay(3000)
+        connect(mac5).delay(4000).await()
+    }
+},onError = {
+    //协程执行错误会调用,回调在主线程中
+},onStart = {
+   //协程执行开始之前会调用,回调在主线程中
+},onFinally = {
+    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+})
+```
+
+**操作符4:retry(int retry)**<br/>
+**含义:当前的链式段执行失败重写执行次数**<br/>
+**链式操作中作用**:
+```java
+QsBle.getInstance().chain()
+    .connect(mac1)...
+    //retry操作符作用的是当前的链
+    //如果mac2连接全部失败,会尝试重写连接3次
+    .connect(mac2).retry(3)...
+    //这里是对mac3重连3*3=9次,retry操作符是对当前链式段的重试
+    .connect(mac3).reConnectCount(3).retry(3)...//默认就是true,可以不设置
+    .start()
+```
+**协程中的作用:**
+```kotlin
+bleLifeScope.launch ({
+    QsBle.getInstance().chain().apply{
+        connect(mac1).await()
+        connect(mac2).retry(3).await()
+        connect(mac3).reConnectCount(3).retry(3).await()
+    }
+},onError = {
+    //协程执行错误会调用,回调在主线程中
+},onStart = {
+   //协程执行开始之前会调用,回调在主线程中
+},onFinally = {
+    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+})
+```
+**操作符5:timeout(long timeout)**<br/>
+**含义:当前的链式段在最大执行的时间,也就是超时时间**<br/>
+**链式操作中作用**:
+```java
+QsBle.getInstance().chain()
+    .connect(mac1).connectTimeout(7000).timeout(4000)...
+    .start()
+```
+**协程中的作用:**
+```kotlin
+bleLifeScope.launch ({
+    QsBle.getInstance().chain().apply{
+        //该协程最长会等待多久?
+        //最长的情况下等待4000*3=12000ms
+        connect(mac1).timeout(4000).retry(3).await()
+    }
+},onError = {
+    //协程执行错误会调用,回调在主线程中
+},onStart = {
+   //协程执行开始之前会调用,回调在主线程中
+},onFinally = {
+    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+})
+```
+**操作符6:withMac(String mac)**<br/>
+**含义:当前的链式段及其后面执行的链对应的设备mac地址,这个参数除了扫描的链不是必须,其它的链都是必须的,只不过有的是隐式有的是显式**<br/>
+
+**链式操作中作用**:
+```java
+//以下面一个不恰当的例子为例
+QsBle.getInstance().chain()
+            //假设将下面的注释去掉,这条链执行到这会直接报错,因为没有默认的mac传入
+            //.connect()
+            .connect(mac1)
+            .connect(mac2)
+            //value0是发给mac2的,因为上游传入的是mac2
+            .writeByLock(serviceUuid,chacUuid,value0).
+            //value1是发给mac1的
+            .writeByLock(serviceUuid,chacUuid,value1).withMac(mac1)
+            //value2是发给mac1的
+            .writeByLock(serviceUuid,chacUuid,value2)
+            //value3是发给mac1的
+            .writeByLock(serviceUuid,chacUuid,value3)
+            //value4是发给mac2的,因为切换了mac的值
+            .writeByLock(serviceUuid,chacUuid,value4).withMac(mac2)
+            //value5是发给mac2的
+            .writeByLock(serviceUuid,chacUuid,value5)
+            //连接mac3
+            .connect().withMac(mac3)
+            //value6是发给mac3的
+            .writeByLock(serviceUuid,chacUuid,value6)
+            //value7是发给mac3的
+            .writeByLock(serviceUuid,chacUuid,value7)
+            //断开mac3,因为上游传入的是mac3
+            .disconnect()
+            //断开mac2
+            .disconnect(mac2)
+            //断开mac3
+            .disconnect(mac3)
+            .start()
+```
+**协程中的作用:**
+```kotlin
+参考上面提供的样例
+```
 ### 全局默认配置
 *改变默认的全局配置,直接设置对应的值就行*
 ```java

@@ -17,6 +17,7 @@
 * **最重要的一个特点是,作者这段时间是会一直维护的**
 
 ### 添加依赖
+[![](https://jitpack.io/v/zqisheng/QsBle.svg)](https://jitpack.io/#zqisheng/QsBle)
 ```
 allprojects {
     repositories {

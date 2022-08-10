@@ -3,6 +3,7 @@ package com.zqs.ble.core.deamon.message.callback;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IMtuChangeCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -35,7 +36,9 @@ public class OnMtuChangedMessage extends AbsBleMessage implements ICallbackMessa
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(() -> String.format("OnMtuChangedMessage:mac=%s,status=%d,mtu=%d", device.getAddress(), status, mtu));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnMtuChangedMessage:mac=%s,status=%d,mtu=%d", device.getAddress(), status, mtu));
+        }
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if (getSimpleBle().getCurrentMtu() != mtu) {
                 clearBeforeMessageIf(msg ->

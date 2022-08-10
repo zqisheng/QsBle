@@ -17,7 +17,7 @@ class BleLifeScope() : Closeable {
 
     constructor(lifecycle: Lifecycle) : this() {
         lifecycle.addObserver(object : DestroyLifecycleObserver {
-            override fun onDestory() {
+            override fun onDestroy() {
                 close()
                 lifecycle.removeObserver(this)
             }

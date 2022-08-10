@@ -77,12 +77,6 @@ public class BleJellyBeanScanCallback implements BluetoothAdapter.LeScanCallback
                 }
                 IBleCallback c2 = simpleBle;
                 if (c2==null) return;
-                BleLog.d(()->{
-                    if (BleDebugConfig.isOpenScanLog){
-                        return String.format("scan device mac=%s,rssi=%d,scanRecord=%s", device.getAddress(), rssi, Utils.bytesToHexStr(scanRecord));
-                    }
-                    return "";
-                });
                 List<IScanCallback> scanCallbacks = c2.getScanCallbacks();
                 if (scanCallbacks != null) {
                     for (IScanCallback callback : scanCallbacks) {

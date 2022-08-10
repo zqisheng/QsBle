@@ -3,6 +3,7 @@ package com.zqs.ble.core.deamon.message.callback;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattService;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IServicesDiscoveredCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -31,15 +32,15 @@ public class OnServicesDiscoveredMessage extends AbsBleMessage implements ICallb
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(() -> {
+        if (BleDebugConfig.isOpenGattCallbackLog){
             StringBuilder sb = new StringBuilder();
             sb.append("[");
             for (BluetoothGattService service:services){
                 sb.append(service.getUuid().toString() + ",");
             }
             sb.append("]");
-            return String.format("OnServicesDiscoveredMessage:mac=%s,status=%d,services=%s", device.getAddress(), status, sb.toString());
-        });
+            BleLog.d(String.format("OnServicesDiscoveredMessage:mac=%s,status=%d,services=%s", device.getAddress(), status, sb.toString()));
+        }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
             globalBleCallback.onServicesDiscovered(device,status);

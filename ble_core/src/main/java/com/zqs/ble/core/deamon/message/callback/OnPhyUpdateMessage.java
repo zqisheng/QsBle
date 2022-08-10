@@ -2,6 +2,7 @@ package com.zqs.ble.core.deamon.message.callback;
 
 import android.bluetooth.BluetoothDevice;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IPhyUpdateCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -30,7 +31,9 @@ public class OnPhyUpdateMessage extends AbsBleMessage implements ICallbackMessag
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(() -> String.format("OnPhyUpdateMessage:mac=%s,txPhy=%d,rxPhy=%d,status=%d", device.getAddress(), txPhy, rxPhy, status));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnPhyUpdateMessage:mac=%s,txPhy=%d,rxPhy=%d,status=%d", device.getAddress(), txPhy, rxPhy, status));
+        }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
             globalBleCallback.onPhyUpdate(device,txPhy,rxPhy,status);

@@ -2,7 +2,8 @@ package com.zqs.ble.core.utils;
 
 import android.util.Log;
 
-import com.zqs.ble.core.BuildConfig;
+import com.zqs.ble.core.BleDebugConfig;
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.utils.fun.DebugFunction;
 
 /*
@@ -13,48 +14,6 @@ import com.zqs.ble.core.utils.fun.DebugFunction;
 public class BleLog {
 
     private static String LOG_TAG="FAST_IOT_BLE";
-
-    private final static boolean isPrintFunStack = true;
-
-    public static void i(DebugFunction debug){
-        if (BuildConfig.DEBUG){
-            try {
-                i(debug.debug());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void d(DebugFunction debug){
-        if (BuildConfig.DEBUG){
-            try {
-                d(debug.debug());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void w(DebugFunction debug){
-        if (BuildConfig.DEBUG){
-            try {
-                w(debug.debug());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void e(DebugFunction debug){
-        if (BuildConfig.DEBUG) {
-            try {
-                e(debug.debug());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     public static void i(String msg){
         i(LOG_TAG, msg);
@@ -73,31 +32,31 @@ public class BleLog {
     }
 
     public static void i(String tag,String msg){
-        if (BuildConfig.DEBUG){
+        if (BleDebugConfig.isDebug){
             Log.i(tag, getFuntionStack()+msg);
         }
     }
 
     public static void e(String tag,String msg){
-        if (BuildConfig.DEBUG){
+        if (BleDebugConfig.isDebug){
             Log.e(tag, getFuntionStack()+msg);
         }
     }
 
     public static void d(String tag,String msg) {
-        if (BuildConfig.DEBUG){
+        if (BleDebugConfig.isDebug){
             Log.d(tag, getFuntionStack()+msg);
         }
     }
 
     public static void w(String tag,String msg) {
-        if (BuildConfig.DEBUG){
+        if (BleDebugConfig.isDebug){
             Log.w(tag, getFuntionStack()+msg);
         }
     }
 
     private static String getFuntionStack(){
-        if (!isPrintFunStack) return "";
+        if (!BleDebugConfig.isPrintFunStack) return "";
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
         if (stackTraceElements != null) {
             for (StackTraceElement st : stackTraceElements) {

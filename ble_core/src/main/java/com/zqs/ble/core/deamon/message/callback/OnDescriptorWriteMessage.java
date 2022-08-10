@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattDescriptor;
 
 import com.zqs.ble.core.BleConst;
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IDescWriteCallback;
 import com.zqs.ble.core.callback.abs.INotifyFailCallback;
@@ -41,7 +42,9 @@ public class OnDescriptorWriteMessage extends AbsBleMessage implements ICallback
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(()->String.format("OnDescriptorWriteMessage:mac=%s,status=%d,chac=%s,desc=%s,value=%s",device.getAddress(),status,descriptor.getCharacteristic().getUuid().toString(),descriptor.getUuid().toString(),  Utils.bytesToHexStr(value)));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnDescriptorWriteMessage:mac=%s,status=%d,chac=%s,desc=%s,value=%s",device.getAddress(),status,descriptor.getCharacteristic().getUuid().toString(),descriptor.getUuid().toString(),  Utils.bytesToHexStr(value)));
+        }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
             globalBleCallback.onDescriptorWrite(device,descriptor,value,status);

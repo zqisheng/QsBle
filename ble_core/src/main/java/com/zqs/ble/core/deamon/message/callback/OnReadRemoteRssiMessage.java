@@ -2,6 +2,7 @@ package com.zqs.ble.core.deamon.message.callback;
 
 import android.bluetooth.BluetoothDevice;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IReadRssiCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -30,7 +31,9 @@ public class OnReadRemoteRssiMessage extends AbsBleMessage implements ICallbackM
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(() -> String.format("OnReadRemoteRssiMessage:mac=%s,status=%d,rssi=%d", device.getAddress(), status, rssi));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnReadRemoteRssiMessage:mac=%s,status=%d,rssi=%d", device.getAddress(), status, rssi));
+        }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
             globalBleCallback.onReadRemoteRssi(device,rssi,status);

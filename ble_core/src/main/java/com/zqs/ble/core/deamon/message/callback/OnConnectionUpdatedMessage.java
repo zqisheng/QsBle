@@ -2,6 +2,7 @@ package com.zqs.ble.core.deamon.message.callback;
 
 import android.bluetooth.BluetoothDevice;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.abs.IConnectionUpdatedCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
 import com.zqs.ble.core.utils.BleLog;
@@ -33,7 +34,9 @@ public class OnConnectionUpdatedMessage extends AbsBleMessage implements ICallba
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(() -> String.format("OnConnectionUpdatedMessage:mac=%s,interval=%d,latency=%d,timeout=%d,status=%d", device.getAddress(), interval, latency, timeout, status));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnConnectionUpdatedMessage:mac=%s,interval=%d,latency=%d,timeout=%d,status=%d", device.getAddress(), interval, latency, timeout, status));
+        }
         List<IConnectionUpdatedCallback> callbacks = getSimpleBle().getCallbackManage().getConnectionUpdatedCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){
             for (IConnectionUpdatedCallback callback:callbacks){

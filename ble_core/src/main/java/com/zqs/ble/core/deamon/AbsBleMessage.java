@@ -35,7 +35,7 @@ public abstract class AbsBleMessage extends AbsMessage {
     public void verifyMessage() {
         super.verifyMessage();
         if (BluetoothAdapter.checkBluetoothAddress(mac)==false){
-            throw new IllegalStateException("mac地址格式错误");
+            throw new IllegalStateException("MAC address format error");
         }
     }
 

@@ -1,5 +1,6 @@
 package com.zqs.ble.core.deamon.message.callback;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IBlueStatusCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -29,7 +30,9 @@ public class OnBlueStatusChangedMessage extends AbsBleMessage implements ICallba
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.i(()->String.format("OnBlueStatusChangedMessage:isOpen=%s", isOpen));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnBlueStatusChangedMessage:isOpen=%s", isOpen));
+        }
         if (!isOpen){
             getSimpleBle().clearMessageIf((msg)->true, null);
             getSimpleBle().clearConnectStatus();

@@ -39,7 +39,6 @@ public class ChainMessage extends AbsMessage {
     public void onHandlerMessage() {
         if (chains!=null&&!chains.isEmpty()){
             BaseChain chain = chains.poll();
-            BleLog.d(() -> String.format("链式执行:name=%s", chain.getClass().getName()));
             handleChain(chain);
         }else{
             if (handleStatusCallback!=null){
@@ -60,13 +59,11 @@ public class ChainMessage extends AbsMessage {
         QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
             @Override
             public void onHandlerMessage() {
-                BleLog.d(()->String.format("链式执行开始:name=%s,timeout=%d",chain.getClass().getName(),chain.getTimeout()==0?2000:chain.getTimeout()));
                 chain.onHandle();
                 if (!chain.isAlreadHandleTimeoutOption()){
                     QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
                         @Override
                         public void onHandlerMessage() {
-                            BleLog.d(() -> String.format("消息超时结束:name=%s", chain.getClass().getName()));
                             if (chain.isDump()){
                                 chains.clear();
                                 if (handleStatusCallback!=null){
@@ -88,7 +85,6 @@ public class ChainMessage extends AbsMessage {
 
     public void onChainHandleFail(BaseChain chain, Exception e) {
         if (chain.getRetry()>0){
-            BleLog.d(() -> String.format("消息retry:name=%s", chain.getClass().getName()));
             chain.letRetryLess();
             QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
                 @Override
@@ -99,7 +95,6 @@ public class ChainMessage extends AbsMessage {
         }else{
             //不是最后一个chain
             if (!chain.isDump()&&!chains.isEmpty()){
-                BleLog.d(() -> String.format("消息dump:name=%s,e=%s", chain.getClass().getName(),e.getClass().getName()));
                 onHandlerMessage();
             }else{
                 callReport(chain,e,false);

@@ -24,13 +24,13 @@ public class WriteFileMessage extends WriteChacLockMessage {
     private IOtaUpdateCallback innerOtaUpdateCallback = new IOtaUpdateCallback() {
         @Override
         public void onStart() {
-            BleLog.d("ota开始");
+            BleLog.d("ota start");
             otaUpdateCallback.onStart();
         }
 
         @Override
         public void onSuccess() {
-            BleLog.d("ota成功");
+            BleLog.d("ota success");
             try {
                 datasource.close();
             } catch (IOException e) {
@@ -42,13 +42,6 @@ public class WriteFileMessage extends WriteChacLockMessage {
         @Override
         public void onError(Exception e) {
             setShouldHandle(false);
-            BleLog.d(()->{
-                if (e==null){
-                    return "ota错误";
-                }else{
-                    return "ota错误:" + e.getMessage();
-                }
-            });
             try {
                 datasource.close();
             } catch (IOException e2) {
@@ -59,7 +52,7 @@ public class WriteFileMessage extends WriteChacLockMessage {
 
         @Override
         public void onProgress(int progress) {
-            BleLog.d("ota进度:"+progress);
+            BleLog.d("ota progress:"+progress);
             otaUpdateCallback.onProgress(progress);
         }
     };

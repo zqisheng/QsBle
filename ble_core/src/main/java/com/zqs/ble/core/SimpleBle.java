@@ -656,7 +656,6 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     @Override
     public void rmConnectStatusChangeCallback(String mac, IConnectStatusChangeCallback callback) {
         assertCurrentIsSenderThread();
-        BleLog.d("准备移除消息rmConnectStatusChangeCallback");
         callbackManage.rmConnectStatusChangeCallback(mac,callback);
     }
 
@@ -717,7 +716,6 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     @Override
     public void rmServicesDiscoveredCallback(String mac, IServicesDiscoveredCallback callback) {
         assertCurrentIsSenderThread();
-        BleLog.d("准备移除消息rmServicesDiscoveredCallback");
         callbackManage.rmServicesDiscoveredCallback(mac,callback);
     }
 

@@ -14,9 +14,7 @@ class QsBleApplicaion: Application() {
     override fun onCreate() {
         super.onCreate()
         QsBle.getInstance().init(this)
-        BleDebugConfig.isOpenBleLooperLog = true
-        BleDebugConfig.isOpenScanLog = true
-        BleDebugConfig.isOpenWriteLog = true
+        QsBle.getInstance().setDebug(true)
     }
 
 

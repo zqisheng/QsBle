@@ -3,7 +3,9 @@ package com.zqs.ble.core.deamon.message.option;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.deamon.AbsBleMessage;
+import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.core.utils.Utils;
 
 import java.util.UUID;
@@ -54,6 +56,9 @@ public class WriteChacMessage extends AbsBleMessage implements IOptionMessage  {
         if (characteristic!=null){
             characteristic.setValue(sendPkg);
             characteristic.setWriteType(writeType);
+            if (BleDebugConfig.isOpenWriteLog){
+                BleLog.d(String.format("set chac:%s,%s", chacUuid.toString(), Utils.bytesToHexStr(sendPkg)));
+            }
             boolean result = gatt.writeCharacteristic(characteristic);
             //方法返回层面的重写
             if (!result){

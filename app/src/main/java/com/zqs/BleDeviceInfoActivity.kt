@@ -1,5 +1,6 @@
 package com.zqs
 
+import android.Manifest
 import android.bluetooth.BluetoothGattService
 import android.os.Build
 import android.os.Bundle
@@ -37,6 +38,7 @@ class BleDeviceInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ble_device_info)
         mac = intent.getStringExtra("mac")!!
+        requestPermission()
         initBleListener()
         setServiceValue()
         macaddress.text=mac
@@ -400,6 +402,21 @@ class BleDeviceInfoActivity : AppCompatActivity() {
     private fun hideLoading(){
         loadingDialog?.dismiss()
         loadingDialog=null
+    }
+
+
+
+    private fun requestPermission(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+                ,"android.permission.BLUETOOTH_SCAN"
+                ,"android.permission.BLUETOOTH_ADVERTISE"
+                ,"android.permission.BLUETOOTH_CONNECT"),1)
+        }
     }
 
 }

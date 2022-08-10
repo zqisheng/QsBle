@@ -79,7 +79,7 @@ public class BleLollipopScanCallback extends ScanCallback {
                 IBleCallback c2 = simpleBle;
                 if (c2 == null) return;
                 if (BleDebugConfig.isOpenScanLog){
-                    BleLog.d(()->String.format("scan device mac=%s,rssi=%d,scanRecord=%s", result.getDevice().getAddress(), result.getRssi(), Utils.bytesToHexStr(result.getScanRecord().getBytes())));
+                    BleLog.d(String.format("scan device mac=%s,rssi=%d,scanRecord=%s", result.getDevice().getAddress(), result.getRssi(), Utils.bytesToHexStr(result.getScanRecord().getBytes())));
                 }
                 List<IScanCallback> scanCallbacks = c2.getScanCallbacks();
                 if (scanCallbacks != null) {

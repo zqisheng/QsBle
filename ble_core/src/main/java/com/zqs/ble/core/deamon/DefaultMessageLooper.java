@@ -1,5 +1,6 @@
 package com.zqs.ble.core.deamon;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.api.IBleMessageSender;
 import com.zqs.ble.core.api.IMessageLooper;
 import com.zqs.ble.core.deamon.message.callback.ICallbackMessage;
@@ -28,9 +29,7 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     private Thread thread;
     private volatile boolean isPrepareWait = false;
-    protected Runnable startLooper = () -> {
-        loop();
-    };
+    protected Runnable startLooper = this::loop;
 
     public DefaultMessageLooper(){
         this.thread = new Thread() {
@@ -80,12 +79,16 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
                 lock.unlock();
             } else {
                 if (minHandlerTime==Long.MAX_VALUE) {
-                    BleLog.d("BleThread->NoDelay await");
+                    if (BleDebugConfig.isOpenBleThreadLog){
+                        BleLog.d("BleThread->NoDelay await");
+                    }
                     block(Long.MAX_VALUE);
                 } else {
                     long awaitTime = minHandlerTime - System.currentTimeMillis();
                     minHandlerTime = Long.MAX_VALUE;
-                    BleLog.d("BleThread->toAwait:" + awaitTime + "ms");
+                    if (BleDebugConfig.isOpenBleThreadLog){
+                        BleLog.d("BleThread->toAwait:" + awaitTime + "ms");
+                    }
                     if (awaitTime >=0) {
                         block(awaitTime);
                     }
@@ -245,7 +248,9 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
                     }
                     delayCacheMessage.add(msg);
                 }
-                BleLog.d(String.format("BleThread->%s,time=%d,minHandlerTime=%d,currentMinAwaitTime=%d", msg.getClass().getSimpleName(), System.currentTimeMillis(), minHandlerTime, minHandlerTime - System.currentTimeMillis()));
+                if (BleDebugConfig.isOpenBleThreadLog){
+                    BleLog.d(String.format("BleThread->%s,time=%d,minHandlerTime=%d,currentMinAwaitTime=%d", msg.getClass().getSimpleName(), System.currentTimeMillis(), minHandlerTime, minHandlerTime - System.currentTimeMillis()));
+                }
             } catch (Exception e) {
                 if (AbsBleMessage.simpleBle.isStrictMode()){
                     throw e;
@@ -303,7 +308,9 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     @Override
     public void sendMessage(AbsMessage message) {
-        BleLog.d(String.format("BleThread->sendMessage:%s", message.getClass().getName()));
+        if (BleDebugConfig.isOpenBleThreadLog){
+            BleLog.d(String.format("BleThread->sendMessage:%s", message.getClass().getName()));
+        }
         if (message instanceof IFrontMessage) {
             message.setAddQueueTime(System.currentTimeMillis());
             frontMessages.add(message);
@@ -319,13 +326,17 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     @Override
     public void rmMessage(AbsMessage message) {
-        BleLog.d(String.format("BleThread->rmMessage:%s", message.getClass().getSimpleName()));
+        if (BleDebugConfig.isOpenBleThreadLog){
+            BleLog.d(String.format("BleThread->rmMessage:%s", message.getClass().getSimpleName()));
+        }
         message.letDead();
     }
 
     @Override
     public void rmMessages(String token) {
-        BleLog.d("BleThread->rmMessages token=" + token);
+        if (BleDebugConfig.isOpenBleThreadLog){
+            BleLog.d("BleThread->rmMessages token=" + token);
+        }
         frontMessages.add(new AbsMessage() {
             @Override
             public void onHandlerMessage() {
@@ -346,7 +357,9 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     @Override
     public void sendMessageByDelay(AbsMessage message, long delay) {
-        BleLog.d(String.format("BleThread->sendMessageByDelay:%s,delay=%d", message.getClass().getName(),delay));
+        if (BleDebugConfig.isOpenBleThreadLog){
+            BleLog.d(String.format("BleThread->sendMessageByDelay:%s,delay=%d", message.getClass().getName(),delay));
+        }
         message.setHandleTime(System.currentTimeMillis() + delay);
         delayMessages.add(message);
         awake(thread);
@@ -359,7 +372,9 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     @Override
     public void rmMessagesByMac(String mac) {
-        BleLog.d(String.format("BleThread->rmMessagesByMac:%s", mac));
+        if (BleDebugConfig.isOpenBleThreadLog){
+            BleLog.d(String.format("BleThread->rmMessagesByMac:%s", mac));
+        }
         AbsMessage message = new AbsMessage() {
             @Override
             public void onHandlerMessage() {

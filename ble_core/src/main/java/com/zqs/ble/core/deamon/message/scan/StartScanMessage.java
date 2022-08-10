@@ -52,7 +52,7 @@ public class StartScanMessage extends AbsBleMessage implements IBleScanMessage {
     public void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (getSimpleBle().isScaning()){
-            BleLog.e("当前正在扫描中,请先停止扫描");
+            BleLog.e("Scanning, please stop scanning first");
             return;
         }
         if (wrapFilter!=null){

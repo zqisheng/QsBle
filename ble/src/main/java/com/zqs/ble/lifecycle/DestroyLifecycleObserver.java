@@ -11,5 +11,5 @@ import androidx.lifecycle.OnLifecycleEvent;
  */
 public interface DestroyLifecycleObserver extends LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    void onDestory();
+    void onDestroy();
 }

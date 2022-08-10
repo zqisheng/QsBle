@@ -6,7 +6,11 @@ package com.zqs.ble.core;
  *   @description
  */
 public class BleDebugConfig {
+    public static boolean isDebug = false;
+    public static boolean isPrintFunStack = false;
+    public static boolean isOpenBleThreadLog = false;
     public static boolean isOpenScanLog = false;
     public static boolean isOpenBleLooperLog = false;
-    public static boolean isOpenWriteLog = true;
+    public static boolean isOpenWriteLog = false;
+    public static boolean isOpenGattCallbackLog = false;
 }

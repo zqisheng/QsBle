@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Handler;
 
 import com.zqs.ble.core.BleConst;
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.SimpleBle;
 import com.zqs.ble.core.api.IBleMessageSender;
@@ -129,6 +130,16 @@ public final class QsBle {
         }
         ble.init(context,new DefaultBleOption(sender), new DefaultBleCallbackManage(),sender);
         return true;
+    }
+
+    public void setDebug(boolean isDebug){
+        BleDebugConfig.isDebug = isDebug;
+        BleDebugConfig.isPrintFunStack = isDebug;
+        BleDebugConfig.isOpenBleThreadLog = isDebug;
+        BleDebugConfig.isOpenScanLog = isDebug;
+        BleDebugConfig.isOpenBleLooperLog = isDebug;
+        BleDebugConfig.isOpenWriteLog = isDebug;
+        BleDebugConfig.isOpenGattCallbackLog = isDebug;
     }
 
     public void setMultiPackageAssembly(@NonNull String mac, @NonNull IMultiPackageAssembly parser){

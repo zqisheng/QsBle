@@ -3,6 +3,7 @@ package com.zqs.ble.core.deamon.message.callback;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IChacWriteCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -34,7 +35,9 @@ public class OnCharacteristicWriteMessage extends AbsBleMessage implements ICall
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(()->String.format("OnCharacteristicWriteMessage:mac=%s,status=%d,chac=%s,value=%s",device.getAddress(),status,characteristic.getUuid().toString(),  Utils.bytesToHexStr(value)));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnCharacteristicWriteMessage:mac=%s,status=%d,chac=%s,value=%s", device.getAddress(), status, characteristic.getUuid().toString(), Utils.bytesToHexStr(value)));
+        }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
             globalBleCallback.onCharacteristicWrite(device,characteristic,status);

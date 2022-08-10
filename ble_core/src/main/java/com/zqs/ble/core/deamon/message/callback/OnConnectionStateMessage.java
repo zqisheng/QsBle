@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothProfile;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IConnectStatusChangeCallback;
@@ -35,7 +36,9 @@ public class OnConnectionStateMessage extends AbsBleMessage implements ICallback
     @Override
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
-        BleLog.d(() -> String.format("OnConnectionStateMessage:mac=%s,status=%s,profileState=%s", device.getAddress(), status, profileState));
+        if (BleDebugConfig.isOpenGattCallbackLog){
+            BleLog.d(String.format("OnConnectionStateMessage:mac=%s,status=%s,profileState=%s", device.getAddress(), status, profileState));
+        }
         boolean isConnect = profileState == BluetoothProfile.STATE_CONNECTED;
         getSimpleBle().updateConnectStatus(getMac(), isConnect,status,profileState);
         if (isConnect){

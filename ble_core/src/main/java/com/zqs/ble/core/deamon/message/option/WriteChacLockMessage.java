@@ -3,6 +3,7 @@ package com.zqs.ble.core.deamon.message.option;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.callback.abs.IChacWriteCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -80,9 +81,11 @@ public class WriteChacLockMessage extends AbsBleMessage implements IOptionMessag
         if (!Utils.uuidIsSame(chac.getUuid(), chacUuid)) {
             return;
         }
-        BleLog.d(String.format("收到写特征值状态回调:value=%s,sendPkg=%s", Utils.bytesToHexStr(value), Utils.bytesToHexStr(sendPkg)));
+        if (BleDebugConfig.isOpenWriteLog){
+            BleLog.d(String.format("write lock chac callback:value=%s,sendPkg=%s", Utils.bytesToHexStr(value), Utils.bytesToHexStr(sendPkg)));
+        }
         if (!Arrays.equals(sendPkg, value)) {
-            BleLog.d(String.format("收到过期的特征值状态回调:value=%s,sendPkg=%s", Utils.bytesToHexStr(value), Utils.bytesToHexStr(sendPkg)));
+            BleLog.d(String.format("Received expired write lock chac callback:value=%s,sendPkg=%s", Utils.bytesToHexStr(value), Utils.bytesToHexStr(sendPkg)));
             return;
         }
         writeCallbackStatus = status;
@@ -120,7 +123,7 @@ public class WriteChacLockMessage extends AbsBleMessage implements IOptionMessag
     @Override
     public void onHandlerMessage() {
         if (!getSimpleBle().isConnect(getMac())){
-            BleLog.d(String.format("设备未连接WriteChacLockMessage:%s",getMac()));
+            BleLog.d(String.format("device is disconnect:%s",getMac()));
             setShouldHandle(false);
             return;
         }
@@ -157,7 +160,9 @@ public class WriteChacLockMessage extends AbsBleMessage implements IOptionMessag
         if (gatt == null) return;
         BluetoothGattCharacteristic characteristic = getGattCharacteristic(serviceUuid, chacUuid);
         if (characteristic != null) {
-            BleLog.d(String.format("设置特征值:%s,%s", chacUuid.toString(), Utils.bytesToHexStr(data)));
+            if (BleDebugConfig.isOpenWriteLog){
+                BleLog.d(String.format("set chac by lock:%s,%s", chacUuid.toString(), Utils.bytesToHexStr(data)));
+            }
             characteristic.setWriteType(writeType);
             characteristic.setValue(data);
             boolean result = gatt.writeCharacteristic(characteristic);

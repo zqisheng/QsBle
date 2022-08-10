@@ -1,5 +1,7 @@
 **QsBle是一款Android Ble框架**
 
+[github链接](https://github.com/zqisheng/QsBle)
+
 [点击下载演示demo](https://raw.githubusercontent.com/zqisheng/QsBle/master/screen/app-debug.apk)
 
 **特点**
@@ -58,7 +60,7 @@ QsBle.getInstance().init(Context context,Handler handler);
 ```
 *注1:QsBle的所有对Ble的操作和回调都是在一个线程中执行的,方式1的初始化是默认使用框架实现的线程对Ble进行操作.但是如果你想让Ble的所有操作都在自己指定的线程中执行,你也可以传入Handler,这样所有Ble的操作和回调都会在这个指定的Handler中调用了<br/>比如你想让所有的操作都在主线程中回调,你可以传一个主线程的Handler,这样所有Ble的操作和回调都是在主线程中回调了,**但是作者强烈不建议这样做***
 
-*注2:QsBle的初始化没有获取任何用户手机的隐私信息,所以放心在任何时候初始化*
+*注2:QsBle的初始化获取任何用户手机的隐私信息,所以放心在任何时候初始化*
 
 
 ### 简单使用
@@ -92,10 +94,32 @@ QsBle.getInstance().chain(mac)
 //使用kotlin协程实现方式2的操作
 bleLifeScope.launch ({
     val chain = ble.chain(mac)
-    chain.connect().await()
-    chain.openNotify().await()
-    chain.requestConnectionToHigh().await()
-    chain.writeByLock().await()
+    //true:连接成功
+    val isConnect:Boolean=chain.connect().reConnectCount(3).connectTimeout(7000).dump(false).await()
+    //三种值:notification,indication,disable,前两种都是通知已经打开
+    val notifyStatus1:String?=chain.openNotify(serviceUuid,notifyUuid).dump(false).retry(3).await()
+    val notifyStatus2:String?=chain.cancelNotify().await()
+    //new int[]{interval, latency, timeout}
+    //只要不空都是设置成功
+    val status1:IntArray?=chain.requestConnectionToLowPower().dump(false).await()
+    val status2:IntArray?=chain.requestConnectionToBalanced().dump(false).await()
+    val status3:IntArray?=chain.requestConnectionToHigh().dump(false).await()
+    //true:写成功 false:写失败
+    val status4:Boolean=chain.writeByLock(serviceUuid,writeUuid,value).dump(false).await()
+    //true:写成功 false:写失败
+    //norsp的速度比没有norsp发送速度快大概3-30倍,和设备的连接参数有关
+    val status5:Boolean=chain.writeByLockNoRsp(serviceUuid,writeUuid,value).dump(false).await()
+    //返回该特征值在设备中的值
+    val readValue:ByteArray?=chain.read(serviceUuid,readUuid).dump(false).await()
+    //返回该描述在设备中的值
+    val readDescValue:ByteArray?=chain.readDesc(serviceUuid,readUuid,descUuid).dump(false).await()
+    //new int[]{txPhy,rxPhy}
+    val phy:IntArray?=chain.readPhy().await()
+    //直接返回rssi
+    val rssi:Int?=chain.readRssi().await()
+    //返回设置成功的mtu,为null就是设置失败
+    val mtu:Int?=chain.requestMtu(517).await()
+    //断开连接
     chain.disconnect().await()
 },onError = {
     //协程执行错误会调用,回调在主线程中
@@ -107,11 +131,11 @@ bleLifeScope.launch ({
 ```
 *注:bleLifeScope是Lifecycle对象的扩展对象,在Lifecycle销毁时,bleLifeScope会自动中断内部的蓝牙协程操作,并且将协程销毁*
 ### 关于协程和链式操作几个公共操作符的说明
-**这几个操作符的特点是所有链式操作都支持的**
+**这几个操作符的特点是所有链式操作都支持的,将各个操作符一起使用,能解决一些很复杂的场景**
 
 **操作符1:dump(boolean dump)**<br/>
 **含义:当前的链式段在执行失败时是否结束整条执行链,默认是true,结束整条链**<br/>
-**链式操作中作用**:
+**链式操作**:
 ```java
 //直接通过链式连接5个设备
 QsBle.getInstance().chain()
@@ -123,7 +147,7 @@ QsBle.getInstance().chain()
     .start()
 ```
 **说明:mac1连接成功后会去连接mac2,如果mac2连接失败,比如连接超时或者系统返回错误,那么mac3是否是否会继续连接,答案是会继续连接,因为mac2这条链的dump=false,即使连接失败也不会中断整条链,mac3会在mac2连接失败后继续执行连接操作,如果mac3也连接失败了呢?因为dump=true,直接中断整条链的执行,后面mac4和mac5就不会执行连接操作了**<br/>
-**协程中的作用:**
+**协程:**
 ```kotlin
 bleLifeScope.launch ({
     //直接通过链式连接5个设备
@@ -146,7 +170,7 @@ bleLifeScope.launch ({
 
 **操作符2:async())**<br/>
 **含义:用过kotlin协程的应该都清楚这个操作符的作用,这个操作符的作用和协程的很相似,它的作用是将当前链异步执行,执行这条链的时候立刻返回成功执行下一条链,而不等待这条链的返回结果**<br/>
-**链式操作中作用**:
+**链式操作**:
 ```java
 //通过链式同时连接5个设备
 QsBle.getInstance().chain()
@@ -158,7 +182,7 @@ QsBle.getInstance().chain()
     .connect(mac5).async()
     .start()
 ```
-**协程中的作用:**
+**协程:**
 ```kotlin
 bleLifeScope.launch ({
     //协程中使用需要注意,即使你调用了async()操作符
@@ -186,7 +210,7 @@ bleLifeScope.launch ({
 ```
 **操作符3:delay(long delay)**<br/>
 **含义:当前的链式段会延迟delay ms执行,注意指是当前链**<br/>
-**链式操作中作用**:
+**链式操作**:
 ```java
 QsBle.getInstance().chain()
     .connect(mac1)...
@@ -196,7 +220,7 @@ QsBle.getInstance().chain()
     .connect(mac5).delay(4000)
     .start()
 ```
-**协程中的作用:**
+**协程:**
 ```kotlin
 bleLifeScope.launch ({
     QsBle.getInstance().chain().apply{
@@ -222,7 +246,7 @@ bleLifeScope.launch ({
 
 **操作符4:retry(int retry)**<br/>
 **含义:当前的链式段执行失败重写执行次数**<br/>
-**链式操作中作用**:
+**链式操作**:
 ```java
 QsBle.getInstance().chain()
     .connect(mac1)...
@@ -233,7 +257,7 @@ QsBle.getInstance().chain()
     .connect(mac3).reConnectCount(3).retry(3)...//默认就是true,可以不设置
     .start()
 ```
-**协程中的作用:**
+**协程:**
 ```kotlin
 bleLifeScope.launch ({
     QsBle.getInstance().chain().apply{
@@ -251,7 +275,7 @@ bleLifeScope.launch ({
 ```
 **操作符5:timeout(long timeout)**<br/>
 **含义:当前的链式段在最大执行的时间,也就是超时时间**<br/>
-**链式操作中作用**:
+**链式操作**:
 ```java
 QsBle.getInstance().chain()
     /**
@@ -261,7 +285,7 @@ QsBle.getInstance().chain()
     .connect(mac1).connectTimeout(7000).timeout(4000)...
     .start()
 ```
-**协程中的作用:**
+**协程:**
 ```kotlin
 bleLifeScope.launch ({
     QsBle.getInstance().chain().apply{
@@ -280,7 +304,7 @@ bleLifeScope.launch ({
 **操作符6:withMac(String mac)**<br/>
 **含义:当前的链式段及其后面执行的链对应的设备mac地址,这个参数除了扫描的链不是必须,其它的链都是必须的,只不过有的是隐式有的是显式**<br/>
 
-**链式操作中作用**:
+**链式操作**:
 ```java
 //以下面一个不恰当的例子为例
 QsBle.getInstance().chain()
@@ -314,7 +338,7 @@ QsBle.getInstance().chain()
             .disconnect(mac3)
             .start()
 ```
-**协程中的作用:**
+**协程:**
 ```kotlin
 参考上面提供的样例
 ```

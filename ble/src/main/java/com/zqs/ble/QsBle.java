@@ -119,6 +119,7 @@ public final class QsBle {
      * @return
      */
     public boolean init(@NonNull Context context, Handler handler) {
+        if (ble!=null) throw new IllegalStateException("QsBle already init");
         if (BluetoothAdapter.getDefaultAdapter()==null) return false;
         this.context = context;
         ble = new SimpleBle();

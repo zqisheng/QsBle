@@ -1,6 +1,7 @@
 package com.zqs.ble.coroutines.await
 
 import com.zqs.ble.BaseChain
+import com.zqs.ble.BleChain
 import com.zqs.ble.BleChainBuilder
 import com.zqs.ble.message.builder.*
 import com.zqs.ble.message.pojo.Entry
@@ -15,9 +16,9 @@ import kotlin.coroutines.resumeWithException
  *   @description 
  */
 
-private fun BleChainBuilder<*>.getBuildChains(): LinkedList<BaseChain<*>> {
+private fun getBuildChains(builder:BleChainBuilder<*,*,*>): LinkedList<BaseChain<*>> {
     val chain: LinkedList<BaseChain<*>> = LinkedList()
-    this.chains.forEach {
+    builder.chains.forEach {
         chain.add(it.build())
     }
     return chain
@@ -25,7 +26,7 @@ private fun BleChainBuilder<*>.getBuildChains(): LinkedList<BaseChain<*>> {
 
 suspend fun ConnectChainBuilder.await(): Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -54,7 +55,7 @@ suspend fun ConnectChainBuilder.await(): Boolean {
 
 suspend fun DisconnectChainBuilder.await():Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -83,7 +84,7 @@ suspend fun DisconnectChainBuilder.await():Boolean {
 
 suspend fun CancelNotifyChainBuilder.await(): String? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -112,7 +113,7 @@ suspend fun CancelNotifyChainBuilder.await(): String? {
 
 suspend fun OpenNotifyChainBuilder.await(): String? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -141,7 +142,7 @@ suspend fun OpenNotifyChainBuilder.await(): String? {
 
 suspend fun ReadChacChainBuilder.await(): ByteArray? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -170,7 +171,7 @@ suspend fun ReadChacChainBuilder.await(): ByteArray? {
 
 suspend fun ReadDescChainBuilder.await(): ByteArray? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -199,7 +200,7 @@ suspend fun ReadDescChainBuilder.await(): ByteArray? {
 
 suspend fun ReadPhyChainBuilder.await(): IntArray? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -228,7 +229,7 @@ suspend fun ReadPhyChainBuilder.await(): IntArray? {
 
 suspend fun ReadRssiChainBuilder.await(): Int? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -257,7 +258,7 @@ suspend fun ReadRssiChainBuilder.await(): Int? {
 
 suspend fun RequestMtuChainBuilder.await(): Int? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -286,7 +287,7 @@ suspend fun RequestMtuChainBuilder.await(): Int? {
 
 suspend fun SetConnectionPriorityChainBuilder.await(): IntArray? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -315,7 +316,7 @@ suspend fun SetConnectionPriorityChainBuilder.await(): IntArray? {
 
 suspend fun SetPhyChainBuilder.await(): IntArray? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -344,7 +345,7 @@ suspend fun SetPhyChainBuilder.await(): IntArray? {
 
 suspend fun StopScanChainBuilder.await():Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -373,7 +374,7 @@ suspend fun StopScanChainBuilder.await():Boolean {
 
 suspend fun WriteByLockChacChainBuilder.await():Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -402,7 +403,7 @@ suspend fun WriteByLockChacChainBuilder.await():Boolean {
 
 suspend fun WriteByLockNoRspChacChainBuilder.await():Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -431,7 +432,7 @@ suspend fun WriteByLockNoRspChacChainBuilder.await():Boolean {
 
 suspend fun WriteChacChainBuilder.await():Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -460,7 +461,7 @@ suspend fun WriteChacChainBuilder.await():Boolean {
 
 suspend fun WriteDescChainBuilder.await():Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -489,7 +490,7 @@ suspend fun WriteDescChainBuilder.await():Boolean {
 
 suspend fun WriteNoRspChacChainBuilder.await():Boolean {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
@@ -518,7 +519,7 @@ suspend fun WriteNoRspChacChainBuilder.await():Boolean {
 
 suspend fun StartScanChainBuilder.await(): Map<String, Entry<Int, ByteArray>>? {
     return suspendCancellableCoroutine { continuation ->
-        getBuildChains().apply {
+        getBuildChains(this).apply {
             (last as StartScanChainBuilder.StartScanChain).isRecordDevice = true
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->

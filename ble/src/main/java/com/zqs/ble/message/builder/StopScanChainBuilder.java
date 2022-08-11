@@ -11,7 +11,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class StopScanChainBuilder extends BleChainBuilder<StopScanChainBuilder> {
+public class StopScanChainBuilder extends BleChainBuilder<StopScanChainBuilder, StopScanChainBuilder.StopScanChain,Boolean> {
 
     private StopScanChain chain = new StopScanChain("");
 
@@ -30,7 +30,7 @@ public class StopScanChainBuilder extends BleChainBuilder<StopScanChainBuilder> 
     }
 
     @Override
-    public BleChain getBleChain() {
+    public StopScanChain getBleChain() {
         return chain;
     }
 
@@ -39,7 +39,7 @@ public class StopScanChainBuilder extends BleChainBuilder<StopScanChainBuilder> 
         return chain;
     }
 
-    public static class StopScanChain extends BleChain<Object> {
+    public static class StopScanChain extends BleChain<Boolean> {
 
         private IScanStatusCallback scanStatusCallback;
         private IScanStatusCallback callback;
@@ -51,29 +51,26 @@ public class StopScanChainBuilder extends BleChainBuilder<StopScanChainBuilder> 
         @Override
         public void handle() {
             if (!getBle().isScaning()){
-                onSuccess(null);
+                onSuccess(false);
             }else{
                 scanStatusCallback = isScanning -> {
                     if (callback!=null){
                         callback.onScanStatusChanged(isScanning);
                     }
                     if (!isScanning){
-                        onSuccess(null);
+                        onSuccess(false);
                     }else{
                         onFail(new IllegalStateException());
                     }
                 };
                 getBle().addScanStatusCallback(scanStatusCallback);
-                if (!getBle().isScaning()){
-                    onSuccess(null);
-                }else{
-                    getBle().stopScan();
-                }
+                getBle().stopScan();
             }
         }
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmScanStatusCallback(scanStatusCallback);
         }
     }

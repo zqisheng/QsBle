@@ -16,7 +16,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class ReadChacChainBuilder extends BleChainBuilder<ReadChacChainBuilder> {
+public class ReadChacChainBuilder extends BleChainBuilder<ReadChacChainBuilder, ReadChacChainBuilder.ReadChacChain,byte[]> {
 
     private ReadChacChain chain = new ReadChacChain(mac);
     public ReadChacChainBuilder(String mac,UUID serviceUuid,UUID chacUuid, Queue<BleChainBuilder> chains) {
@@ -31,7 +31,7 @@ public class ReadChacChainBuilder extends BleChainBuilder<ReadChacChainBuilder> 
     }
 
     @Override
-    public BleChain getBleChain() {
+    public ReadChacChain getBleChain() {
         return chain;
     }
 
@@ -80,6 +80,7 @@ public class ReadChacChainBuilder extends BleChainBuilder<ReadChacChainBuilder> 
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmChacReadCallback(getMac(),chacReadCallback);
         }
     }

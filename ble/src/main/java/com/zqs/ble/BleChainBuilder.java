@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.os.Build;
 
 import com.zqs.ble.core.BleGlobalConfig;
+import com.zqs.ble.core.deamon.message.order.FrontMessage;
+import com.zqs.ble.core.utils.fun.VoidFunction;
 import com.zqs.ble.message.builder.CancelNotifyChainBuilder;
 import com.zqs.ble.message.builder.ConnectChainBuilder;
 import com.zqs.ble.message.builder.DisconnectChainBuilder;
@@ -27,6 +29,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 /*
@@ -35,7 +38,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  QsBle.requestPermission().startScan(mac:String).connect().openNotify(nUuid:UUID).write(cUuid:UUID).await()
  */
-public abstract class BleChainBuilder<T extends BleChainBuilder> {
+public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleChain,D> {
 
     protected Queue<BleChainBuilder> chains;
 
@@ -62,7 +65,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder> {
         this.mac = mac;
     }
 
-    public abstract BleChain getBleChain();
+    public abstract C getBleChain();
 
     public T withMac(String mac){
         setMac(mac);
@@ -92,6 +95,46 @@ public abstract class BleChainBuilder<T extends BleChainBuilder> {
     public T dump(boolean dump){
         getBleChain().setDump(dump);
         return (T) this;
+    }
+
+    public T before(boolean isRunOnMain,@NonNull Runnable before){
+        getBleChain().beforeIsRunMain = isRunOnMain;
+        getBleChain().setBeforeCallback(before);
+        return (T) this;
+    }
+
+    public T before(@NonNull Runnable before){
+        return before(false, before);
+    }
+
+    public T after(boolean isRunOnMain,@NonNull Runnable after){
+        getBleChain().afterIsRunMain = isRunOnMain;
+        getBleChain().setAfterCallback(after);
+        return (T) this;
+    }
+
+    public T after(@NonNull Runnable after){
+        return after(false, after);
+    }
+
+    public T data(boolean isRunOnMain,@NonNull VoidFunction<D> acceptData){
+        getBleChain().acceptDataIsRunMain=isRunOnMain;
+        getBleChain().setAcceptDataCallback(acceptData);
+        return (T) this;
+    }
+
+    public T data(@NonNull VoidFunction<D> acceptData){
+        return data(false, acceptData);
+    }
+
+    public T error(boolean isRunOnMain,@NonNull VoidFunction<Exception> error){
+        getBleChain().errorIsRunMain = isRunOnMain;
+        getBleChain().errorCallback = error;
+        return (T) this;
+    }
+
+    public T error(@NonNull VoidFunction<Exception> error){
+        return error(false, error);
     }
 
     public StartScanChainBuilder startScan(){
@@ -276,7 +319,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder> {
         return new ChainMessage.ChainHandleOption() {
             @Override
             public void cancel() {
-                message.setShouldHandle(false);
+                message.cancel();
             }
 
             @Override

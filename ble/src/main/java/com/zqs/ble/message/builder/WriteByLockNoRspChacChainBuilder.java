@@ -13,7 +13,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLockNoRspChacChainBuilder> {
+public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLockNoRspChacChainBuilder, WriteByLockNoRspChacChainBuilder.WriteByLockNoRspChacChain,Boolean> {
 
     private WriteByLockNoRspChacChain chain = new WriteByLockNoRspChacChain(mac);
 
@@ -40,7 +40,7 @@ public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLoc
     }
 
     @Override
-    public BleChain getBleChain() {
+    public WriteByLockNoRspChacChain getBleChain() {
         return chain;
     }
 
@@ -49,7 +49,7 @@ public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLoc
         return chain;
     }
 
-    public class WriteByLockNoRspChacChain extends BleChain<Object> {
+    public class WriteByLockNoRspChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;
@@ -79,16 +79,11 @@ public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLoc
                     callback.onCallback(isSuccess, status);
                 }
                 if (isSuccess){
-                    onSuccess(null);
+                    onSuccess(true);
                 }else{
                     onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
                 }
             });
-        }
-
-        @Override
-        public void onDestroy() {
-
         }
 
         @Override

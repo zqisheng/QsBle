@@ -11,7 +11,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuilder> {
+public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuilder, DisconnectChainBuilder.DisconnectChain,Boolean> {
 
     private DisconnectChain chain = new DisconnectChain(mac);
 
@@ -25,7 +25,7 @@ public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuild
     }
 
     @Override
-    public BleChain getBleChain() {
+    public DisconnectChain getBleChain() {
         return chain;
     }
 
@@ -34,7 +34,7 @@ public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuild
         return chain;
     }
 
-    public static class DisconnectChain extends BleChain<Object>{
+    public static class DisconnectChain extends BleChain<Boolean>{
 
         private IConnectStatusChangeCallback connectStatusChangeCallback;
         private IConnectStatusChangeCallback callback;
@@ -46,14 +46,14 @@ public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuild
         @Override
         public void handle() {
             if (!getBle().isConnect(getMac())){
-                onSuccess(null);
+                onSuccess(false);
             }else{
                 connectStatusChangeCallback = (device, isConnect, status, profileState) -> {
                     if (callback!=null){
                         callback.onConnectStatusChanged(device, isConnect, status, profileState);
                     }
                     if (!isConnect){
-                        onSuccess(null);
+                        onSuccess(false);
                     }else{
                         onFail(new IllegalStateException(String.format("%s disconnect fail",device.getAddress())));
                     }
@@ -65,6 +65,7 @@ public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuild
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmConnectStatusChangeCallback(getMac(),connectStatusChangeCallback);
         }
     }

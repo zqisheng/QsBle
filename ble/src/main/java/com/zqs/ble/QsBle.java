@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 
 import com.zqs.ble.core.BleConst;
 import com.zqs.ble.core.BleDebugConfig;
@@ -89,6 +90,8 @@ public final class QsBle {
 
     private Context context;
 
+    private Handler mainHandler;
+
     private QsBle(){}
 
     public static QsBle getInstance(){
@@ -123,6 +126,7 @@ public final class QsBle {
         if (BluetoothAdapter.getDefaultAdapter()==null) return false;
         this.context = context;
         ble = new SimpleBle();
+        mainHandler = new Handler(Looper.getMainLooper());
         IBleMessageSender sender;
         if (handler==null){
             sender = new DefaultBleMessageSender();
@@ -759,13 +763,20 @@ public final class QsBle {
     }
 
     void sendMessage(AbsMessage message) {
-        if (message instanceof IFrontMessage) throw new IllegalArgumentException("不能发送IOrderMessage的实现");
         ble.sendMessage(message);
     }
 
     void sendMessageByDelay(AbsMessage message,long delay){
-        if (message instanceof IFrontMessage) throw new IllegalArgumentException("不能发送IOrderMessage的实现");
         ble.sendMessageByDelay(message,delay);
+    }
+
+    void sendMessageToMain(Runnable callback){
+        if (Thread.currentThread() == Looper.getMainLooper().getThread()) {
+            callback.run();
+        }else{
+            mainHandler.post(callback);
+        }
+
     }
 
     private void safeRun(Runnable runnable){

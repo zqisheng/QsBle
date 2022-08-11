@@ -17,7 +17,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder> {
+public class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder, SetPhyChainBuilder.SetPhyChain,int[]> {
 
     private SetPhyChain chain = new SetPhyChain(mac);
 
@@ -35,7 +35,7 @@ public class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder> {
 
 
     @Override
-    public BleChain getBleChain() {
+    public SetPhyChain getBleChain() {
         return chain;
     }
 
@@ -76,6 +76,7 @@ public class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder> {
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmPhyUpdateCallback(getMac(), phyUpdateCallback);
         }
     }

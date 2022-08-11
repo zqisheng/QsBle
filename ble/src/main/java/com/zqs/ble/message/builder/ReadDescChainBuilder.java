@@ -15,7 +15,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBuilder> {
+public class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBuilder, ReadDescChainBuilder.ReadDescChain,byte[]> {
 
     private ReadDescChain chain = new ReadDescChain(mac);
     public ReadDescChainBuilder(String mac, UUID serviceUuid, UUID chacUuid,UUID descUuid, Queue<BleChainBuilder> chains) {
@@ -80,6 +80,7 @@ public class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBuilder> 
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmDescReadCallback(getMac(),descReadCallback);
         }
     }

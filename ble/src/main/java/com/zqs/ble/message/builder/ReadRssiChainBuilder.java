@@ -13,7 +13,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBuilder> {
+public class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBuilder, ReadRssiChainBuilder.ReadRssiChain,Integer> {
 
     private ReadRssiChain chain = new ReadRssiChain(mac);
     public ReadRssiChainBuilder(String mac, Queue<BleChainBuilder> chains) {
@@ -26,7 +26,7 @@ public class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBuilder> 
     }
 
     @Override
-    public BleChain getBleChain() {
+    public ReadRssiChain getBleChain() {
         return chain;
     }
 
@@ -66,6 +66,7 @@ public class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBuilder> 
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmReadRssiCallback(getMac(),readRssiCallback);
         }
     }

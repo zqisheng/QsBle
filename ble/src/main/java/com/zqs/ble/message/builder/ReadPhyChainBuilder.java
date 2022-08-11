@@ -17,7 +17,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuilder> {
+public class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuilder, ReadPhyChainBuilder.ReadPhyChain,int[]> {
 
     private ReadPhyChain chain = new ReadPhyChain(mac);
     public ReadPhyChainBuilder(String mac, Queue<BleChainBuilder> chains) {
@@ -30,7 +30,7 @@ public class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuilder> {
     }
 
     @Override
-    public BleChain getBleChain() {
+    public ReadPhyChain getBleChain() {
         return chain;
     }
 
@@ -70,6 +70,7 @@ public class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuilder> {
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmPhyReadCallback(getMac(),phyReadCallback);
         }
     }

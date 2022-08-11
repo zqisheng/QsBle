@@ -17,7 +17,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder> {
+public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder, WriteChacChainBuilder.WriteChacChain,Boolean> {
 
     private WriteChacChain chain = new WriteChacChain(mac);
     public WriteChacChainBuilder(String mac, UUID serviceUuid, UUID chacUuid,byte[] value, Queue<BleChainBuilder> chains) {
@@ -38,7 +38,7 @@ public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder
     }
 
     @Override
-    public BleChain getBleChain() {
+    public WriteChacChain getBleChain() {
         return chain;
     }
 
@@ -47,7 +47,7 @@ public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder
         return chain;
     }
 
-    public class WriteChacChain extends BleChain<Object> {
+    public class WriteChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;
@@ -83,7 +83,7 @@ public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder
                 }
                 if (status== BluetoothGatt.GATT_SUCCESS){
                     if (Arrays.equals(value,WriteChacChain.this.value)){
-                        onSuccess(null);
+                        onSuccess(true);
                     }
                 }else{
                     onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
@@ -95,6 +95,7 @@ public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmChacWriteCallback(getMac(), chacWriteCallback);
         }
     }

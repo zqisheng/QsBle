@@ -1,7 +1,11 @@
 package com.zqs.ble;
 
+import com.zqs.ble.core.utils.fun.Function1;
 import com.zqs.ble.core.utils.fun.VoidFunction;
 
+import java.util.function.Function;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /*
@@ -23,10 +27,54 @@ public abstract class BaseChain<T> {
     //是否异步
     private boolean isAsync = false;
 
+    public Runnable beforeCallback;
+    public boolean beforeIsRunMain = false;
+
+    public Runnable afterCallback;
+    public boolean afterIsRunMain = false;
+
+    public VoidFunction<T> acceptDataCallback;
+    public boolean acceptDataIsRunMain = false;
+
+    public VoidFunction<Exception> errorCallback;
+    public boolean errorIsRunMain = false;
+
     private ChainHandleStatusCallback<T> chainHandleStatusCallback;
+
+    public void setBeforeIsRunMain(boolean beforeIsRunMain) {
+        this.beforeIsRunMain = beforeIsRunMain;
+    }
+
+    public void setAfterIsRunMain(boolean afterIsRunMain) {
+        this.afterIsRunMain = afterIsRunMain;
+    }
+
+    public void setAcceptDataIsRunMain(boolean acceptDataIsRunMain) {
+        this.acceptDataIsRunMain = acceptDataIsRunMain;
+    }
+
+    public void setErrorIsRunMain(boolean errorIsRunMain) {
+        this.errorIsRunMain = errorIsRunMain;
+    }
+
+    public void setErrorCallback(VoidFunction<Exception> errorCallback) {
+        this.errorCallback = errorCallback;
+    }
+
+    public void setAcceptDataCallback(VoidFunction<T> acceptDataCallback) {
+        this.acceptDataCallback = acceptDataCallback;
+    }
 
     public void setChainHandleStatusCallback(ChainHandleStatusCallback<T> chainHandleStatusCallback) {
         this.chainHandleStatusCallback = chainHandleStatusCallback;
+    }
+
+    public void setAfterCallback(Runnable afterCallback) {
+        this.afterCallback = afterCallback;
+    }
+
+    public void setBeforeCallback(Runnable beforeCallback){
+        this.beforeCallback = beforeCallback;
     }
 
     public boolean isAsync() {
@@ -138,15 +186,17 @@ public abstract class BaseChain<T> {
     }
 
     public final void onHandle(){
+        handle();
         if (isAsync){
             onSuccess(null);
         }
-        handle();
     }
 
     public abstract void handle();
 
-    public abstract void onDestroy();
+    public void onDestroy(){
+
+    }
 
     @FunctionalInterface
     public interface ChainHandleStatusCallback<T>{
@@ -156,5 +206,6 @@ public abstract class BaseChain<T> {
     public boolean isAlreadHandleTimeoutOption(){
         return false;
     }
+
 
 }

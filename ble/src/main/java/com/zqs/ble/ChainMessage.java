@@ -1,7 +1,6 @@
 package com.zqs.ble;
 
 import com.zqs.ble.core.deamon.AbsMessage;
-import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.message.exception.ChainHandleTimeoutException;
 
 import java.util.Queue;
@@ -16,6 +15,7 @@ import androidx.annotation.Nullable;
 public class ChainMessage extends AbsMessage {
 
     private Queue<BaseChain> chains;
+    private BaseChain currentChain;
     private ChainHandleStatusCallback handleStatusCallback;
     private boolean isShouldHandle = true;
 
@@ -38,24 +38,93 @@ public class ChainMessage extends AbsMessage {
     @Override
     public void onHandlerMessage() {
         if (chains!=null&&!chains.isEmpty()){
-            BaseChain chain = chains.poll();
-            handleChain(chain);
+            if (currentChain!=null){
+                if (currentChain.afterCallback!=null){
+                    if (currentChain.afterIsRunMain){
+                        sendMessageToMain(()->{
+                            currentChain.afterCallback.run();
+                            QsBle.getInstance().sendMessage(new AbsMessage() {
+                                @Override
+                                public void onHandlerMessage() {
+                                    pollChainsAndHandle();
+                                }
+                            });
+                        });
+                    }else{
+                        currentChain.afterCallback.run();
+                        pollChainsAndHandle();
+                    }
+                }else{
+                    pollChainsAndHandle();
+                }
+            }else{
+                pollChainsAndHandle();
+            }
         }else{
-            if (handleStatusCallback!=null){
-                handleStatusCallback.onReport(true, null);
+            if (currentChain!=null){
+                if (currentChain.afterCallback!=null){
+                    if (currentChain.afterIsRunMain){
+                        sendMessageToMain(()->{
+                            currentChain.afterCallback.run();
+                            if (handleStatusCallback!=null){
+                                handleStatusCallback.onReport(true, null);
+                            }
+                        });
+                    }else{
+                        currentChain.afterCallback.run();
+                        if (handleStatusCallback!=null){
+                            handleStatusCallback.onReport(true, null);
+                        }
+                    }
+                }else{
+                    if (handleStatusCallback!=null){
+                        handleStatusCallback.onReport(true, null);
+                    }
+                }
+            }else{
+                if (handleStatusCallback!=null){
+                    handleStatusCallback.onReport(true, null);
+                }
             }
         }
     }
 
+    private void pollChainsAndHandle(){
+        currentChain = chains.poll();
+        currentChain.onCreate();
+        handleChain(currentChain);
+    }
+
     private void handleChain(BaseChain chain) {
         if (!isShouldHandle){
+            chain.onDestroy();
             Exception e = new IllegalStateException(String.format("%s has been cancelled",this.getClass().getName()));
             callReport(chain,e,true);
             return;
         }
+        if (chain.beforeCallback!=null){
+            if (chain.beforeIsRunMain){
+                sendMessageToMain(()->{
+                    chain.beforeCallback.run();
+                    QsBle.getInstance().sendMessage(new AbsMessage() {
+                        @Override
+                        public void onHandlerMessage() {
+                            handleChainOption(chain);
+                        }
+                    });
+                });
+            }else{
+                chain.beforeCallback.run();
+                handleChainOption(chain);
+            }
+        }else{
+            handleChainOption(chain);
+        }
+    }
+
+    private void handleChainOption(BaseChain chain){
         chain.setCallback(false);
         chain.setParentMessage(this);
-        chain.onCreate();
         QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
             @Override
             public void onHandlerMessage() {
@@ -64,6 +133,9 @@ public class ChainMessage extends AbsMessage {
                     QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
                         @Override
                         public void onHandlerMessage() {
+                            if (!isShouldHandle){
+                                return;
+                            }
                             if (chain.isDump()){
                                 chains.clear();
                                 if (handleStatusCallback!=null){
@@ -97,7 +169,25 @@ public class ChainMessage extends AbsMessage {
             if (!chain.isDump()&&!chains.isEmpty()){
                 onHandlerMessage();
             }else{
-                callReport(chain,e,false);
+                if (e!=null){
+                    if (chain.errorCallback!=null){
+                        if (chain.errorIsRunMain){
+                            sendMessageToMain(()->{
+                                chain.errorCallback.apply(e);
+                                QsBle.getInstance().sendMessage(new AbsMessage() {
+                                    @Override
+                                    public void onHandlerMessage() {
+                                        callReport(chain,e,false);
+                                    }
+                                });
+                            });
+                        }else{
+                            chain.errorCallback.apply(e);
+                        }
+                    }
+                }else{
+                    callReport(chain,e,false);
+                }
             }
         }
     }
@@ -112,13 +202,43 @@ public class ChainMessage extends AbsMessage {
     }
 
     public void onChainHandleSuccess(BaseChain chain, Object data) {
-        chain.onReport(true,chain.isDump(),data,null);
-        onHandlerMessage();
+        if (data!=null&&chain.acceptDataCallback!=null){
+            if (chain.acceptDataIsRunMain){
+                sendMessageToMain(()->{
+                    chain.acceptDataCallback.apply(data);
+                    chain.onReport(true,chain.isDump(),data,null);
+                    onHandlerMessage();
+                });
+            }else{
+                chain.acceptDataCallback.apply(data);
+                chain.onReport(true,chain.isDump(),data,null);
+                onHandlerMessage();
+            }
+        }else{
+            chain.onReport(true,chain.isDump(),data,null);
+            onHandlerMessage();
+        }
     }
 
     @FunctionalInterface
     public interface ChainHandleStatusCallback{
         void onReport(Boolean isSuccess, @Nullable Exception e);
+    }
+
+    public void cancel(){
+        setShouldHandle(false);
+    }
+
+    private void sendMessageToMain(Runnable callback){
+        QsBle.getInstance().sendMessageToMain(()->{
+            if (isShouldHandle){
+                callback.run();
+            }else {
+                if (currentChain!=null){
+                    currentChain.onDestroy();
+                }
+            }
+        });
     }
 
     public interface ChainHandleOption{

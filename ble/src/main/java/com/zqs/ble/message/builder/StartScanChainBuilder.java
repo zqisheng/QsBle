@@ -19,7 +19,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder> {
+public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder, StartScanChainBuilder.StartScanChain,HashMap<String, Entry<Integer,byte[]>>> {
 
     private StartScanChain chain = new StartScanChain();
 
@@ -74,7 +74,7 @@ public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder
     }
 
     @Override
-    public BleChain getBleChain() {
+    public StartScanChain getBleChain() {
         return chain;
     }
 
@@ -196,6 +196,7 @@ public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmScanCallback(scanCallback);
             getBle().rmScanStatusCallback(scanStatusCallback);
             getBle().rmScanErrorCallback(scanErrorCallback);

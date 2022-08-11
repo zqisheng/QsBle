@@ -20,7 +20,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder> {
+public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder, ConnectChainBuilder.ConnectChain,Boolean> {
 
     private ConnectChain chain = new ConnectChain(mac);
 
@@ -66,7 +66,7 @@ public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder> {
     }
 
     @Override
-    public BleChain getBleChain() {
+    public ConnectChain getBleChain() {
         return chain;
     }
 
@@ -75,7 +75,7 @@ public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder> {
         return chain;
     }
 
-    public static class ConnectChain extends BleChain<Object>{
+    public static class ConnectChain extends BleChain<Boolean>{
         private long connectTimeout = BleGlobalConfig.connectTimeout;
         private int reconnectCount=0;
         private Map<String, Boolean> uuids;
@@ -101,7 +101,7 @@ public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder> {
         @Override
         public void handle() {
             if (getBle().isConnect(getMac())){
-                onSuccess(getBle().getGattService(getMac()));
+                onSuccess(true);
             }else{
                 connectStatusChangeCallback = (device, isConnect, status, profileState) -> {
                     if (callback1!=null){
@@ -128,10 +128,10 @@ public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder> {
                                 }
                             }
                             if (isFind){
-                                onSuccess(services);
+                                onSuccess(true);
                             }
                         }else{
-                            onSuccess(services);
+                            onSuccess(true);
                         }
                     }else{
                         onFail(new IllegalStateException());
@@ -147,6 +147,7 @@ public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder> {
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             if (callback2 != null) {
                 getBle().rmServicesDiscoveredCallback(getMac(), callback2);
             }

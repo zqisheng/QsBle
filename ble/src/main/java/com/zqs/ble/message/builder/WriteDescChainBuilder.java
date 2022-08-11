@@ -15,7 +15,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainBuilder> {
+public class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainBuilder, WriteDescChainBuilder.WriteDescChain,Boolean> {
 
     private WriteDescChain chain = new WriteDescChain(mac);
     public WriteDescChainBuilder(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value, Queue<BleChainBuilder> chains) {
@@ -33,7 +33,7 @@ public class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainBuilder
 
 
     @Override
-    public BleChain getBleChain() {
+    public WriteDescChain getBleChain() {
         return chain;
     }
 
@@ -42,7 +42,7 @@ public class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainBuilder
         return chain;
     }
 
-    public static class WriteDescChain extends BleChain<Object>{
+    public static class WriteDescChain extends BleChain<Boolean>{
 
         private UUID serviceUuid;
         private UUID chacUuid;
@@ -79,6 +79,7 @@ public class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainBuilder
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmDescWriteCallback(getMac(),descWriteCallback);
         }
     }

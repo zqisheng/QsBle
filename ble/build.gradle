@@ -10,7 +10,8 @@ android {
 
     defaultConfig {
         minSdkVersion 18
-        targetSdkVersion 30
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
 
@@ -34,5 +35,4 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.0.0'
     implementation "androidx.lifecycle:lifecycle-common:2.0.0"
     api project(':ble_core')
-    testImplementation 'junit:junit:4.12'
 }

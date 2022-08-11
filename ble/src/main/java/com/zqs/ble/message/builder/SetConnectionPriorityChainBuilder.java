@@ -17,7 +17,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnectionPriorityChainBuilder> {
+public class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnectionPriorityChainBuilder, SetConnectionPriorityChainBuilder.SetConnectionPriorityChain,int[]> {
 
     private SetConnectionPriorityChain chain = new SetConnectionPriorityChain(mac);
 
@@ -32,7 +32,7 @@ public class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnec
     }
 
     @Override
-    public BleChain getBleChain() {
+    public SetConnectionPriorityChain getBleChain() {
         return chain;
     }
 
@@ -85,6 +85,7 @@ public class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnec
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmConnectionUpdatedCallback(getMac(), connectionUpdatedCallback);
         }
     }

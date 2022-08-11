@@ -13,7 +13,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLockChacChainBuilder> {
+public class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLockChacChainBuilder, WriteByLockChacChainBuilder.WriteByLockChacChain,Boolean> {
 
     private WriteByLockChacChain chain = new WriteByLockChacChain(mac);
 
@@ -35,7 +35,7 @@ public class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLockChac
     }
 
     @Override
-    public BleChain getBleChain() {
+    public WriteByLockChacChain getBleChain() {
         return chain;
     }
 
@@ -44,7 +44,7 @@ public class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLockChac
         return chain;
     }
 
-    public class WriteByLockChacChain extends BleChain<Object> {
+    public class WriteByLockChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;
@@ -74,16 +74,11 @@ public class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLockChac
                     callback.onCallback(isSuccess, status);
                 }
                 if (isSuccess){
-                    onSuccess(null);
+                    onSuccess(true);
                 }else{
                     onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
                 }
             });
-        }
-
-        @Override
-        public void onDestroy() {
-
         }
 
         @Override

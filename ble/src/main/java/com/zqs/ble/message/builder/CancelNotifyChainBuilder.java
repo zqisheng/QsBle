@@ -17,7 +17,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotifyChainBuilder> {
+public class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotifyChainBuilder, CancelNotifyChainBuilder.CancelNotifyChain,String> {
 
     private CancelNotifyChain chain = new CancelNotifyChain(mac);
 
@@ -38,7 +38,7 @@ public class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotifyChainB
     }
 
     @Override
-    public BleChain getBleChain() {
+    public CancelNotifyChain getBleChain() {
         return chain;
     }
 
@@ -90,6 +90,7 @@ public class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotifyChainB
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmNotifyStatusCallback(mac,notifyStatusChangedCallback);
         }
     }

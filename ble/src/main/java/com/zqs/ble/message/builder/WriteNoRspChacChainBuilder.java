@@ -13,7 +13,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRspChacChainBuilder> {
+public class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRspChacChainBuilder, WriteNoRspChacChainBuilder.WriteNoRspChacChain,Boolean> {
 
     private WriteNoRspChacChain chain = new WriteNoRspChacChain(mac);
 
@@ -35,7 +35,7 @@ public class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRspChacCh
     }
 
     @Override
-    public BleChain getBleChain() {
+    public WriteNoRspChacChain getBleChain() {
         return chain;
     }
 
@@ -44,7 +44,7 @@ public class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRspChacCh
         return chain;
     }
 
-    public class WriteNoRspChacChain extends BleChain<Object> {
+    public class WriteNoRspChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;
@@ -76,6 +76,7 @@ public class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRspChacCh
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmChacWriteCallback(getMac(), chacWriteCallback);
         }
     }

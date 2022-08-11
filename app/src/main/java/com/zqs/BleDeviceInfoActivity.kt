@@ -9,10 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.rxLifeScope
 import com.alibaba.fastjson.JSON
 import com.zqs.app.R
+import com.zqs.ble.core.utils.BleLog
 import com.zqs.ble.core.utils.Utils
 import com.zqs.ble.coroutines.await.await
 import com.zqs.ble.coroutines.await.bleLifeScope
 import com.zqs.ble.message.ota.IOtaUpdateCallback
+import com.zqs.utils.toJson
 import kotlinx.android.synthetic.main.activity_ble_device_info.*
 import kotlinx.android.synthetic.main.activity_ble_device_info.connect
 import kotlinx.android.synthetic.main.activity_ble_device_info.connection_priority_high
@@ -100,7 +102,15 @@ class BleDeviceInfoActivity : AppCompatActivity() {
                         UUID.fromString(suuid),
                         UUID.fromString(cuuid),
                         Utils.hexStrToBytes(hexData)
-                    ).await()
+                    ).before(true) {
+                        BleLog.d("操作之前")
+                    }.after(true) {
+                        BleLog.d("操作之后")
+                    }.error(true) {
+                        BleLog.d("操作错误:${it.message}")
+                    }.data(true) {
+                        BleLog.d("操作数据:${it}")
+                    }.await()
                 }else{
                     ble.chain(mac).connect().writeByLock(
                         UUID.fromString(suuid),
@@ -172,7 +182,15 @@ class BleDeviceInfoActivity : AppCompatActivity() {
         read_phy.setOnClickListener {
             bleLifeScope.launch ({
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    val result:IntArray?=ble.chain(mac).connect().readPhy().await()
+                    val result:IntArray?=ble.chain(mac).readPhy().before(true) {
+                        BleLog.d("操作之前")
+                    }.after(true) {
+                        BleLog.d("操作之后")
+                    }.error(true) {
+                        BleLog.d("操作错误:${it.message}")
+                    }.data(true) {
+                        BleLog.d("操作数据:${it.toJson()}")
+                    }.await()
                     phy_tv.text="txPhy=${result?.get(0)},rxPhy=${result?.get(1)}"
                 } else {
                     phy_tv.text="不支持"

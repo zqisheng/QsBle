@@ -13,7 +13,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChainBuilder> {
+public class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChainBuilder, RequestMtuChainBuilder.RequestMtuChain,Integer> {
 
     private RequestMtuChain chain = new RequestMtuChain(mac);
     public RequestMtuChainBuilder(String mac,int mtu, Queue<BleChainBuilder> chains) {
@@ -32,7 +32,7 @@ public class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChainBuild
     }
 
     @Override
-    public BleChain getBleChain() {
+    public RequestMtuChain getBleChain() {
         return chain;
     }
 
@@ -77,6 +77,7 @@ public class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChainBuild
 
         @Override
         public void onDestroy() {
+            super.onDestroy();
             getBle().rmMtuChangeCallback(getMac(),mtuChangeCallback);
         }
     }

@@ -9,15 +9,45 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.zqs.app.R
+import com.zqs.ble.QsBle
+import com.zqs.ble.core.BleGlobalConfig
+import com.zqs.ble.core.callback.abs.IScanCallback
+import com.zqs.ble.core.callback.abs.IScanErrorCallback
+import com.zqs.ble.core.callback.abs.IScanStatusCallback
+import com.zqs.ble.core.callback.scan.SimpleScanConfig
+import com.zqs.ble.core.utils.BleLog
 import com.zqs.ble.core.utils.Utils
 import com.zqs.ble.coroutines.await.await
 import com.zqs.ble.coroutines.await.bleLifeScope
+import com.zqs.utils.toJson
 import kotlinx.android.synthetic.main.activity_ble_index.*
-import kotlinx.android.synthetic.main.item_scan_device.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class QsBleIndexActivity : AppCompatActivity() {
+
+    val scanCallback:IScanCallback = IScanCallback { device, rssi, scanRecord ->
+        runOnUiThread {
+            addToDeviceList(device,rssi,scanRecord)
+        }
+    }
+
+    val scanStatusCallback:IScanStatusCallback = IScanStatusCallback {
+        runOnUiThread {
+            if (it){
+                Toast.makeText(this@QsBleIndexActivity, "扫描已经开始", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(this@QsBleIndexActivity, "扫描已经结束", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val scanError:IScanErrorCallback= IScanErrorCallback {
+        runOnUiThread {
+            Toast.makeText(this@QsBleIndexActivity, "扫描错误errorCode:${it}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,52 +56,34 @@ class QsBleIndexActivity : AppCompatActivity() {
         if (!ble.bluetoothEnable()){
             ble.openBluetooth()
         }
-        ble.chain().startScan().distinct().setScanStatusCallback {
-            runOnUiThread {
-                if (it){
-                    Toast.makeText(this@QsBleIndexActivity, "扫描已经开始", Toast.LENGTH_SHORT).show()
-                }else{
-                    Toast.makeText(this@QsBleIndexActivity, "扫描已经结束", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }.setScanCallback { device, rssi, scanRecord ->
-            runOnUiThread {
-                addToDeviceList(device,rssi,scanRecord)
-            }
-        }.start()
         start_scan.setOnClickListener {
             if (ble.isScaning){
                 Toast.makeText(this, "请先结束扫描", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             scan_device_con.removeAllViews()
-            ble.chain().startScan().distinct().setScanStatusCallback {
-                runOnUiThread {
-                    if (it){
-                        Toast.makeText(this@QsBleIndexActivity, "扫描已经开始", Toast.LENGTH_SHORT).show()
-                    }else{
-                        Toast.makeText(this@QsBleIndexActivity, "扫描已经结束", Toast.LENGTH_SHORT).show()
-                    }
+            SimpleScanConfig().apply {
+                BleGlobalConfig.globalScanConfig.toApplyConfig(this)
+                if (!scan_mac.text.toString().isNullOrEmpty()){
+                    this.mac=scan_mac.text.toString()
                 }
-            }.setScanCallback { device, rssi, scanRecord ->
-                runOnUiThread {
-                    addToDeviceList(device,rssi,scanRecord)
+                if (!scan_name.text.toString().isNullOrEmpty()){
+                    this.deviceName=scan_name.text.toString()
                 }
-            }.start()
+                if (!scan_service_uuid.text.toString().isNullOrEmpty()){
+                    this.serviceUuid=UUID.fromString("0000${scan_service_uuid.text}-0000-1000-8000-00805f9b34fb")
+                }
+                this.isRepeatCallback=is_repeat_scan.isChecked
+                ble.startScan(20000, null, this)
+            }
         }
 
         stop_scan.setOnClickListener {
-            ble.chain().stopScan().setScanStatusCallback {
-                runOnUiThread {
-                    if (it){
-                        Toast.makeText(this@QsBleIndexActivity, "扫描已经开始", Toast.LENGTH_SHORT).show()
-                    }else{
-                        Toast.makeText(this@QsBleIndexActivity, "扫描已经结束", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }.start()
+            ble.stopScan()
         }
-
+        ble.addScanCallback(lifecycle,scanCallback)
+        ble.addScanStatusCallback(lifecycle,scanStatusCallback)
+        ble.addScanErrorCallback(lifecycle,scanError)
     }
 
     private fun addToDeviceList(device: BluetoothDevice, rssi: Int, scanRecord: ByteArray) {

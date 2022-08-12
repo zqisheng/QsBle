@@ -7,7 +7,7 @@ import android.bluetooth.le.ScanSettings;
 import com.zqs.ble.core.api.IBleMessageSender;
 import com.zqs.ble.core.api.IBleOption;
 import com.zqs.ble.core.callback.abs.IScanCallback;
-import com.zqs.ble.core.callback.scan.WrapScanConfig;
+import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.deamon.AbsBleMessage;
 import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.core.deamon.message.option.ConnectMessage;
@@ -165,7 +165,7 @@ public class DefaultBleOption implements IBleOption {
     }
 
     @Override
-    public void startScan(long time, IScanCallback callback, WrapScanConfig filter) {
+    public void startScan(long time, IScanCallback callback, SimpleScanConfig filter) {
         StartScanMessage message = new StartScanMessage(callback, time);
         message.setWrapFilter(filter);
         sendMessage(message);

@@ -3,6 +3,8 @@ package com
 import android.app.Application
 import com.zqs.ble.QsBle
 import com.zqs.ble.core.BleDebugConfig
+import com.zqs.ble.core.BleGlobalConfig
+import com.zqs.ble.core.callback.scan.SimpleScanConfig
 
 /*
  *   @author zhangqisheng
@@ -15,6 +17,9 @@ class QsBleApplicaion: Application() {
         super.onCreate()
         QsBle.getInstance().init(this)
         QsBle.getInstance().setDebug(true)
+        BleGlobalConfig.globalScanConfig = SimpleScanConfig().apply {
+            this.deviceName="TT"
+        }
     }
 
 

@@ -42,9 +42,8 @@ import com.zqs.ble.core.callback.abs.IScanCallback;
 import com.zqs.ble.core.callback.abs.IScanErrorCallback;
 import com.zqs.ble.core.callback.abs.IScanStatusCallback;
 import com.zqs.ble.core.callback.abs.IServicesDiscoveredCallback;
-import com.zqs.ble.core.callback.scan.WrapScanConfig;
+import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.deamon.AbsMessage;
-import com.zqs.ble.core.deamon.message.order.IFrontMessage;
 import com.zqs.ble.core.utils.Utils;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
@@ -275,10 +274,6 @@ public final class QsBle {
         };
     }
 
-    public BleChainBuilder chain(){
-        return new StartScanChainBuilder(new LinkedList<>());
-    }
-
     public void connect(@NonNull String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
         if (getConnectCount()>= BleGlobalConfig.maxConnectCount&&!isConnect(mac)){
             ble.handleLruDisconnect();
@@ -473,7 +468,7 @@ public final class QsBle {
         ble.startScan(time, null,null);
     }
 
-    public void startScan(long time, IScanCallback callback, WrapScanConfig config) {
+    public void startScan(long time, IScanCallback callback, SimpleScanConfig config) {
         ble.startScan(time, callback, config == null ? BleGlobalConfig.globalScanConfig : config);
     }
 

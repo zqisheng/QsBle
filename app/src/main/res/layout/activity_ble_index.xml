@@ -6,17 +6,60 @@
     android:layout_height="match_parent"
     tools:context="com.zqs.QsBleIndexActivity">
 
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="扫描设置" />
+
+        <EditText
+            android:id="@+id/scan_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="广播名" />
+
+        <EditText
+            android:id="@+id/scan_mac"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mac地址" />
+
+        <EditText
+            android:id="@+id/scan_service_uuid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="4"
+            android:hint="过滤服务UUID" />
+
+        <CheckBox
+            android:id="@+id/is_repeat_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="是否重复回调" />
+    </LinearLayout>
+
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
         <LinearLayout
             android:id="@+id/scan_device_con"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical" />
     </ScrollView>
 
     <LinearLayout

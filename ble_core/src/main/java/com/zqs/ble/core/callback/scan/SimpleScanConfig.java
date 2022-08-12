@@ -1,6 +1,7 @@
 package com.zqs.ble.core.callback.scan;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.le.ScanSettings;
 import android.os.ParcelUuid;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.UUID;
  *   @date 2022-07-29
  *   @description
  */
-public class WrapScanConfig {
+public class SimpleScanConfig {
 
     //过滤的设备名称
     private String deviceName;
@@ -72,7 +73,7 @@ public class WrapScanConfig {
         return list;
     }
 
-    public void toApplyConfig(WrapScanConfig config){
+    public void toApplyConfig(SimpleScanConfig config){
         config.deviceName = this.deviceName;
         config.mac = this.mac;
         config.isRepeatCallback = this.isRepeatCallback;

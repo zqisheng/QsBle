@@ -7,6 +7,11 @@ package com.zqs.ble.message.pojo;
  */
 public class Entry<First,Second> {
 
+    public Entry(First first, Second second) {
+        this.first = first;
+        this.second = second;
+    }
+
     public First first;
     public Second second;
 

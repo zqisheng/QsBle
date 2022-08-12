@@ -3,13 +3,10 @@ package com.zqs.ble.core.callback.scan;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 
-import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.SimpleBle;
 import com.zqs.ble.core.api.IBleCallback;
 import com.zqs.ble.core.callback.abs.IScanCallback;
 import com.zqs.ble.core.deamon.AbsMessage;
-import com.zqs.ble.core.utils.BleLog;
-import com.zqs.ble.core.utils.Utils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,11 +20,11 @@ public class BleJellyBeanScanCallback implements BluetoothAdapter.LeScanCallback
 
     IScanCallback scanCallback;
     SimpleBle simpleBle;
-    private WrapScanConfig config;
+    private SimpleScanConfig config;
 
     private Map<String, Boolean> record;
 
-    public void setConfig(WrapScanConfig config) {
+    public void setConfig(SimpleScanConfig config) {
         this.config = config;
         if (config ==null){
             record = null;

@@ -4,7 +4,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 
 import com.zqs.ble.core.callback.abs.IScanCallback;
-import com.zqs.ble.core.callback.scan.WrapScanConfig;
+import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
 
@@ -50,7 +50,7 @@ public interface IBleOption {
 
     void setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions);
 
-    void startScan(long time, IScanCallback callback, WrapScanConfig config);
+    void startScan(long time, IScanCallback callback, SimpleScanConfig config);
 
     void startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback);
 

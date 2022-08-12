@@ -40,7 +40,7 @@ import com.zqs.ble.core.callback.abs.IScanErrorCallback;
 import com.zqs.ble.core.callback.abs.IScanStatusCallback;
 import com.zqs.ble.core.callback.abs.IServicesDiscoveredCallback;
 import com.zqs.ble.core.callback.scan.BleScanOption;
-import com.zqs.ble.core.callback.scan.WrapScanConfig;
+import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.deamon.AbsBleMessage;
 import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.core.deamon.message.callback.OnBlueStatusChangedMessage;
@@ -426,7 +426,7 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     }
 
     @Override
-    public void startScan(long time, IScanCallback callback, WrapScanConfig config) {
+    public void startScan(long time, IScanCallback callback, SimpleScanConfig config) {
         bleOption.startScan(time, callback,config);
     }
 

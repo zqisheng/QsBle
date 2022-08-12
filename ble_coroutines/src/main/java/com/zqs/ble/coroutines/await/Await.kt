@@ -517,14 +517,14 @@ suspend fun WriteNoRspChacChainBuilder.await():Boolean {
     }
 }
 
-suspend fun StartScanChainBuilder.await(): Map<String, Entry<Int, ByteArray>>? {
+suspend fun StartScanChainBuilder.await(): Entry<Int, ByteArray>? {
     return suspendCancellableCoroutine { continuation ->
         getBuildChains(this).apply {
             (last as StartScanChainBuilder.StartScanChain).isRecordDevice = true
             last.isAsync=false
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
-                    continuation.resume(data as Map<String, Entry<Int, ByteArray>>)
+                    continuation.resume(data as Entry<Int, ByteArray>)
                 } else if (isDump) {
                     continuation.resumeWithException(e!!)
                 } else{

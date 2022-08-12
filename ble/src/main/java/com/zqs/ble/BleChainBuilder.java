@@ -46,10 +46,6 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
 
     protected String mac;
 
-    public BleChainBuilder(Queue<BleChainBuilder> chains){
-        this.chains = chains;
-    }
-
     public BleChainBuilder(String mac, Queue<BleChainBuilder> chains){
         verifyMac(mac);
         this.mac = mac;
@@ -140,11 +136,11 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
     }
 
     public StartScanChainBuilder startScan(){
-        return startScan(null);
+        return startScan(mac);
     }
 
     public StartScanChainBuilder startScan(String mac){
-        StartScanChainBuilder builder = new StartScanChainBuilder(chains);
+        StartScanChainBuilder builder = new StartScanChainBuilder(mac,chains);
         builder.setMac(mac);
         chains.add(builder);
         return builder;

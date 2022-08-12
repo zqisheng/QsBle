@@ -1,5 +1,7 @@
 package com.zqs.ble.core;
 
+import com.zqs.ble.core.callback.scan.WrapScanConfig;
+
 import java.util.UUID;
 
 /*
@@ -32,5 +34,7 @@ public class BleGlobalConfig {
     public static int otaSingleRewriteCount = 3;
     //ota发送的段尺寸,比如文件大小1000b,otaSegmentSize=200b,那么每发200个长度就会回调一下progress
     public static int otaSegmentSize = 200;
+    //全局的扫描配置
+    public static WrapScanConfig globalScanConfig;
 
 }

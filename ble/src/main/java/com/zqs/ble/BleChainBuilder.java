@@ -4,8 +4,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.os.Build;
 
 import com.zqs.ble.core.BleGlobalConfig;
-import com.zqs.ble.core.deamon.message.order.FrontMessage;
 import com.zqs.ble.core.utils.fun.VoidFunction;
+import com.zqs.ble.lifecycle.DestroyLifecycleObserver;
 import com.zqs.ble.message.builder.CancelNotifyChainBuilder;
 import com.zqs.ble.message.builder.ConnectChainBuilder;
 import com.zqs.ble.message.builder.DisconnectChainBuilder;
@@ -25,12 +25,14 @@ import com.zqs.ble.message.builder.WriteChacChainBuilder;
 import com.zqs.ble.message.builder.WriteDescChainBuilder;
 import com.zqs.ble.message.builder.WriteNoRspChacChainBuilder;
 
+import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.lifecycle.Lifecycle;
 
 /*
  *   @author zhangqisheng
@@ -334,10 +336,23 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         };
     }
 
-    public void start(ChainMessage.ChainHandleStatusCallback handleStatusCallback){
+    public void start(Lifecycle lifecycle,ChainMessage.ChainHandleStatusCallback handleStatusCallback){
         ChainMessage.ChainHandleOption option = prepare();
+        if (lifecycle!=null){
+            WeakReference<ChainMessage.ChainHandleOption> weak = new WeakReference<>(option);
+            lifecycle.addObserver((DestroyLifecycleObserver) () -> {
+                ChainMessage.ChainHandleOption optionNullable = weak.get();
+                if (optionNullable!=null){
+                    optionNullable.cancel();
+                }
+            });
+        }
         option.setHandleStatusCallback(handleStatusCallback);
         option.start();
+    }
+
+    public void start(ChainMessage.ChainHandleStatusCallback handleStatusCallback){
+        start(null,handleStatusCallback);
     }
 
     public void start() {

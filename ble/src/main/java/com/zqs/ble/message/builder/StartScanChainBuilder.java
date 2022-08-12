@@ -101,7 +101,7 @@ public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder
         private String targetMac;
         private boolean isRecordDevice = false;
 
-        private boolean distinct = false;
+        private Boolean distinct;
         private String filterName;
         private UUID filterServiceUuid;
 
@@ -168,7 +168,7 @@ public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder
                 if (callback2 != null) {
                     callback2.onScanStatusChanged(isScanning);
                 }
-                if (!isScanning) {
+                if (targetMac!=null&&!targetMac.isEmpty()&&!isScanning) {
                     onFail(new IllegalStateException(String.format("scan stop, but device not found")));
                 }
             };
@@ -182,8 +182,11 @@ public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder
             getBle().addScanStatusCallback(scanStatusCallback);
             getBle().addScanErrorCallback(scanErrorCallback);
             WrapScanConfig config = new WrapScanConfig();
-            if (distinct){
-                config.setRepeatCallback(false);
+            if (BleGlobalConfig.globalScanConfig!=null){
+                BleGlobalConfig.globalScanConfig.toApplyConfig(config);
+            }
+            if (distinct!=null){
+                config.setRepeatCallback(distinct);
             }
             if (filterName!=null){
                 config.setDeviceName(filterName);

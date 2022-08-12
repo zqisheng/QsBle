@@ -474,7 +474,7 @@ public final class QsBle {
     }
 
     public void startScan(long time, IScanCallback callback, WrapScanConfig config) {
-        ble.startScan(time, callback,config);
+        ble.startScan(time, callback, config == null ? BleGlobalConfig.globalScanConfig : config);
     }
 
     //android5.0以下版本无法生效

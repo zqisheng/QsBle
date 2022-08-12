@@ -72,4 +72,11 @@ public class WrapScanConfig {
         return list;
     }
 
+    public void toApplyConfig(WrapScanConfig config){
+        config.deviceName = this.deviceName;
+        config.mac = this.mac;
+        config.isRepeatCallback = this.isRepeatCallback;
+        config.serviceUuid = this.serviceUuid;
+    }
+
 }

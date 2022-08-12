@@ -303,6 +303,9 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
     }
 
     private void handleMessage(AbsMessage message) {
+        if (BleDebugConfig.isOpenBleThreadLog){
+            BleLog.d(String.format("BleThread->handleMessage:%s", message.getClass().getName()));
+        }
         message.onHandlerMessage();
     }
 

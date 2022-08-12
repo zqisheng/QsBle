@@ -1,6 +1,7 @@
 package com.zqs.ble;
 
 import com.zqs.ble.core.deamon.AbsMessage;
+import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.message.exception.ChainHandleTimeoutException;
 
 import java.util.Queue;
@@ -156,6 +157,7 @@ public class ChainMessage extends AbsMessage {
     }
 
     public void onChainHandleFail(BaseChain chain, Exception e) {
+        BleLog.d(String.format("chain handle fail:%s,%s", chain.getClass().getName(), e == null ? "null" : e.getMessage()));
         if (chain.getRetry()>0){
             chain.letRetryLess();
             QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
@@ -169,21 +171,20 @@ public class ChainMessage extends AbsMessage {
             if (!chain.isDump()&&!chains.isEmpty()){
                 onHandlerMessage();
             }else{
-                if (e!=null){
-                    if (chain.errorCallback!=null){
-                        if (chain.errorIsRunMain){
-                            sendMessageToMain(()->{
-                                chain.errorCallback.apply(e);
-                                QsBle.getInstance().sendMessage(new AbsMessage() {
-                                    @Override
-                                    public void onHandlerMessage() {
-                                        callReport(chain,e,false);
-                                    }
-                                });
-                            });
-                        }else{
+                if (e!=null&&chain.errorCallback!=null){
+                    if (chain.errorIsRunMain){
+                        sendMessageToMain(()->{
                             chain.errorCallback.apply(e);
-                        }
+                            QsBle.getInstance().sendMessage(new AbsMessage() {
+                                @Override
+                                public void onHandlerMessage() {
+                                    callReport(chain,e,false);
+                                }
+                            });
+                        });
+                    }else{
+                        chain.errorCallback.apply(e);
+                        callReport(chain,e,false);
                     }
                 }else{
                     callReport(chain,e,false);

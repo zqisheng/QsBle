@@ -45,6 +45,11 @@ class BleDeviceInfoActivity : AppCompatActivity() {
         setServiceValue()
         macaddress.text=mac
         connect_status.text = if (ble.isConnect(mac)) "连接状态:连接" else "连接状态:断开"
+        disconnec_auto_reconnect_count_btn.setOnClickListener {
+            if (!disconnec_auto_reconnect_count.text.toString().isNullOrEmpty()){
+                ble.setAutoReconnectCount(mac,disconnec_auto_reconnect_count.text.toString().toInt())
+            }
+        }
         connect.setOnClickListener {
             if (ble.isConnect(mac)){
                 Toast.makeText(this, "已经被连接", Toast.LENGTH_SHORT).show()

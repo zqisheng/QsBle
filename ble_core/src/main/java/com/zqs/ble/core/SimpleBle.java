@@ -83,10 +83,7 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     private static Map<String, IMultiPackageAssembly> chacAssembly = new HashMap<>();
 
     private Map<String, BluetoothGatt> gatts = new HashMap<>();
-    private Map<String, Boolean> connectStatus = new HashMap<>();
-    private Map<String, Long> connectStatusUpdateTime = new HashMap<>();
-    private Map<String, int[]> connectErrorCode = new HashMap<>();
-    private int currentConnectCount = 0;
+    private Map<String, BleDevice> bleDevices = new HashMap<>();
 
     private BroadcastReceiver blueStatusReceiver = new BroadcastReceiver() {
         @Override
@@ -225,8 +222,7 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
 
     public void clearConnectStatus(){
         assertCurrentIsSenderThread();
-        connectStatus.clear();
-        connectStatusUpdateTime.clear();
+        bleDevices.clear();
         if (!gatts.isEmpty()) {
             for (String mac : gatts.keySet()) {
                 BluetoothGatt gatt = gatts.get(mac);
@@ -238,42 +234,54 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
         }
     }
 
-    public void updateConnectStatus(String mac, boolean isConnect, int status, int profileState){
+    public void setAutoReconnectCount(String mac,int autoReconnectCount){
+        assertCurrentIsSenderThread();
+        mac = mac.toUpperCase();
+        BleDevice bleDevice = bleDevices.get(mac);
+        if (bleDevice==null){
+            bleDevice = new BleDevice(mac, false);
+        }
+        bleDevice.setAutoConnectCount(autoReconnectCount);
+    }
+
+    public void updateConnectStatus(String mac, boolean isConnect, int status, int profileState,String disconnecter){
         assertCurrentIsSenderThread();
         if (!isConnect){
             currentMtu = 20;
         }
-        if (isConnect(mac)&&!isConnect){
-            currentConnectCount--;
-        }else if (!isConnect(mac)&&isConnect){
-            currentConnectCount++;
+        BleDevice bleDevice = bleDevices.get(mac);
+        if (bleDevice==null){
+            bleDevice = new BleDevice(mac, isConnect);
+            bleDevices.put(mac, bleDevice);
         }
-        if (currentConnectCount<0){
-            currentConnectCount = 0;
-        }else if (currentConnectCount>7){
-            currentConnectCount = 7;
-        }
-        connectStatusUpdateTime.put(mac, System.currentTimeMillis());
-        connectStatus.put(mac.toUpperCase(), isConnect);
-        if (!isConnect) {
-            connectErrorCode.put(mac, new int[]{status, profileState});
-        }else{
-            connectErrorCode.remove(mac);
+        bleDevice.setLastGattCode(new int[]{status, profileState});
+        bleDevice.setConnect(isConnect);
+        bleDevice.setConnectStatusUpdateTime(System.currentTimeMillis());
+        bleDevice.setDisconnecter(disconnecter);
+        if (bleDevice.getAutoConnectCount() > 0 && disconnecter != null && disconnecter.equals("device")) {
+            connect(mac, BleGlobalConfig.connectTimeout, bleDevice.getAutoConnectCount(), null);
         }
     }
 
-    public int[] getConnectErrorCode(String mac){
-        return connectErrorCode.get(mac);
+    public List<BluetoothDevice> getConnectDevices(){
+        BluetoothManager manager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        return manager.getConnectedDevices(BluetoothProfile.GATT);
+    }
+
+    public int[] getConnectCode(String mac){
+        BleDevice bleDevice = bleDevices.get(mac.toUpperCase());
+        if (bleDevice==null) return null;
+        return bleDevice.getLastGattCode();
     }
 
     public Boolean isConnect(String mac){
-        Boolean connect = connectStatus.get(mac.toUpperCase());
-        if (connect==null) return false;
-        return connect;
+        BleDevice bleDevice = bleDevices.get(mac.toUpperCase());
+        if (bleDevice==null) return false;
+        return bleDevice.isConnect();
     }
 
     public int getConnectCount(){
-        return currentConnectCount;
+        return getConnectDevices().size();
     }
 
     public void handleLruDisconnect(){
@@ -282,12 +290,10 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
             public void onHandlerMessage() {
                 String lruMac = null;
                 long time = 0;
-                for (String mac:connectStatus.keySet()){
-                    if (connectStatus.get(mac)==true){
-                        if (connectStatusUpdateTime.get(mac)<time){
-                            time = connectStatusUpdateTime.get(mac);
-                            lruMac = mac;
-                        }
+                for (BleDevice bleDevice:bleDevices.values()){
+                    if (bleDevice.isConnect()&&bleDevice.getConnectStatusUpdateTime()<time){
+                        time = bleDevice.getConnectStatusUpdateTime();
+                        lruMac = bleDevice.getMac();
                     }
                 }
                 if (lruMac!=null){
@@ -297,23 +303,10 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
         });
     }
 
-    @Deprecated
-    public void updateConnectStatusFromGatt(){
-        assertCurrentIsSenderThread();
-        BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bluetoothManager!=null){
-            List<BluetoothDevice> connectDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
-            connectStatus.clear();
-            for (BluetoothDevice device:connectDevices){
-                connectStatus.put(device.getAddress().toUpperCase(), true);
-            }
-        }
-    }
-
     public Long getConnectStatusUpdateTime(String mac){
-        Long time=connectStatusUpdateTime.get(mac);
-        if (time==null) return 0L;
-        return time;
+        BleDevice bleDevice = bleDevices.get(mac.toUpperCase());
+        if (bleDevice==null) return 0L;
+        return bleDevice.getConnectStatusUpdateTime();
     }
 
     public IBleCallback getCallbackManage() {

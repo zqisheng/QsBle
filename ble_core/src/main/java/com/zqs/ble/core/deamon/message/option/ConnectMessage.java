@@ -105,7 +105,7 @@ public class ConnectMessage extends AbsBleMessage implements IOptionMessage {
                             //连接超时
                             connectFailCallback.onCallback(true, -1, -1);
                         }else{
-                            int[] codes = getSimpleBle().getConnectErrorCode(getMac());
+                            int[] codes = getSimpleBle().getConnectCode(getMac());
                             if (codes!=null){
                                 connectFailCallback.onCallback(false, codes[0], codes[1]);
                             }

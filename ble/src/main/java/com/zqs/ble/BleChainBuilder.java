@@ -65,36 +65,71 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
 
     public abstract C getBleChain();
 
+    /**
+     * 切换下游及当前链操作的设备mac地址
+     * @param mac
+     * @return
+     */
     public T withMac(String mac){
         setMac(mac);
         return (T) this;
     }
 
+    /**
+     * 当前链延迟多少ms执行
+     * @param delay
+     * @return
+     */
     public T delay(long delay) {
         getBleChain().setDelay(delay);
         return (T) this;
     }
 
+    /**
+     * 当前链失败重写执行的次数
+     * @param retry
+     * @return
+     */
     public T retry(int retry){
         getBleChain().setRetry(retry);
         return (T) this;
     }
 
+    /**
+     * 当前链一个重试周期内最大的执行时间,超过时间,这条链直接判断执行失败
+     * @param timeout
+     * @return
+     */
     public T timeout(long timeout) {
         getBleChain().setTimeout(timeout);
         return (T) this;
     }
 
+    /**
+     * 当前链将异步执行,立即返回成功状态
+     * @return
+     */
     public T async(){
         getBleChain().setAsync(true);
         return (T) this;
     }
 
+    /**
+     * 当前链执行不成功是否中断整条链的执行
+     * @param dump
+     * @return
+     */
     public T dump(boolean dump){
         getBleChain().setDump(dump);
         return (T) this;
     }
 
+    /**
+     * 这条链执行之前回调
+     * @param isRunOnMain true:回调在主线程  false:回调在蓝牙线程
+     * @param before
+     * @return
+     */
     public T before(boolean isRunOnMain,@NonNull Runnable before){
         getBleChain().beforeIsRunMain = isRunOnMain;
         getBleChain().setBeforeCallback(before);
@@ -105,6 +140,12 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         return before(false, before);
     }
 
+    /**
+     * 这条链在执行下一条链之前会执行
+     * @param isRunOnMain true:回调在主线程  false:回调在蓝牙线程
+     * @param after
+     * @return
+     */
     public T after(boolean isRunOnMain,@NonNull Runnable after){
         getBleChain().afterIsRunMain = isRunOnMain;
         getBleChain().setAfterCallback(after);
@@ -115,6 +156,12 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         return after(false, after);
     }
 
+    /**
+     * 这条链执行成功,并且获得了结果,该值不会为null
+     * @param isRunOnMain true:回调在主线程  false:回调在蓝牙线程
+     * @param acceptData
+     * @return
+     */
     public T data(boolean isRunOnMain,@NonNull VoidFunction<D> acceptData){
         getBleChain().acceptDataIsRunMain=isRunOnMain;
         getBleChain().setAcceptDataCallback(acceptData);
@@ -125,6 +172,12 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         return data(false, acceptData);
     }
 
+    /**
+     * 当前链执行错误会回调
+     * @param isRunOnMain true:回调在主线程  false:回调在蓝牙线程
+     * @param error
+     * @return
+     */
     public T error(boolean isRunOnMain,@NonNull VoidFunction<Exception> error){
         getBleChain().errorIsRunMain = isRunOnMain;
         getBleChain().errorCallback = error;
@@ -135,6 +188,12 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         return error(false, error);
     }
 
+    /**
+     * 开始扫描
+     * 必须要传入mac,从上游传入或者显示指定mac地址
+     * 当扫到指定的设备时,会判定成功,执行下一条链,没调用一次,当发现正在扫描时,会先停止扫描,再开始扫描,所以注意超过一分钟最大开始停止扫描调用次数
+     * @return
+     */
     public StartScanChainBuilder startScan(){
         return startScan(mac);
     }
@@ -146,6 +205,10 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         return builder;
     }
 
+    /**
+     * 停止扫描
+     * @return
+     */
     public StopScanChainBuilder stopScan(){
         StopScanChainBuilder builder = new StopScanChainBuilder(mac, chains);
         chains.add(builder);
@@ -332,6 +395,13 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         };
     }
 
+    /**
+     * 建议每一条链都绑定一个Lifecycle对象,这样可以有效防止内存泄漏
+     * 我使用的几个老式的Ble框架,或多或少的都出现过内存泄漏的问题
+     * 最好每一条链都绑定一个Lifecycle对象
+     * @param lifecycle
+     * @param handleStatusCallback 返回的闭包对象,用于对整条链操作,可以手动销毁整条链
+     */
     public void start(Lifecycle lifecycle,ChainMessage.ChainHandleStatusCallback handleStatusCallback){
         ChainMessage.ChainHandleOption option = prepare();
         if (lifecycle!=null){
@@ -355,6 +425,10 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         start(null);
     }
 
+    /**
+     * 由子类实现
+     * @return
+     */
     public BleChain build(){
         throw new IllegalStateException();
     }

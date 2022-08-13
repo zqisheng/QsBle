@@ -36,5 +36,7 @@ public class BleGlobalConfig {
     public static int otaSegmentSize = 200;
     //全局的扫描配置
     public static SimpleScanConfig globalScanConfig;
+    //默认的断开自动重连次数,默认是0,不自动重连
+    public static int autoReconnectCount = 0;
 
 }

@@ -74,7 +74,7 @@ public final class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBui
                     }
                 };
                 getBle().addDescReadCallback(getMac(),descReadCallback);
-                getBle().readDesc(getMac(),serviceUuid,chacUuid,descUuid);
+                setMessageOption(getBle().readDesc(getMac(), serviceUuid, chacUuid, descUuid));
             }
         }
 

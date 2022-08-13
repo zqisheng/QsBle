@@ -147,7 +147,7 @@ public final class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuild
                     }
                     onFail(new IllegalStateException("device connect fail"));
                 };
-                getBle().connect(getMac(),connectTimeout,reconnectCount,innerConnectFailCallback);
+                setMessageOption(getBle().connect(getMac(), connectTimeout, reconnectCount, innerConnectFailCallback));
             }
         }
 

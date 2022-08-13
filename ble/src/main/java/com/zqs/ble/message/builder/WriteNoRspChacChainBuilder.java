@@ -57,7 +57,6 @@ public final class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRsp
         private int retryWriteCount = BleGlobalConfig.rewriteCount;
         private IChacWriteCallback chacWriteCallback;
         private IChacWriteCallback callback;
-        private WriteChacMessage message;
 
         private WriteNoRspChacChain(String mac) {
             super(mac);
@@ -91,20 +90,12 @@ public final class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRsp
                 }
             };
             getBle().addChacWriteCallback(getMac(), chacWriteCallback);
-            write(getMac(),serviceUuid,chacUuid,value,retryWriteCount);
-        }
-
-        private void write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
-            message = new WriteChacMessage(mac, serviceUuid, chacUuid, value);
-            message.setRetryWriteCount(retryWriteCount);
-            message.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-            sendMessage(message);
+            setMessageOption(getBle().write(getMac(), serviceUuid, chacUuid, value, retryWriteCount));
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
-            rmMessage(message);
             getBle().rmChacWriteCallback(getMac(), chacWriteCallback);
         }
     }

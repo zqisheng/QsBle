@@ -75,11 +75,11 @@ public final class SetConnectionPriorityChainBuilder extends BleChainBuilder<Set
             };
             getBle().addConnectionUpdatedCallback(getMac(),connectionUpdatedCallback);
             if (mode==0){
-                getBle().requestConnectionToHigh(getMac());
+                setMessageOption(getBle().requestConnectionToHigh(getMac()));
             }else if (mode==1){
-                getBle().requestConnectionToBalanced(getMac());
+                setMessageOption(getBle().requestConnectionToBalanced(getMac()));
             }else if (mode==2){
-                getBle().requestConnectionToLowPower(getMac());
+                setMessageOption(getBle().requestConnectionToLowPower(getMac()));
             }
         }
 

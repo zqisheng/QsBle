@@ -61,7 +61,7 @@ public final class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBui
                 }
             };
             getBle().addReadRssiCallback(getMac(),readRssiCallback);
-            getBle().readRssi(getMac());
+            setMessageOption(getBle().readRssi(getMac()));
         }
 
         @Override

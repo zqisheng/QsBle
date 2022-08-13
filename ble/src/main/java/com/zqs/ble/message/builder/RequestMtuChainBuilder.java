@@ -71,7 +71,7 @@ public final class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChai
                     }
                 };
                 getBle().addMtuChangeCallback(getMac(),mtuChangeCallback);
-                getBle().setMtu(getMac(),mtu);
+                setMessageOption(getBle().setMtu(getMac(), mtu));
             }
         }
 

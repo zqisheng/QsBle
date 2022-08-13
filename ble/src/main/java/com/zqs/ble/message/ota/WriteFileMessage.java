@@ -121,8 +121,4 @@ public class WriteFileMessage extends WriteChacLockMessage {
             }
         }
     }
-
-    public interface WriteFileOption{
-        void cancel();
-    }
 }

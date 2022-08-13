@@ -7,6 +7,7 @@ import com.zqs.ble.core.callback.abs.IScanCallback;
 import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
+import com.zqs.ble.core.utils.fun.IMessageOption;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,43 +19,43 @@ import java.util.UUID;
  */
 public interface IBleOption {
 
-    void connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback);
+    IMessageOption connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback);
 
-    void disconnect(String mac);
+    IMessageOption disconnect(String mac);
 
-    void write(String mac,UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount);
+    IMessageOption write(String mac,UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount);
 
-    void writeNoRsp(String mac,UUID serviceUuid, UUID chacUuid, byte[] value,int retryWriteCount);
+    IMessageOption writeNoRsp(String mac,UUID serviceUuid, UUID chacUuid, byte[] value,int retryWriteCount);
 
-    void writeByLock(String mac,UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallbac);
+    IMessageOption writeByLock(String mac,UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallbac);
 
-    void writeByLockNoRsp(String mac,UUID serviceUuid, UUID chacUuid, byte[] value,int retryWriteCount, Function2<Boolean,Integer> writeCallback);
+    IMessageOption writeByLockNoRsp(String mac,UUID serviceUuid, UUID chacUuid, byte[] value,int retryWriteCount, Function2<Boolean,Integer> writeCallback);
 
-    void writeDesc(String mac,UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value);
+    IMessageOption writeDesc(String mac,UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value);
 
-    void read(String mac,UUID serviceUuid, UUID chacUuid);
+    IMessageOption read(String mac,UUID serviceUuid, UUID chacUuid);
 
-    void readDesc(String mac,UUID serviceUuid, UUID chacUuid, UUID descUuid);
+    IMessageOption readDesc(String mac,UUID serviceUuid, UUID chacUuid, UUID descUuid);
 
-    void openNotify(String mac,UUID serviceUuid, UUID chacUuid);
+    IMessageOption openNotify(String mac,UUID serviceUuid, UUID chacUuid);
 
-    void cancelNotify(String mac,UUID serviceUuid, UUID chacUuid);
+    IMessageOption cancelNotify(String mac,UUID serviceUuid, UUID chacUuid);
 
-    void setMtu(String mac, int mtu);
+    IMessageOption setMtu(String mac, int mtu);
 
-    void readRssi(String mac);
+    IMessageOption readRssi(String mac);
 
-    void readPhy(String mac);
+    IMessageOption readPhy(String mac);
 
-    void requestConnectionPriority(String mac,int connectionPriority);
+    IMessageOption requestConnectionPriority(String mac,int connectionPriority);
 
-    void setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions);
+    IMessageOption setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions);
 
-    void startScan(long time, IScanCallback callback, SimpleScanConfig config);
+    IMessageOption startScan(long time, IScanCallback callback, SimpleScanConfig config);
 
-    void startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback);
+    IMessageOption startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback);
 
-    void stopScan();
+    IMessageOption stopScan();
 
 
 }

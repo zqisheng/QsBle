@@ -65,7 +65,7 @@ public final class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuild
                 }
             };
             getBle().addPhyReadCallback(getMac(),phyReadCallback);
-            getBle().readPhy(getMac());
+            setMessageOption(getBle().readPhy(getMac()));
         }
 
         @Override

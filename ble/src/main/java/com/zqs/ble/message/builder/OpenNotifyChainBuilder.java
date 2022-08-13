@@ -106,7 +106,7 @@ public final class OpenNotifyChainBuilder extends BleChainBuilder<OpenNotifyChai
                     }
                 };
                 getBle().addNotifyStatusCallback(getMac(), notifyStatusChangedCallback);
-                getBle().openNotify(getMac(), serviceUuid, notifyUuid);
+                setMessageOption(getBle().openNotify(getMac(), serviceUuid, notifyUuid));
             }
         }
 

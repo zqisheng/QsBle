@@ -56,7 +56,6 @@ public final class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainB
         private int retryWriteCount = BleGlobalConfig.rewriteCount;
         private IChacWriteCallback chacWriteCallback;
         private IChacWriteCallback callback;
-        private WriteChacMessage message;
 
         private WriteChacChain(String mac) {
             super(mac);
@@ -91,19 +90,12 @@ public final class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainB
                 }
             };
             getBle().addChacWriteCallback(getMac(), chacWriteCallback);
-            write(getMac(),serviceUuid,chacUuid,value,retryWriteCount);
-        }
-
-        private void write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
-            message = new WriteChacMessage(mac, serviceUuid, chacUuid, value);
-            message.setRetryWriteCount(retryWriteCount);
-            sendMessage(message);
+            setMessageOption(getBle().write(getMac(), serviceUuid, chacUuid, value, retryWriteCount));
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
-            rmMessage(message);
             getBle().rmChacWriteCallback(getMac(), chacWriteCallback);
         }
     }

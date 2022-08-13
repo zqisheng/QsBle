@@ -149,7 +149,7 @@ public final class StartScanChainBuilder extends BleChainBuilder<StartScanChainB
             if (filterServiceUuid!=null){
                 config.setServiceUuid(filterServiceUuid);
             }
-            getBle().startScan(scanTime, null, config);
+            setMessageOption(getBle().startScan(scanTime, null, config));
         }
 
         @Override

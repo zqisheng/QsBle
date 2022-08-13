@@ -54,7 +54,6 @@ public final class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLo
         private byte[] value;
         private int retryWriteCount = BleGlobalConfig.rewriteCount;
         private Function2<Boolean,Integer> callback;
-        private WriteChacLockMessage message;
 
         private WriteByLockChacChain(String mac) {
             super(mac);
@@ -74,31 +73,16 @@ public final class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLo
                 onFail(new IllegalStateException(String.format("%s device not connect",getMac())));
                 return;
             }
-            writeByLock(getMac(),serviceUuid,chacUuid,value,retryWriteCount,(isSuccess,status)->{
-                if (callback!=null){
+            setMessageOption(QsBle.getInstance().writeByLock(getMac(), serviceUuid, chacUuid, value, retryWriteCount, (isSuccess, status) -> {
+                if (callback != null) {
                     callback.onCallback(isSuccess, status);
                 }
-                if (isSuccess){
+                if (isSuccess) {
                     onSuccess(true);
-                }else{
+                } else {
                     onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
                 }
-            });
-        }
-
-        private void writeByLock(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount, Function2<Boolean, Integer> writeCallback){
-            message = new WriteChacLockMessage(mac, serviceUuid, chacUuid, value);
-            message.setRetryWriteCount(retryWriteCount);
-            if (writeCallback!=null){
-                message.setWriteCallback(writeCallback);
-            }
-            sendMessage(message);
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            rmMessage(message);
+            }));
         }
 
         @Override

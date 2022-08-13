@@ -71,7 +71,7 @@ public final class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder
                 }
             };
             getBle().addPhyUpdateCallback(getMac(),phyUpdateCallback);
-            getBle().setPreferredPhy(getMac(),txPhy,rxPhy,phyOptions);
+            setMessageOption(getBle().setPreferredPhy(getMac(), txPhy, rxPhy, phyOptions));
         }
 
         @Override

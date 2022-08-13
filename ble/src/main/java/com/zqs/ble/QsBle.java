@@ -48,12 +48,12 @@ import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.core.utils.Utils;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
+import com.zqs.ble.core.utils.fun.IMessageOption;
 import com.zqs.ble.impl.DefaultBleCallbackManage;
 import com.zqs.ble.impl.DefaultBleMessageSender;
 import com.zqs.ble.impl.DefaultBleOption;
 import com.zqs.ble.impl.HandleMessageLooper;
 import com.zqs.ble.lifecycle.DestroyLifecycleObserver;
-import com.zqs.ble.message.builder.StartScanChainBuilder;
 import com.zqs.ble.message.ota.IOtaUpdateCallback;
 import com.zqs.ble.message.ota.WriteFileMessage;
 
@@ -97,14 +97,6 @@ public final class QsBle {
 
     public static QsBle getInstance(){
         return INSTANCE;
-    }
-
-    private static Map<String, IMultiPackageAssembly> chacParser = new HashMap<>();
-
-    public static void assertBluetoothAddress(@NonNull String mac){
-        if (!BluetoothAdapter.checkBluetoothAddress(mac)){
-            throw new IllegalArgumentException("mac地址格式不正确");
-        }
     }
 
     private SimpleBle ble;
@@ -367,6 +359,11 @@ public final class QsBle {
             public BleChain getBleChain() {
                 return null;
             }
+
+            @Override
+            public BleChain build() {
+                throw new IllegalStateException("valid chain");
+            }
         };
     }
 
@@ -377,41 +374,41 @@ public final class QsBle {
      * @param reconnectCount 连接失败重连次数
      * @param connectFailCallback 连接失败回调
      */
-    public void connect(@NonNull String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
+    public IMessageOption connect(@NonNull String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
         if (BleDebugConfig.isDebug){
             BleLog.d(String.format("handle connect mac=%s,timeout=%d,reconnectCount=%d", mac, timeout, reconnectCount));
         }
         if (getConnectCount()>= BleGlobalConfig.maxConnectCount&&!isConnect(mac)){
             ble.handleLruDisconnect();
         }
-        ble.connect(mac, timeout, reconnectCount,connectFailCallback);
+        return ble.connect(mac, timeout, reconnectCount,connectFailCallback);
     }
 
-    public void connect(@NonNull String mac, long timeout, int reconnectCount) {
-        connect(mac, timeout, reconnectCount,null);
+    public IMessageOption connect(@NonNull String mac, long timeout, int reconnectCount) {
+        return connect(mac, timeout, reconnectCount,null);
     }
 
-    public void connect(@NonNull String mac, long timeout) {
-        connect(mac, timeout,BleGlobalConfig.reconnectCount ,null);
+    public IMessageOption connect(@NonNull String mac, long timeout) {
+        return connect(mac, timeout,BleGlobalConfig.reconnectCount ,null);
     }
 
-    public void connect(@NonNull String mac) {
-        connect(mac, BleGlobalConfig.connectTimeout,BleGlobalConfig.reconnectCount ,null);
+    public IMessageOption connect(@NonNull String mac) {
+        return connect(mac, BleGlobalConfig.connectTimeout,BleGlobalConfig.reconnectCount ,null);
     }
 
     /**
      * 断开连接
      * @param mac
      */
-    public void disconnect(@NonNull String mac) {
+    public IMessageOption disconnect(@NonNull String mac) {
         if (BleDebugConfig.isDebug){
             BleLog.d(String.format("hanlde disconnect mac=%s", mac));
         }
-        ble.disconnect(mac);
+        return ble.disconnect(mac);
     }
 
     @NonNull
-    public WriteFileMessage.WriteFileOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    public IMessageOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
         return writeFile(mac, serviceUuid, chacUuid, fileBytes.length,BleGlobalConfig.otaSegmentSize, new ByteArrayInputStream(fileBytes), otaUpdateCallback);
     }
 
@@ -424,7 +421,7 @@ public final class QsBle {
      * @param otaUpdateCallback
      */
     @Nullable
-    public WriteFileMessage.WriteFileOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    public IMessageOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
         try {
             return writeFile(mac, serviceUuid, chacUuid,(int) file.length(),BleGlobalConfig.otaSegmentSize, new FileInputStream(file), otaUpdateCallback);
         } catch (FileNotFoundException e) {
@@ -450,7 +447,7 @@ public final class QsBle {
      * @param otaUpdateCallback
      */
     @NonNull
-    public WriteFileMessage.WriteFileOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    public IMessageOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
         WriteFileMessage message = new WriteFileMessage(mac, serviceUuid, chacUuid, fileByteCount, segmentSize, datasource, otaUpdateCallback);
         ble.sendMessage(message);
         WeakReference<WriteFileMessage> weakReference = new WeakReference<>(message);
@@ -463,12 +460,12 @@ public final class QsBle {
     }
 
     @NonNull
-    public WriteFileMessage.WriteFileOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    public IMessageOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
         return writeFileNoRsp(mac, serviceUuid, chacUuid, fileBytes.length,BleGlobalConfig.otaSegmentSize, new ByteArrayInputStream(fileBytes), otaUpdateCallback);
     }
 
     @Nullable
-    public WriteFileMessage.WriteFileOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    public IMessageOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
         try {
             return writeFileNoRsp(mac, serviceUuid, chacUuid, (int) file.length(),BleGlobalConfig.otaSegmentSize, new FileInputStream(file), otaUpdateCallback);
         } catch (FileNotFoundException e) {
@@ -479,7 +476,7 @@ public final class QsBle {
     }
 
     @NonNull
-    public WriteFileMessage.WriteFileOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    public IMessageOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
         WriteFileMessage message = new WriteFileMessage(mac, serviceUuid, chacUuid, fileByteCount, segmentSize, datasource, otaUpdateCallback);
         message.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         ble.sendMessage(message);
@@ -492,27 +489,32 @@ public final class QsBle {
         };
     }
 
-    public void write(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid,@NonNull  byte[] value, int retryWriteCount) {
-        ble.write(mac, serviceUuid, chacUuid, value, retryWriteCount);
+    @NonNull
+    public IMessageOption write(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid,@NonNull  byte[] value, int retryWriteCount) {
+        return ble.write(mac, serviceUuid, chacUuid, value, retryWriteCount);
     }
 
-    public void write(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
+    @NonNull
+    public IMessageOption write(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
         verifyDefaultWriteUuid();
-        write(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount);
+        return write(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount);
     }
 
-    public void write(@NonNull String mac, @NonNull byte[] value) {
-        write(mac, value, BleGlobalConfig.rewriteCount);
+    @NonNull
+    public IMessageOption write(@NonNull String mac, @NonNull byte[] value) {
+        return write(mac, value, BleGlobalConfig.rewriteCount);
     }
 
-    public void writeNoRsp(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
+    @NonNull
+    public IMessageOption writeNoRsp(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
         verifyDefaultWriteUuid();
-        writeNoRsp(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount);
+        return writeNoRsp(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount);
     }
 
-    public void writeNoRsp(@NonNull String mac, @NonNull byte[] value) {
+    @NonNull
+    public IMessageOption writeNoRsp(@NonNull String mac, @NonNull byte[] value) {
         verifyDefaultWriteUuid();
-        writeNoRsp(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, BleGlobalConfig.rewriteCount);
+        return writeNoRsp(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, BleGlobalConfig.rewriteCount);
     }
 
     /**
@@ -526,21 +528,25 @@ public final class QsBle {
      * @param value 一个mtu大小的值,可以小于,但是不能大于,小于的话框架会自动补0凑成一个mtu大小的字节数组
      * @param retryWriteCount 一个mtu包的失败重写次数
      */
-    public void writeNoRsp(@NonNull String mac,@NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount) {
-        ble.writeNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount);
+    @NonNull
+    public IMessageOption writeNoRsp(@NonNull String mac,@NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount) {
+        return ble.writeNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount);
     }
 
-    public void writeByLock(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount, Function2<Boolean, Integer> writeCallback) {
-        ble.writeByLock(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
+    @NonNull
+    public IMessageOption writeByLock(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount, Function2<Boolean, Integer> writeCallback) {
+        return ble.writeByLock(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
     }
 
-    public void writeByLock(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
+    @NonNull
+    public IMessageOption writeByLock(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
         verifyDefaultWriteUuid();
-        writeByLock(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount,null);
+        return writeByLock(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount,null);
     }
 
-    public void writeByLock(@NonNull String mac, @NonNull byte[] value) {
-        writeByLock(mac, value,BleGlobalConfig.rewriteCount);
+    @NonNull
+    public IMessageOption writeByLock(@NonNull String mac, @NonNull byte[] value) {
+        return writeByLock(mac, value,BleGlobalConfig.rewriteCount);
     }
 
     /**
@@ -558,17 +564,20 @@ public final class QsBle {
      * @param retryWriteCount 一个mtu包失败重写次数
      * @param writeCallback 所有数据发送完成或者没有发送完成,都会回调该方法,这个方法主要是发送该数据包的状态回调,该方法能确保被回调
      */
-    public void writeByLockNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount, Function2<Boolean, Integer> writeCallback) {
-        ble.writeByLockNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
+    @NonNull
+    public IMessageOption writeByLockNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount, Function2<Boolean, Integer> writeCallback) {
+        return ble.writeByLockNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
     }
 
-    public void writeByLockNoRsp(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
+    @NonNull
+    public IMessageOption writeByLockNoRsp(@NonNull String mac, @NonNull byte[] value, int retryWriteCount) {
         verifyDefaultWriteUuid();
-        writeByLockNoRsp(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount,null);
+        return writeByLockNoRsp(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.writeUUID, value, retryWriteCount,null);
     }
 
-    public void writeByLockNoRsp(@NonNull String mac, @NonNull byte[] value) {
-        writeByLockNoRsp(mac, value, BleGlobalConfig.rewriteCount);
+    @NonNull
+    public IMessageOption writeByLockNoRsp(@NonNull String mac, @NonNull byte[] value) {
+        return writeByLockNoRsp(mac, value, BleGlobalConfig.rewriteCount);
     }
 
     /**
@@ -579,8 +588,9 @@ public final class QsBle {
      * @param descUuid
      * @param value
      */
-    public void writeDesc(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull UUID descUuid, @NonNull byte[] value) {
-        ble.writeDesc(mac, serviceUuid, chacUuid, descUuid, value);
+    @NonNull
+    public IMessageOption writeDesc(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull UUID descUuid, @NonNull byte[] value) {
+        return ble.writeDesc(mac, serviceUuid, chacUuid, descUuid, value);
     }
 
     /**
@@ -589,8 +599,9 @@ public final class QsBle {
      * @param serviceUuid
      * @param chacUuid
      */
-    public void read(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid) {
-        ble.read(mac, serviceUuid, chacUuid);
+    @NonNull
+    public IMessageOption read(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid) {
+        return ble.read(mac, serviceUuid, chacUuid);
     }
 
     /**
@@ -600,8 +611,9 @@ public final class QsBle {
      * @param chacUuid
      * @param descUuid
      */
-    public void readDesc(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull UUID descUuid) {
-        ble.readDesc(mac, serviceUuid, chacUuid, descUuid);
+    @NonNull
+    public IMessageOption readDesc(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull UUID descUuid) {
+        return ble.readDesc(mac, serviceUuid, chacUuid, descUuid);
     }
 
     /**
@@ -611,13 +623,15 @@ public final class QsBle {
      * @param serviceUuid
      * @param chacUuid
      */
-    public void openNotify(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid) {
-        ble.openNotify(mac, serviceUuid, chacUuid);
+    @NonNull
+    public IMessageOption openNotify(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid) {
+        return ble.openNotify(mac, serviceUuid, chacUuid);
     }
 
-    public void openNotify(@NonNull String mac) {
+    @NonNull
+    public IMessageOption openNotify(@NonNull String mac) {
         verifyDefaultNotifyUuid();
-        ble.openNotify(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID);
+        return ble.openNotify(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID);
     }
 
     /**
@@ -626,21 +640,24 @@ public final class QsBle {
      * @param serviceUuid
      * @param chacUuid
      */
-    public void cancelNotify(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid) {
-        ble.cancelNotify(mac, serviceUuid, chacUuid);
+    @NonNull
+    public IMessageOption cancelNotify(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid) {
+        return ble.cancelNotify(mac, serviceUuid, chacUuid);
     }
 
-    public void cancelNotify(@NonNull String mac) {
+    @NonNull
+    public IMessageOption cancelNotify(@NonNull String mac) {
         verifyDefaultNotifyUuid();
-        ble.cancelNotify(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID);
+        return ble.cancelNotify(mac, BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID);
     }
 
     /**
      * 读rssi
      * @param mac
      */
-    public void readRssi(@NonNull String mac) {
-        ble.readRssi(mac);
+    @NonNull
+    public IMessageOption readRssi(@NonNull String mac) {
+        return ble.readRssi(mac);
     }
 
     /**
@@ -650,8 +667,9 @@ public final class QsBle {
      * @param mac
      * @param mtu
      */
-    public void setMtu(@NonNull String mac, int mtu) {
-        ble.setMtu(mac, mtu);
+    @NonNull
+    public IMessageOption setMtu(@NonNull String mac, int mtu) {
+        return ble.setMtu(mac, mtu);
     }
 
     /**
@@ -659,9 +677,10 @@ public final class QsBle {
      * 包括设置物理信道的方式
      * @param mac
      */
+    @NonNull
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public void readPhy(@NonNull String mac) {
-        ble.readPhy(mac);
+    public IMessageOption readPhy(@NonNull String mac) {
+        return ble.readPhy(mac);
     }
 
     /**
@@ -679,9 +698,10 @@ public final class QsBle {
                     注:除了你手机支持ble5.0的,你连接的设备也需要支持ble5.0才能设置成功,所有这条设置对于不是特别了解ble的不需要关注,全部默认就行,因为各个手机各个设备
                         所支持的硬件也是不同的
      */
+    @NonNull
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public void setPreferredPhy(@NonNull String mac, int txPhy, int rxPhy, int phyOptions) {
-        ble.setPreferredPhy(mac, txPhy, rxPhy, phyOptions);
+    public IMessageOption setPreferredPhy(@NonNull String mac, int txPhy, int rxPhy, int phyOptions) {
+        return ble.setPreferredPhy(mac, txPhy, rxPhy, phyOptions);
     }
 
     //参考值:interval=12 latency=0
@@ -692,37 +712,43 @@ public final class QsBle {
      * 连接间隔和设备时延已经超时时间影响着数据的收发速度和手机的功耗
      * @param mac
      */
+    @NonNull
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public void requestConnectionToHigh(@NonNull String mac) {
-        ble.requestConnectionPriority(mac, BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+    public IMessageOption requestConnectionToHigh(@NonNull String mac) {
+        return ble.requestConnectionPriority(mac, BluetoothGatt.CONNECTION_PRIORITY_HIGH);
     }
 
     //参考值:interval=40 latency=0
     //发送和接受数据度一般,耗电量一般
     //{@link BluetoothGatt.CONNECTION_PRIORITY_BALANCED}
+    @NonNull
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public void requestConnectionToBalanced(@NonNull String mac) {
-        ble.requestConnectionPriority(mac, BluetoothGatt.CONNECTION_PRIORITY_BALANCED);
+    public IMessageOption requestConnectionToBalanced(@NonNull String mac) {
+        return ble.requestConnectionPriority(mac, BluetoothGatt.CONNECTION_PRIORITY_BALANCED);
     }
 
     //参考值:interval=100 latency=2
     //发送和接受数据度较慢,耗电量低
     //{@link BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER}
+    @NonNull
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public void requestConnectionToLowPower(@NonNull String mac) {
-        ble.requestConnectionPriority(mac, BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER);
+    public IMessageOption requestConnectionToLowPower(@NonNull String mac) {
+        return ble.requestConnectionPriority(mac, BluetoothGatt.CONNECTION_PRIORITY_LOW_POWER);
     }
 
-    public void startScan() {
-        startScan(BleGlobalConfig.scanTime);
+    @NonNull
+    public IMessageOption startScan() {
+        return startScan(BleGlobalConfig.scanTime);
     }
 
-    public void startScan(long time, IScanCallback callback) {
-        ble.startScan(time, callback,null);
+    @NonNull
+    public IMessageOption startScan(long time, IScanCallback callback) {
+        return ble.startScan(time, callback,null);
     }
 
-    public void startScan(long time) {
-        ble.startScan(time, null,null);
+    @NonNull
+    public IMessageOption startScan(long time) {
+        return ble.startScan(time, null,null);
     }
 
     /**
@@ -731,18 +757,21 @@ public final class QsBle {
      * @param callback 扫描回调
      * @param config 扫描过滤配置
      */
-    public void startScan(long time, IScanCallback callback, SimpleScanConfig config) {
-        ble.startScan(time, callback, config == null ? BleGlobalConfig.globalScanConfig : config);
+    @NonNull
+    public IMessageOption startScan(long time, IScanCallback callback, SimpleScanConfig config) {
+        return ble.startScan(time, callback, config == null ? BleGlobalConfig.globalScanConfig : config);
     }
 
     //android5.0以下版本无法生效
+    @NonNull
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public void startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
-        ble.startScanOnlyLollipop(time, filters, settings != null ? settings : new ScanSettings.Builder().build(), callback);
+    public IMessageOption startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
+        return ble.startScanOnlyLollipop(time, filters, settings != null ? settings : new ScanSettings.Builder().build(), callback);
     }
 
-    public void stopScan() {
-        ble.stopScan();
+    @NonNull
+    public IMessageOption stopScan() {
+        return ble.stopScan();
     }
 
     /**

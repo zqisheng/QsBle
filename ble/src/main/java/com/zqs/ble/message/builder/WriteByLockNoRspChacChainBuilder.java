@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 
 import com.zqs.ble.BleChain;
 import com.zqs.ble.BleChainBuilder;
+import com.zqs.ble.QsBle;
 import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.deamon.message.option.WriteChacLockMessage;
 import com.zqs.ble.core.utils.fun.Function2;
@@ -60,7 +61,6 @@ public final class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<Writ
         private byte[] value;
         private int retryWriteCount = BleGlobalConfig.rewriteCount;
         private Function2<Boolean,Integer> callback;
-        private WriteChacLockMessage message;
 
         private WriteByLockNoRspChacChain(String mac) {
             super(mac);
@@ -80,32 +80,16 @@ public final class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<Writ
                 onFail(new IllegalStateException(String.format("%s device not connect",getMac())));
                 return;
             }
-            writeByLockNoRsp(getMac(),serviceUuid,chacUuid,value,retryWriteCount,(isSuccess,status)->{
-                if (callback!=null){
+            setMessageOption(QsBle.getInstance().writeByLockNoRsp(getMac(), serviceUuid, chacUuid, value, retryWriteCount, (isSuccess, status) -> {
+                if (callback != null) {
                     callback.onCallback(isSuccess, status);
                 }
-                if (isSuccess){
+                if (isSuccess) {
                     onSuccess(true);
-                }else{
+                } else {
                     onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
                 }
-            });
-        }
-
-        private void writeByLockNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount, Function2<Boolean, Integer> writeCallback){
-            message = new WriteChacLockMessage(mac, serviceUuid, chacUuid, value);
-            message.setRetryWriteCount(retryWriteCount);
-            message.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-            if (writeCallback!=null){
-                message.setWriteCallback(writeCallback);
-            }
-            sendMessage(message);
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            rmMessage(message);
+            }));
         }
 
         @Override

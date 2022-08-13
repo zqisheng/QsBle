@@ -64,7 +64,7 @@ public final class StopScanChainBuilder extends BleChainBuilder<StopScanChainBui
                     }
                 };
                 getBle().addScanStatusCallback(scanStatusCallback);
-                getBle().stopScan();
+                setMessageOption(getBle().stopScan());
             }
         }
 

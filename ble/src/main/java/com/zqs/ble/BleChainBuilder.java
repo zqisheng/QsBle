@@ -432,18 +432,8 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
 
     /**
      * 由子类实现
+     *
      * @return
      */
-    public BleChain build(){
-        throw new IllegalStateException();
-    }
-
-    protected void sendMessage(AbsMessage message){
-        QsBle.getInstance().sendMessage(message);
-    }
-
-    protected void rmMessage(AbsMessage message){
-        QsBle.getInstance().rmMessage(message);
-    }
-
+    public abstract BleChain build();
 }

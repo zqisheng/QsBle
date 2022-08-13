@@ -49,6 +49,7 @@ import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.core.utils.fun.BooleanFunction;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
+import com.zqs.ble.core.utils.fun.IMessageOption;
 
 import java.util.HashMap;
 import java.util.List;
@@ -339,98 +340,98 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     }
 
     @Override
-    public void connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
-        bleOption.connect(mac, timeout, reconnectCount,connectFailCallback);
+    public IMessageOption connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
+        return bleOption.connect(mac, timeout, reconnectCount,connectFailCallback);
     }
 
     @Override
-    public void disconnect(String mac) {
-        bleOption.disconnect(mac);
+    public IMessageOption disconnect(String mac) {
+        return bleOption.disconnect(mac);
     }
 
     @Override
-    public void write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
-        bleOption.write(mac, serviceUuid, chacUuid, value, retryWriteCount);
+    public IMessageOption write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
+        return bleOption.write(mac, serviceUuid, chacUuid, value, retryWriteCount);
     }
 
     @Override
-    public void writeNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
-        bleOption.writeNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount);
+    public IMessageOption writeNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
+        return bleOption.writeNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount);
     }
 
     @Override
-    public void writeByLock(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
-        bleOption.writeByLock(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
+    public IMessageOption writeByLock(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
+        return bleOption.writeByLock(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
     }
 
     @Override
-    public void writeByLockNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
-        bleOption.writeByLockNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
+    public IMessageOption writeByLockNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
+        return bleOption.writeByLockNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
     }
 
     @Override
-    public void writeDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value) {
-       bleOption.writeDesc(mac, serviceUuid, chacUuid, descUuid, value);
+    public IMessageOption writeDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value) {
+        return bleOption.writeDesc(mac, serviceUuid, chacUuid, descUuid, value);
     }
 
     @Override
-    public void read(String mac, UUID serviceUuid, UUID chacUuid) {
-        bleOption.read(mac, serviceUuid, chacUuid);
+    public IMessageOption read(String mac, UUID serviceUuid, UUID chacUuid) {
+        return bleOption.read(mac, serviceUuid, chacUuid);
     }
 
     @Override
-    public void readDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid) {
-        bleOption.readDesc(mac, serviceUuid, chacUuid, descUuid);
+    public IMessageOption readDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid) {
+        return bleOption.readDesc(mac, serviceUuid, chacUuid, descUuid);
     }
 
     @Override
-    public void openNotify(String mac, UUID serviceUuid, UUID chacUuid) {
-        bleOption.openNotify(mac, serviceUuid, chacUuid);
+    public IMessageOption openNotify(String mac, UUID serviceUuid, UUID chacUuid) {
+        return bleOption.openNotify(mac, serviceUuid, chacUuid);
     }
 
     @Override
-    public void cancelNotify(String mac, UUID serviceUuid, UUID chacUuid) {
-        bleOption.cancelNotify(mac, serviceUuid, chacUuid);
+    public IMessageOption cancelNotify(String mac, UUID serviceUuid, UUID chacUuid) {
+        return bleOption.cancelNotify(mac, serviceUuid, chacUuid);
     }
 
     @Override
-    public void setMtu(String mac, int mtu) {
-        bleOption.setMtu(mac, mtu);
+    public IMessageOption setMtu(String mac, int mtu) {
+        return bleOption.setMtu(mac, mtu);
     }
 
     @Override
-    public void readRssi(String mac) {
-        bleOption.readRssi(mac);
+    public IMessageOption readRssi(String mac) {
+        return bleOption.readRssi(mac);
     }
 
     @Override
-    public void readPhy(String mac) {
-        bleOption.readPhy(mac);
+    public IMessageOption readPhy(String mac) {
+        return bleOption.readPhy(mac);
     }
 
     @Override
-    public void requestConnectionPriority(String mac, int connectionPriority) {
-        bleOption.requestConnectionPriority(mac, connectionPriority);
+    public IMessageOption requestConnectionPriority(String mac, int connectionPriority) {
+        return bleOption.requestConnectionPriority(mac, connectionPriority);
     }
 
     @Override
-    public void setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions) {
-        bleOption.setPreferredPhy(mac, txPhy, rxPhy, phyOptions);
+    public IMessageOption setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions) {
+        return  bleOption.setPreferredPhy(mac, txPhy, rxPhy, phyOptions);
     }
 
     @Override
-    public void startScan(long time, IScanCallback callback, SimpleScanConfig config) {
-        bleOption.startScan(time, callback,config);
+    public IMessageOption startScan(long time, IScanCallback callback, SimpleScanConfig config) {
+        return bleOption.startScan(time, callback,config);
     }
 
     @Override
-    public void startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
-        bleOption.startScanOnlyLollipop(time, filters, settings, callback);
+    public IMessageOption startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
+        return bleOption.startScanOnlyLollipop(time, filters, settings, callback);
     }
 
     @Override
-    public void stopScan() {
-        bleOption.stopScan();
+    public IMessageOption stopScan() {
+        return bleOption.stopScan();
     }
 
     @Override

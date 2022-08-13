@@ -59,7 +59,7 @@ public final class DisconnectChainBuilder extends BleChainBuilder<DisconnectChai
                     }
                 };
                 getBle().addConnectStatusChangeCallback(getMac(), connectStatusChangeCallback);
-                getBle().disconnect(getMac());
+                setMessageOption(getBle().disconnect(getMac()));
             }
         }
 

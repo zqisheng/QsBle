@@ -74,7 +74,7 @@ public final class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainB
                 }
             };
             getBle().addDescWriteCallback(getMac(),descWriteCallback);
-            getBle().writeDesc(getMac(), serviceUuid, chacUuid, descUuid, value);
+            setMessageOption(getBle().writeDesc(getMac(), serviceUuid, chacUuid, descUuid, value));
         }
 
         @Override

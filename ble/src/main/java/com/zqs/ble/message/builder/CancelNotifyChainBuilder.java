@@ -84,7 +84,7 @@ public final class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotify
                     }
                 };
                 getBle().addNotifyStatusCallback(mac,notifyStatusChangedCallback);
-                getBle().cancelNotify(mac,serviceUuid,notifyUuid);
+                setMessageOption(getBle().cancelNotify(mac,serviceUuid,notifyUuid));
             }
         }
 

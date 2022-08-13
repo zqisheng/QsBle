@@ -74,7 +74,7 @@ public final class ReadChacChainBuilder extends BleChainBuilder<ReadChacChainBui
                     }
                 };
                 getBle().addChacReadCallback(getMac(),chacReadCallback);
-                getBle().read(getMac(),serviceUuid,chacUuid);
+                setMessageOption(getBle().read(getMac(), serviceUuid, chacUuid));
             }
         }
 

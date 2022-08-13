@@ -62,6 +62,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -409,8 +410,9 @@ public final class QsBle {
         ble.disconnect(mac);
     }
 
-    public void writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
-        writeFile(mac, serviceUuid, chacUuid, fileBytes.length,BleGlobalConfig.otaSegmentSize, new ByteArrayInputStream(fileBytes), otaUpdateCallback);
+    @NonNull
+    public WriteFileMessage.WriteFileOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
+        return writeFile(mac, serviceUuid, chacUuid, fileBytes.length,BleGlobalConfig.otaSegmentSize, new ByteArrayInputStream(fileBytes), otaUpdateCallback);
     }
 
     /**
@@ -421,13 +423,15 @@ public final class QsBle {
      * @param file 注意AndroidQ的存储沙箱机制
      * @param otaUpdateCallback
      */
-    public void writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    @Nullable
+    public WriteFileMessage.WriteFileOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
         try {
-            writeFile(mac, serviceUuid, chacUuid,(int) file.length(),BleGlobalConfig.otaSegmentSize, new FileInputStream(file), otaUpdateCallback);
+            return writeFile(mac, serviceUuid, chacUuid,(int) file.length(),BleGlobalConfig.otaSegmentSize, new FileInputStream(file), otaUpdateCallback);
         } catch (FileNotFoundException e) {
             otaUpdateCallback.onError(e);
             e.printStackTrace();
         }
+        return null;
     }
 
     /**
@@ -445,28 +449,47 @@ public final class QsBle {
      * @param datasource
      * @param otaUpdateCallback
      */
-    public void writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    @NonNull
+    public WriteFileMessage.WriteFileOption writeFile(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
         WriteFileMessage message = new WriteFileMessage(mac, serviceUuid, chacUuid, fileByteCount, segmentSize, datasource, otaUpdateCallback);
         ble.sendMessage(message);
+        WeakReference<WriteFileMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            WriteFileMessage msg = weakReference.get();
+            if (msg!=null){
+                rmMessage(msg);
+            }
+        };
     }
 
-    public void writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
-        writeFileNoRsp(mac, serviceUuid, chacUuid, fileBytes.length,BleGlobalConfig.otaSegmentSize, new ByteArrayInputStream(fileBytes), otaUpdateCallback);
+    @NonNull
+    public WriteFileMessage.WriteFileOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] fileBytes, @NonNull IOtaUpdateCallback otaUpdateCallback){
+        return writeFileNoRsp(mac, serviceUuid, chacUuid, fileBytes.length,BleGlobalConfig.otaSegmentSize, new ByteArrayInputStream(fileBytes), otaUpdateCallback);
     }
 
-    public void writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    @Nullable
+    public WriteFileMessage.WriteFileOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull File file, @NonNull IOtaUpdateCallback otaUpdateCallback){
         try {
-            writeFileNoRsp(mac, serviceUuid, chacUuid, (int) file.length(),BleGlobalConfig.otaSegmentSize, new FileInputStream(file), otaUpdateCallback);
+            return writeFileNoRsp(mac, serviceUuid, chacUuid, (int) file.length(),BleGlobalConfig.otaSegmentSize, new FileInputStream(file), otaUpdateCallback);
         } catch (FileNotFoundException e) {
             otaUpdateCallback.onError(e);
             e.printStackTrace();
         }
+        return null;
     }
 
-    public void writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
+    @NonNull
+    public WriteFileMessage.WriteFileOption writeFileNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, int fileByteCount, int segmentSize, @NonNull InputStream datasource, @NonNull IOtaUpdateCallback otaUpdateCallback){
         WriteFileMessage message = new WriteFileMessage(mac, serviceUuid, chacUuid, fileByteCount, segmentSize, datasource, otaUpdateCallback);
         message.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         ble.sendMessage(message);
+        WeakReference<WriteFileMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            WriteFileMessage msg = weakReference.get();
+            if (msg!=null){
+                rmMessage(msg);
+            }
+        };
     }
 
     public void write(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid,@NonNull  byte[] value, int retryWriteCount) {

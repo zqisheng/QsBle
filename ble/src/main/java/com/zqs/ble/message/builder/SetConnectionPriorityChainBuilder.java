@@ -17,7 +17,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnectionPriorityChainBuilder, SetConnectionPriorityChainBuilder.SetConnectionPriorityChain,int[]> {
+public final class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnectionPriorityChainBuilder, SetConnectionPriorityChainBuilder.SetConnectionPriorityChain,int[]> {
 
     private SetConnectionPriorityChain chain = new SetConnectionPriorityChain(mac);
 

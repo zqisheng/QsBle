@@ -1,19 +1,24 @@
 package com.zqs.ble.message.builder;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+
 import com.zqs.ble.BleChain;
 import com.zqs.ble.BleChainBuilder;
 import com.zqs.ble.core.BleGlobalConfig;
+import com.zqs.ble.core.deamon.message.option.WriteChacLockMessage;
 import com.zqs.ble.core.utils.fun.Function2;
 
 import java.util.Queue;
 import java.util.UUID;
+
+import androidx.annotation.NonNull;
 
 /*
  *   @author zhangqisheng
  *   @date 2022-08-01
  *   @description
  */
-public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLockNoRspChacChainBuilder, WriteByLockNoRspChacChainBuilder.WriteByLockNoRspChacChain,Boolean> {
+public final class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLockNoRspChacChainBuilder, WriteByLockNoRspChacChainBuilder.WriteByLockNoRspChacChain,Boolean> {
 
     private WriteByLockNoRspChacChain chain = new WriteByLockNoRspChacChain(mac);
 
@@ -55,6 +60,7 @@ public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLoc
         private byte[] value;
         private int retryWriteCount = BleGlobalConfig.rewriteCount;
         private Function2<Boolean,Integer> callback;
+        private WriteChacLockMessage message;
 
         private WriteByLockNoRspChacChain(String mac) {
             super(mac);
@@ -74,7 +80,7 @@ public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLoc
                 onFail(new IllegalStateException(String.format("%s device not connect",getMac())));
                 return;
             }
-            getBle().writeByLockNoRsp(getMac(),serviceUuid,chacUuid,value,retryWriteCount,(isSuccess,status)->{
+            writeByLockNoRsp(getMac(),serviceUuid,chacUuid,value,retryWriteCount,(isSuccess,status)->{
                 if (callback!=null){
                     callback.onCallback(isSuccess, status);
                 }
@@ -84,6 +90,22 @@ public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLoc
                     onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
                 }
             });
+        }
+
+        private void writeByLockNoRsp(@NonNull String mac, @NonNull UUID serviceUuid, @NonNull UUID chacUuid, @NonNull byte[] value, int retryWriteCount, Function2<Boolean, Integer> writeCallback){
+            message = new WriteChacLockMessage(mac, serviceUuid, chacUuid, value);
+            message.setRetryWriteCount(retryWriteCount);
+            message.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+            if (writeCallback!=null){
+                message.setWriteCallback(writeCallback);
+            }
+            sendMessage(message);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            rmMessage(message);
         }
 
         @Override

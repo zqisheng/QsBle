@@ -17,9 +17,6 @@ class QsBleApplicaion: Application() {
         super.onCreate()
         QsBle.getInstance().init(this)
         QsBle.getInstance().setDebug(true)
-        BleGlobalConfig.globalScanConfig = SimpleScanConfig().apply {
-            this.deviceName="TT"
-        }
     }
 
 

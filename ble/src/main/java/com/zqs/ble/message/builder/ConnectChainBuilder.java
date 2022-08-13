@@ -20,7 +20,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder, ConnectChainBuilder.ConnectChain,Boolean> {
+public final class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder, ConnectChainBuilder.ConnectChain,Boolean> {
 
     private ConnectChain chain = new ConnectChain(mac);
 

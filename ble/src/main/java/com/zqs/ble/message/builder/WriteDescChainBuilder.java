@@ -15,7 +15,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainBuilder, WriteDescChainBuilder.WriteDescChain,Boolean> {
+public final class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainBuilder, WriteDescChainBuilder.WriteDescChain,Boolean> {
 
     private WriteDescChain chain = new WriteDescChain(mac);
     public WriteDescChainBuilder(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value, Queue<BleChainBuilder> chains) {

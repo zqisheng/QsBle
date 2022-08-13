@@ -44,6 +44,7 @@ import com.zqs.ble.core.callback.abs.IScanStatusCallback;
 import com.zqs.ble.core.callback.abs.IServicesDiscoveredCallback;
 import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.deamon.AbsMessage;
+import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.core.utils.Utils;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
@@ -148,7 +149,6 @@ public final class QsBle {
         BleDebugConfig.isPrintFunStack = isDebug;
         BleDebugConfig.isOpenBleThreadLog = isDebug;
         BleDebugConfig.isOpenScanLog = isDebug;
-        BleDebugConfig.isOpenBleLooperLog = isDebug;
         BleDebugConfig.isOpenWriteLog = isDebug;
         BleDebugConfig.isOpenGattCallbackLog = isDebug;
     }
@@ -339,6 +339,9 @@ public final class QsBle {
         sendMessage(new AbsMessage() {
             @Override
             public void onHandlerMessage() {
+                if (BleDebugConfig.isDebug){
+                    BleLog.d(String.format("setAutoReconnectCount mac=%s,autoReconnectCount=%d", mac, autoReconnectCount));
+                }
                 ble.setAutoReconnectCount(mac, autoReconnectCount);
             }
         });
@@ -374,6 +377,9 @@ public final class QsBle {
      * @param connectFailCallback 连接失败回调
      */
     public void connect(@NonNull String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
+        if (BleDebugConfig.isDebug){
+            BleLog.d(String.format("handle connect mac=%s,timeout=%d,reconnectCount=%d", mac, timeout, reconnectCount));
+        }
         if (getConnectCount()>= BleGlobalConfig.maxConnectCount&&!isConnect(mac)){
             ble.handleLruDisconnect();
         }
@@ -397,6 +403,9 @@ public final class QsBle {
      * @param mac
      */
     public void disconnect(@NonNull String mac) {
+        if (BleDebugConfig.isDebug){
+            BleLog.d(String.format("hanlde disconnect mac=%s", mac));
+        }
         ble.disconnect(mac);
     }
 
@@ -425,7 +434,7 @@ public final class QsBle {
      * 传入一个io流,会将io流中的所有字节按顺序依次发送给设备
      * 相较于writeFileNoRsp方式写,这种方式写一个mtu的速度比writeFileNoRsp的速度慢大概3-30倍
      * 我建议所有的写操作都使用NoRsp类型,除非是特别指定必须保证到达的数据
-     * 有norsp和没有norsp的区别就像是Udp和Tcp协议的区别,udp效率肯定比tcp高,但是速度肯定不上udp
+     * 有norsp和没有norsp的区别就像是Udp和Tcp协议的区别,udp速度肯定比tcp高,但是不能保证数据在传输过程的丢失重发
      * norsp-->udp
      * rsp-->tcp
      * @param mac
@@ -1091,6 +1100,13 @@ public final class QsBle {
         ble.sendMessage(message);
     }
 
+    /**
+     * 不支持外部使用
+     * @param message
+     */
+    void rmMessage(AbsMessage message){
+        ble.rmMessage(message);
+    }
 
     /**
      * 不支持外部使用
@@ -1103,7 +1119,6 @@ public final class QsBle {
 
     /**
      * 不支持外部使用
-     * @param message
      */
     void sendMessageToMain(Runnable callback){
         if (Thread.currentThread() == Looper.getMainLooper().getThread()) {

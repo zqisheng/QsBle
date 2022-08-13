@@ -18,7 +18,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder, StartScanChainBuilder.StartScanChain,Entry<Integer, byte[]>> {
+public final class StartScanChainBuilder extends BleChainBuilder<StartScanChainBuilder, StartScanChainBuilder.StartScanChain,Entry<Integer, byte[]>> {
 
     private StartScanChain chain = new StartScanChain();
 

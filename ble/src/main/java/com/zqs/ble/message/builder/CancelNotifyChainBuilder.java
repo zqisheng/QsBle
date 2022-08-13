@@ -17,7 +17,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotifyChainBuilder, CancelNotifyChainBuilder.CancelNotifyChain,String> {
+public final class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotifyChainBuilder, CancelNotifyChainBuilder.CancelNotifyChain,String> {
 
     private CancelNotifyChain chain = new CancelNotifyChain(mac);
 

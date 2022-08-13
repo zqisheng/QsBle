@@ -17,7 +17,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class OpenNotifyChainBuilder extends BleChainBuilder<OpenNotifyChainBuilder, OpenNotifyChainBuilder.OpenNotifyChain,String> {
+public final class OpenNotifyChainBuilder extends BleChainBuilder<OpenNotifyChainBuilder, OpenNotifyChainBuilder.OpenNotifyChain,String> {
 
     private OpenNotifyChain chain = new OpenNotifyChain(mac);
 

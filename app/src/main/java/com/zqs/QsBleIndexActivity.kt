@@ -63,7 +63,9 @@ class QsBleIndexActivity : AppCompatActivity() {
             }
             scan_device_con.removeAllViews()
             SimpleScanConfig().apply {
-                BleGlobalConfig.globalScanConfig.toApplyConfig(this)
+                if (BleGlobalConfig.globalScanConfig!=null){
+                    BleGlobalConfig.globalScanConfig.toApplyConfig(this)
+                }
                 if (!scan_mac.text.toString().isNullOrEmpty()){
                     this.mac=scan_mac.text.toString()
                 }

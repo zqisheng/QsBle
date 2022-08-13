@@ -17,7 +17,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuilder, ReadPhyChainBuilder.ReadPhyChain,int[]> {
+public final class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuilder, ReadPhyChainBuilder.ReadPhyChain,int[]> {
 
     private ReadPhyChain chain = new ReadPhyChain(mac);
     public ReadPhyChainBuilder(String mac, Queue<BleChainBuilder> chains) {

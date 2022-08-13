@@ -14,7 +14,6 @@ public class BleDebugConfig {
     public static boolean isOpenBleThreadLog = false;
     //是否打开扫描日志
     public static boolean isOpenScanLog = false;
-    public static boolean isOpenBleLooperLog = false;
     //是否打开写特征日志
     public static boolean isOpenWriteLog = false;
     //是否打开gatt回调日志

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.os.Build;
 
 import com.zqs.ble.core.BleGlobalConfig;
+import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.core.utils.fun.VoidFunction;
 import com.zqs.ble.lifecycle.DestroyLifecycleObserver;
 import com.zqs.ble.message.builder.CancelNotifyChainBuilder;
@@ -421,8 +422,12 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         start(null,handleStatusCallback);
     }
 
+    public void start(Lifecycle lifecycle) {
+        start(lifecycle,null);
+    }
+
     public void start() {
-        start(null);
+        start(null,null);
     }
 
     /**
@@ -431,6 +436,14 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
      */
     public BleChain build(){
         throw new IllegalStateException();
+    }
+
+    protected void sendMessage(AbsMessage message){
+        QsBle.getInstance().sendMessage(message);
+    }
+
+    protected void rmMessage(AbsMessage message){
+        QsBle.getInstance().rmMessage(message);
     }
 
 }

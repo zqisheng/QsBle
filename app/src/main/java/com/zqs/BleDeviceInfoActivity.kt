@@ -115,7 +115,7 @@ class BleDeviceInfoActivity : AppCompatActivity() {
                         BleLog.d("操作错误:${it.message}")
                     }.data(true) {
                         BleLog.d("操作数据:${it}")
-                    }.await()
+                    }.start(lifecycle)
                 }else{
                     ble.chain(mac).connect().writeByLock(
                         UUID.fromString(suuid),
@@ -355,7 +355,6 @@ class BleDeviceInfoActivity : AppCompatActivity() {
             val result:Int?=ble.chain(mac).readRssi().await()
             read_rssi_tv.text="rssi=${result}"
         }
-
     }
 
     //简单的设置一下

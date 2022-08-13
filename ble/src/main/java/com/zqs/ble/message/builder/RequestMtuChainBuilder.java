@@ -13,7 +13,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChainBuilder, RequestMtuChainBuilder.RequestMtuChain,Integer> {
+public final class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChainBuilder, RequestMtuChainBuilder.RequestMtuChain,Integer> {
 
     private RequestMtuChain chain = new RequestMtuChain(mac);
     public RequestMtuChainBuilder(String mac,int mtu, Queue<BleChainBuilder> chains) {

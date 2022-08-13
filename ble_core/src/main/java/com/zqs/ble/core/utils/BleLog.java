@@ -13,7 +13,7 @@ import com.zqs.ble.core.utils.fun.DebugFunction;
  */
 public class BleLog {
 
-    private static String LOG_TAG="FAST_IOT_BLE";
+    private static String LOG_TAG="QsBle";
 
     public static void i(String msg){
         i(LOG_TAG, msg);

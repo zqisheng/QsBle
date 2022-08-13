@@ -11,7 +11,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class StopScanChainBuilder extends BleChainBuilder<StopScanChainBuilder, StopScanChainBuilder.StopScanChain,Boolean> {
+public final class StopScanChainBuilder extends BleChainBuilder<StopScanChainBuilder, StopScanChainBuilder.StopScanChain,Boolean> {
 
     private StopScanChain chain = new StopScanChain("");
 

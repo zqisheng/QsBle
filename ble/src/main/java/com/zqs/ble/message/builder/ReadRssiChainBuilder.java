@@ -13,7 +13,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBuilder, ReadRssiChainBuilder.ReadRssiChain,Integer> {
+public final class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBuilder, ReadRssiChainBuilder.ReadRssiChain,Integer> {
 
     private ReadRssiChain chain = new ReadRssiChain(mac);
     public ReadRssiChainBuilder(String mac, Queue<BleChainBuilder> chains) {

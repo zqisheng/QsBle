@@ -15,7 +15,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBuilder, ReadDescChainBuilder.ReadDescChain,byte[]> {
+public final class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBuilder, ReadDescChainBuilder.ReadDescChain,byte[]> {
 
     private ReadDescChain chain = new ReadDescChain(mac);
     public ReadDescChainBuilder(String mac, UUID serviceUuid, UUID chacUuid,UUID descUuid, Queue<BleChainBuilder> chains) {

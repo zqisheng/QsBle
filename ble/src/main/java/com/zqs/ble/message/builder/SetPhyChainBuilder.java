@@ -17,7 +17,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder, SetPhyChainBuilder.SetPhyChain,int[]> {
+public final class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder, SetPhyChainBuilder.SetPhyChain,int[]> {
 
     private SetPhyChain chain = new SetPhyChain(mac);
 

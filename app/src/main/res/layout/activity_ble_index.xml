@@ -31,7 +31,7 @@
             android:id="@+id/scan_mac"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Mac地址" />
+            android:hint="Mac地址(带:形式)" />
 
         <EditText
             android:id="@+id/scan_service_uuid"

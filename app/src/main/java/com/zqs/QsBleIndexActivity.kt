@@ -101,14 +101,14 @@ class QsBleIndexActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main){
                     if (isConnect){
                         Toast.makeText(this@QsBleIndexActivity, "连接成功", Toast.LENGTH_SHORT).show()
+                        Intent(this@QsBleIndexActivity,BleDeviceInfoActivity::class.java).apply {
+                            this.putExtra("mac",device.address)
+                            startActivity(this)
+                        }
                     }else{
                         Toast.makeText(this@QsBleIndexActivity, "连接失败", Toast.LENGTH_SHORT).show()
                     }
                     hideLoading()
-                    Intent(this@QsBleIndexActivity,BleDeviceInfoActivity::class.java).apply {
-                        this.putExtra("mac",device.address)
-                        startActivity(this)
-                    }
                 }
             }
         }

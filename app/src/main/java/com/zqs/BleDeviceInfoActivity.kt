@@ -48,6 +48,7 @@ class BleDeviceInfoActivity : AppCompatActivity() {
         disconnec_auto_reconnect_count_btn.setOnClickListener {
             if (!disconnec_auto_reconnect_count.text.toString().isNullOrEmpty()){
                 ble.setAutoReconnectCount(mac,disconnec_auto_reconnect_count.text.toString().toInt())
+                Toast.makeText(this@BleDeviceInfoActivity, "设置断开自动重连次数成功", Toast.LENGTH_SHORT).show()
             }
         }
         connect.setOnClickListener {

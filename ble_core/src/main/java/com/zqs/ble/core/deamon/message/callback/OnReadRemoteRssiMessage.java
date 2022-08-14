@@ -32,7 +32,7 @@ public class OnReadRemoteRssiMessage extends AbsBleMessage implements ICallbackM
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnReadRemoteRssiMessage:mac=%s,status=%d,rssi=%d", device.getAddress(), status, rssi));
+            BleLog.d(String.format("BleCallback OnReadRemoteRssiMessage:mac=%s,status=%d,rssi=%d", device.getAddress(), status, rssi));
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){

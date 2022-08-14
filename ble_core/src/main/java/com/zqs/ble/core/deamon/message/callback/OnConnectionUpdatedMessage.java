@@ -35,7 +35,7 @@ public class OnConnectionUpdatedMessage extends AbsBleMessage implements ICallba
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnConnectionUpdatedMessage:mac=%s,interval=%d,latency=%d,timeout=%d,status=%d", device.getAddress(), interval, latency, timeout, status));
+            BleLog.d(String.format("BleCallback OnConnectionUpdatedMessage:mac=%s,interval=%d,latency=%d,timeout=%d,status=%d", device.getAddress(), interval, latency, timeout, status));
         }
         List<IConnectionUpdatedCallback> callbacks = getSimpleBle().getCallbackManage().getConnectionUpdatedCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){

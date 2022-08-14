@@ -71,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -144,6 +145,7 @@ public final class QsBle {
         BleDebugConfig.isOpenScanLog = isDebug;
         BleDebugConfig.isOpenWriteLog = isDebug;
         BleDebugConfig.isOpenGattCallbackLog = isDebug;
+        BleDebugConfig.isOpenChainHandleLog = isDebug;
     }
 
     /**
@@ -747,6 +749,15 @@ public final class QsBle {
     }
 
     @NonNull
+    @MainThread
+    public IMessageOption startScan(long time,Lifecycle lifecycle, IScanCallback callback) {
+        lifecycle.addObserver((DestroyLifecycleObserver) () -> {
+            ble.rmScanCallback(callback);
+        });
+        return ble.startScan(time, callback,null);
+    }
+
+    @NonNull
     public IMessageOption startScan(long time) {
         return ble.startScan(time, null,null);
     }
@@ -759,6 +770,15 @@ public final class QsBle {
      */
     @NonNull
     public IMessageOption startScan(long time, IScanCallback callback, SimpleScanConfig config) {
+        return ble.startScan(time, callback, config == null ? BleGlobalConfig.globalScanConfig : config);
+    }
+
+    @NonNull
+    @MainThread
+    public IMessageOption startScan(long time,Lifecycle lifecycle, IScanCallback callback, SimpleScanConfig config) {
+        lifecycle.addObserver((DestroyLifecycleObserver) () -> {
+            ble.rmScanCallback(callback);
+        });
         return ble.startScan(time, callback, config == null ? BleGlobalConfig.globalScanConfig : config);
     }
 
@@ -784,6 +804,7 @@ public final class QsBle {
         safeRun(()->ble.addBleMultiPkgsCallback(mac, chacUuid, callback));
     }
 
+    @MainThread
     public void addBleMultiPkgsCallback(String mac, UUID chacUuid, Lifecycle lifecycle, IBleMultiPkgsCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmBleMultiPkgsCallback(mac, chacUuid, callback));
         safeRun(()->ble.addBleMultiPkgsCallback(mac, chacUuid, callback));
@@ -803,6 +824,7 @@ public final class QsBle {
         safeRun(()->ble.addNotifyFailCallback(mac, callback));
     }
 
+    @MainThread
     public void addNotifyFailCallback(String mac,Lifecycle lifecycle, INotifyFailCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmNotifyFailCallback(mac, callback));
         safeRun(()->ble.addNotifyFailCallback(mac, callback));
@@ -823,6 +845,7 @@ public final class QsBle {
         safeRun(() -> ble.addNotifyStatusCallback(mac, callback));
     }
 
+    @MainThread
     public void addNotifyStatusCallback(String mac,Lifecycle lifecycle, INotifyStatusChangedCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmNotifyStatusCallback(mac, callback));
         safeRun(() -> ble.addNotifyStatusCallback(mac, callback));
@@ -841,6 +864,7 @@ public final class QsBle {
         safeRun(() -> ble.addBleStatusCallback(callback));
     }
 
+    @MainThread
     public void addBleStatusCallback(Lifecycle lifecycle,IBlueStatusCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmBleStatusCallback(callback));
         safeRun(() -> ble.addBleStatusCallback(callback));
@@ -858,6 +882,7 @@ public final class QsBle {
         safeRun(() -> ble.addScanStatusCallback(callback));
     }
 
+    @MainThread
     public void addScanStatusCallback(Lifecycle lifecycle,IScanStatusCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmScanStatusCallback(callback));
         safeRun(() -> ble.addScanStatusCallback(callback));
@@ -876,6 +901,7 @@ public final class QsBle {
         safeRun(() -> ble.addScanCallback(callback));
     }
 
+    @MainThread
     public void addScanCallback(Lifecycle lifecycle,IScanCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmScanCallback(callback));
         safeRun(() -> ble.addScanCallback(callback));
@@ -896,6 +922,7 @@ public final class QsBle {
         safeRun(() -> ble.addScanErrorCallback(callback));
     }
 
+    @MainThread
     public void addScanErrorCallback(Lifecycle lifecycle,IScanErrorCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmScanErrorCallback(callback));
         safeRun(() -> ble.addScanErrorCallback(callback));
@@ -914,6 +941,7 @@ public final class QsBle {
         safeRun(() -> ble.addChacChangeCallback(mac, callback));
     }
 
+    @MainThread
     public void addChacChangeCallback(String mac,Lifecycle lifecycle, IChacChangeCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmChacChangeCallback(mac,callback));
         safeRun(() -> ble.addChacChangeCallback(mac, callback));
@@ -933,6 +961,7 @@ public final class QsBle {
         safeRun(() -> ble.addChacReadCallback(mac, callback));
     }
 
+    @MainThread
     public void addChacReadCallback(String mac,Lifecycle lifecycle, IChacReadCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmChacReadCallback(mac,callback));
         safeRun(() -> ble.addChacReadCallback(mac, callback));
@@ -951,6 +980,7 @@ public final class QsBle {
         safeRun(() -> ble.addChacWriteCallback(mac, callback));
     }
 
+    @MainThread
     public void addChacWriteCallback(String mac,Lifecycle lifecycle, IChacWriteCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmChacWriteCallback(mac,callback));
         safeRun(() -> ble.addChacWriteCallback(mac, callback));
@@ -970,6 +1000,7 @@ public final class QsBle {
         safeRun(() -> ble.addConnectionUpdatedCallback(mac, callback));
     }
 
+    @MainThread
     public void addConnectionUpdatedCallback(String mac,Lifecycle lifecycle, IConnectionUpdatedCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmConnectionUpdatedCallback(mac,callback));
         safeRun(() -> ble.addConnectionUpdatedCallback(mac, callback));
@@ -989,6 +1020,7 @@ public final class QsBle {
         safeRun(() -> ble.addConnectStatusChangeCallback(mac, callback));
     }
 
+    @MainThread
     public void addConnectStatusChangeCallback(String mac,Lifecycle lifecycle, IConnectStatusChangeCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmConnectStatusChangeCallback(mac,callback));
         safeRun(() -> ble.addConnectStatusChangeCallback(mac, callback));
@@ -1008,6 +1040,7 @@ public final class QsBle {
         safeRun(() -> ble.addDescReadCallback(mac, callback));
     }
 
+    @MainThread
     public void addDescReadCallback(String mac,Lifecycle lifecycle, IDescReadCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmDescReadCallback(mac,callback));
         safeRun(() -> ble.addDescReadCallback(mac, callback));
@@ -1027,6 +1060,7 @@ public final class QsBle {
         safeRun(() -> ble.addDescWriteCallback(mac, callback));
     }
 
+    @MainThread
     public void addDescWriteCallback(String mac,Lifecycle lifecycle, IDescWriteCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmDescWriteCallback(mac,callback));
         safeRun(() -> ble.addDescWriteCallback(mac, callback));
@@ -1046,6 +1080,7 @@ public final class QsBle {
         safeRun(() -> ble.addMtuChangeCallback(mac, callback));
     }
 
+    @MainThread
     public void addMtuChangeCallback(String mac,Lifecycle lifecycle, IMtuChangeCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmMtuChangeCallback(mac,callback));
         safeRun(() -> ble.addMtuChangeCallback(mac, callback));
@@ -1065,6 +1100,7 @@ public final class QsBle {
         safeRun(() -> ble.addReadRssiCallback(mac, callback));
     }
 
+    @MainThread
     public void addReadRssiCallback(String mac,Lifecycle lifecycle, IReadRssiCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmReadRssiCallback(mac,callback));
         safeRun(() -> ble.addReadRssiCallback(mac, callback));
@@ -1083,6 +1119,7 @@ public final class QsBle {
         safeRun(() -> ble.addServicesDiscoveredCallback(mac, callback));
     }
 
+    @MainThread
     public void addServicesDiscoveredCallback(String mac,Lifecycle lifecycle, IServicesDiscoveredCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmServicesDiscoveredCallback(mac,callback));
         safeRun(() -> ble.addServicesDiscoveredCallback(mac, callback));
@@ -1117,6 +1154,7 @@ public final class QsBle {
         safeRun(()->ble.addPhyUpdateCallback(mac, callback));
     }
 
+    @MainThread
     public void addPhyUpdateCallback(String mac,Lifecycle lifecycle, IPhyUpdateCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmPhyUpdateCallback(mac,callback));
         safeRun(()->ble.addPhyUpdateCallback(mac, callback));
@@ -1135,6 +1173,7 @@ public final class QsBle {
         safeRun(()->ble.addPhyReadCallback(mac, callback));
     }
 
+    @MainThread
     public void addPhyReadCallback(String mac,Lifecycle lifecycle, IPhyReadCallback callback) {
         lifecycle.addObserver((DestroyLifecycleObserver) () ->rmPhyReadCallback(mac,callback));
         safeRun(()->ble.addPhyReadCallback(mac, callback));

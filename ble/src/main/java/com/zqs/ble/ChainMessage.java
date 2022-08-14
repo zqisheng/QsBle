@@ -1,9 +1,11 @@
 package com.zqs.ble;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.message.exception.ChainHandleTimeoutException;
 
+import java.util.Objects;
 import java.util.Queue;
 
 import androidx.annotation.Nullable;
@@ -157,7 +159,9 @@ public class ChainMessage extends AbsMessage {
     }
 
     public void onChainHandleFail(BaseChain chain, Exception e) {
-        BleLog.d(String.format("chain handle fail:%s,%s", chain.getClass().getName(), e == null ? "null" : e.getMessage()));
+        if (BleDebugConfig.isOpenChainHandleLog){
+            BleLog.d(String.format("chain handle fail:%s,%s", chain.getClass().getName(), e));
+        }
         if (chain.getRetry()>0){
             chain.letRetryLess();
             QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
@@ -200,9 +204,17 @@ public class ChainMessage extends AbsMessage {
         if (handleStatusCallback!=null){
             handleStatusCallback.onReport(isSuccess, e);
         }
+        if (BleDebugConfig.isOpenChainHandleLog){
+            if (e!=null){
+                BleLog.e(String.format("handle chain message error:%s",e));
+            }
+        }
     }
 
     public void onChainHandleSuccess(BaseChain chain, Object data) {
+        if (BleDebugConfig.isOpenChainHandleLog){
+            BleLog.d(String.format("chain handle success:%s", chain.getClass().getName()));
+        }
         if (data!=null&&chain.acceptDataCallback!=null){
             if (chain.acceptDataIsRunMain){
                 sendMessageToMain(()->{

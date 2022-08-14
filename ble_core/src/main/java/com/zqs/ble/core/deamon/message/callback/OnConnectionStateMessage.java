@@ -37,7 +37,7 @@ public class OnConnectionStateMessage extends AbsBleMessage implements ICallback
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnConnectionStateMessage:mac=%s,status=%s,profileState=%s", device.getAddress(), status, profileState));
+            BleLog.d(String.format("BleCallback OnConnectionStateMessage:mac=%s,status=%s,profileState=%s", device.getAddress(), status, profileState));
         }
         boolean isConnect = profileState == BluetoothProfile.STATE_CONNECTED;
         boolean oldConnectStatus = getSimpleBle().isConnect(getMac());

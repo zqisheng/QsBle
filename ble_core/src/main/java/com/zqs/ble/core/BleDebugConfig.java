@@ -18,4 +18,7 @@ public class BleDebugConfig {
     public static boolean isOpenWriteLog = false;
     //是否打开gatt回调日志
     public static boolean isOpenGattCallbackLog = false;
+    //是否打开链式执行日志
+    public static boolean isOpenChainHandleLog = false;
+
 }

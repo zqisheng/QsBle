@@ -43,7 +43,7 @@ public class OnDescriptorWriteMessage extends AbsBleMessage implements ICallback
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnDescriptorWriteMessage:mac=%s,status=%d,chac=%s,desc=%s,value=%s",device.getAddress(),status,descriptor.getCharacteristic().getUuid().toString(),descriptor.getUuid().toString(),  Utils.bytesToHexStr(value)));
+            BleLog.d(String.format("BleCallback OnDescriptorWriteMessage:mac=%s,status=%d,chac=%s,desc=%s,value=%s",device.getAddress(),status,descriptor.getCharacteristic().getUuid().toString(),descriptor.getUuid().toString(),  Utils.bytesToHexStr(value)));
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){

@@ -37,7 +37,7 @@ public class OnMtuChangedMessage extends AbsBleMessage implements ICallbackMessa
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnMtuChangedMessage:mac=%s,status=%d,mtu=%d", device.getAddress(), status, mtu));
+            BleLog.d(String.format("BleCallback OnMtuChangedMessage:mac=%s,status=%d,mtu=%d", device.getAddress(), status, mtu));
         }
         if (status == BluetoothGatt.GATT_SUCCESS) {
             if (getSimpleBle().getCurrentMtu() != mtu) {

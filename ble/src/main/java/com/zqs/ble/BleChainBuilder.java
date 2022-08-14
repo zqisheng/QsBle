@@ -371,6 +371,10 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         return chains;
     }
 
+    /**
+     *
+     * @return 返回的闭包对象,用于对整条链操作,可以手动销毁整条链
+     */
     public ChainMessage.ChainHandleOption prepare(){
         Queue<BaseChain> chainQueue = new LinkedList<>();
         while (!chains.isEmpty()){
@@ -401,7 +405,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
      * 我使用的几个老式的Ble框架,或多或少的都出现过内存泄漏的问题
      * 最好每一条链都绑定一个Lifecycle对象
      * @param lifecycle
-     * @param handleStatusCallback 返回的闭包对象,用于对整条链操作,可以手动销毁整条链
+     * @param handleStatusCallback 这条链执行状态回调
      */
     public void start(Lifecycle lifecycle,ChainMessage.ChainHandleStatusCallback handleStatusCallback){
         ChainMessage.ChainHandleOption option = prepare();

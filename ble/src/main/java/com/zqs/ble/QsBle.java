@@ -294,7 +294,7 @@ public final class QsBle {
      * @return
      */
     public boolean notifyIsOpen(@NonNull String mac,@NonNull UUID serviceUuid,@NonNull UUID notifyUuid){
-        return getNotifyType(mac, serviceUuid, notifyUuid).equals("disable");
+        return !getNotifyType(mac, serviceUuid, notifyUuid).equals("disable");
     }
 
     @Nullable
@@ -1283,6 +1283,10 @@ public final class QsBle {
      */
     public boolean isSupportReadPermission(@NonNull BluetoothGattDescriptor descriptor) {
         return (descriptor.getPermissions()&BluetoothGattDescriptor.PERMISSION_WRITE) != 0;
+    }
+
+    public void assertCurrentIsSenderThread(){
+        ble.assertCurrentIsSenderThread();
     }
 
 }

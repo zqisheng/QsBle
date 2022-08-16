@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.os.Build;
 
 import com.zqs.ble.core.BleGlobalConfig;
-import com.zqs.ble.core.deamon.AbsMessage;
+import com.zqs.ble.core.utils.fun.ReturnFunction;
 import com.zqs.ble.core.utils.fun.VoidFunction;
 import com.zqs.ble.lifecycle.DestroyLifecycleObserver;
 import com.zqs.ble.message.builder.CancelNotifyChainBuilder;
@@ -32,6 +32,7 @@ import java.util.Queue;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.lifecycle.Lifecycle;
 
@@ -367,6 +368,33 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
         return builder;
     }
 
+    public BleChainBuilder together(@NonNull ReturnFunction<BleChainBuilder> createBuilder){
+        return together(createBuilder.create());
+    }
+
+    /**
+     * 传入的链类似原子性,要么同时成功,要么同时失败,可以对传入的整条链设置操作符,比如retry操作
+     * @param builder
+     * @return
+     */
+    public BleChainBuilder together(@NonNull BleChainBuilder builder){
+        BleChainBuilder bu = new BleChainBuilder(mac, chains) {
+            private TransactionChain chain = new TransactionChain(mac, builder.getChains());
+
+            @Override
+            public BleChain getBleChain() {
+                return chain;
+            }
+
+            @Override
+            public BleChain build() {
+                return chain;
+            }
+        };
+        chains.add(bu);
+        return this;
+    }
+
     public Queue<BleChainBuilder> getChains(){
         return chains;
     }
@@ -440,4 +468,37 @@ public abstract class BleChainBuilder<T extends BleChainBuilder,C extends BleCha
      * @return
      */
     public abstract BleChain build();
+
+
+    private static class TransactionChain extends BleChain<Boolean>{
+        private Queue<BaseChain> chains;
+        private ChainMessage message;
+        public TransactionChain(String mac,Queue<BaseChain> chains) {
+            super(mac);
+            this.chains = chains;
+        }
+
+        @Override
+        public void handle() {
+            message = new ChainMessage(chains);
+            message.setHandleStatusCallback(new ChainMessage.ChainHandleStatusCallback() {
+                @Override
+                public void onReport(Boolean isSuccess, @Nullable Exception e) {
+                    if (isSuccess){
+                        onSuccess(true);
+                    }else{
+                        onFail(e);
+                    }
+                }
+            });
+            QsBle.getInstance().sendMessage(message);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            message.cancel();
+        }
+    }
+
 }

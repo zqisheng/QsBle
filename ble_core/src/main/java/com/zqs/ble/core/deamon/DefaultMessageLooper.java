@@ -51,10 +51,6 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     private Condition condition = lock.newCondition();
 
-    /**
-     * callbackMessages中的消息都是回调在系统线程中
-     * optionMessages和frontMessages中的消息都是回调在同一个线程中,默认是main线程
-     */
     private Queue<AbsMessage> callbackMessages = new LinkedBlockingQueue<>();
     //所有的add操作必须在一个线程中回调,BleThread主要是对线程的遍历操作，不改变messages中的size
     private Queue<AbsMessage> optionMessages = new LinkedBlockingQueue<>();

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 
 import com.zqs.ble.BleChain;
 import com.zqs.ble.BleChainBuilder;
+import com.zqs.ble.QsBle;
 import com.zqs.ble.core.BleConst;
 import com.zqs.ble.core.callback.abs.INotifyStatusChangedCallback;
 import com.zqs.ble.core.utils.Utils;
@@ -67,7 +68,7 @@ public final class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotify
             BluetoothGattDescriptor desc = getBle().getGattDescriptor(getMac(), serviceUuid, notifyUuid, BleConst.clientCharacteristicConfig);
             if (desc==null){
                 onFail(new IllegalStateException(String.format("%s notify desc not found",getMac())));
-            }else if (!isRefresh&&Arrays.equals(desc.getValue(), BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE)){
+            }else if (!isRefresh&& !QsBle.getInstance().notifyIsOpen(mac,serviceUuid,notifyUuid)){
                 onSuccess("disable");
             }else{
                 notifyStatusChangedCallback = (device, descriptor, notifyEnable) -> {

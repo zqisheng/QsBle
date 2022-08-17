@@ -1,15 +1,13 @@
 package com.zqs.ble;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Build;
 
 import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.callback.abs.IBleMultiPkgsCallback;
 import com.zqs.ble.core.callback.abs.IChacChangeCallback;
+import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.core.utils.Utils;
-import com.zqs.ble.core.utils.fun.Function1;
 import com.zqs.ble.core.utils.fun.ReturnFunction;
 import com.zqs.ble.core.utils.fun.VoidFunction;
 import com.zqs.ble.fun.Function;
@@ -17,6 +15,7 @@ import com.zqs.ble.lifecycle.DestroyLifecycleObserver;
 import com.zqs.ble.message.builder.CancelNotifyChainBuilder;
 import com.zqs.ble.message.builder.ConnectChainBuilder;
 import com.zqs.ble.message.builder.DisconnectChainBuilder;
+import com.zqs.ble.message.builder.InterruptChainBuilder;
 import com.zqs.ble.message.builder.OpenNotifyChainBuilder;
 import com.zqs.ble.message.builder.ReadChacChainBuilder;
 import com.zqs.ble.message.builder.ReadDescChainBuilder;
@@ -27,6 +26,7 @@ import com.zqs.ble.message.builder.SetConnectionPriorityChainBuilder;
 import com.zqs.ble.message.builder.SetPhyChainBuilder;
 import com.zqs.ble.message.builder.StartScanChainBuilder;
 import com.zqs.ble.message.builder.StopScanChainBuilder;
+import com.zqs.ble.message.builder.TogetherChainBuilder;
 import com.zqs.ble.message.builder.WriteByLockChacChainBuilder;
 import com.zqs.ble.message.builder.WriteByLockNoRspChacChainBuilder;
 import com.zqs.ble.message.builder.WriteChacChainBuilder;
@@ -73,7 +73,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         this.mac = mac;
     }
 
-    public abstract C getBleChain();
+    public abstract BaseChain getBleChain();
 
     /**
      * 切换下游及当前链操作的设备mac地址
@@ -241,6 +241,11 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         return connect(mac);
     }
 
+    /**
+     * 连接设备,如果设备之前已经连接,会直接执行下一条链
+     * @param mac
+     * @return
+     */
     public ConnectChainBuilder connect(String mac) {
         ConnectChainBuilder builder = new ConnectChainBuilder(mac, chains);
         chains.add(builder);
@@ -257,11 +262,19 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         return builder;
     }
 
+    /**
+     * 打开通知,如果本地缓存的通知状态是打开的会直接返回成功,除非调用了refresh操作才会从设备那边更新状态
+     * @return
+     */
     public OpenNotifyChainBuilder openNotify() {
         QsBle.getInstance().verifyDefaultNotifyUuid();
         return openNotify(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID);
     }
 
+    /**
+     * 关闭通知,如果本地缓存的通知状态是关闭的会直接返回成功,除非调用了refresh操作才会从设备那边更新状态
+     * @return
+     */
     public CancelNotifyChainBuilder cancelNotify() {
         QsBle.getInstance().verifyDefaultNotifyUuid();
         return cancelNotify(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID);
@@ -388,25 +401,23 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         return builder;
     }
 
-    /*public WriteByLockChacChainBuilder accept(){
-
-        return this;
-    }*/
-
-    public BleChainBuilder together(@NonNull ReturnFunction<BleChainBuilder> createBuilder) {
-        return together(createBuilder.create());
+    public InterruptChainBuilder<byte[]> acceptNotify(Function<byte[], Boolean> chacChangedCallback) {
+        return acceptNotify(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID, chacChangedCallback);
     }
 
-    public BleChainBuilder acceptPkg(Function<byte[], Boolean> chacChangedCallback) {
-        return acceptPkg(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID, chacChangedCallback);
-    }
-
-    public BleChainBuilder acceptPkg(UUID serviceUuid, UUID chacUuid, Function<byte[], Boolean> chacChangedCallback) {
+    /**
+     * 接收设备返回的数据,一个mtu大小的
+     * @param serviceUuid
+     * @param chacUuid
+     * @param chacChangedCallback 返回true表示返回了符合要求的数据,可以执行下一条链,false表示继续等待符合要求的数据
+     * @return
+     */
+    public InterruptChainBuilder<byte[]> acceptNotify(UUID serviceUuid, UUID chacUuid, Function<byte[], Boolean> chacChangedCallback) {
         return interrupt((option) -> {
             IChacChangeCallback callback = (device, characteristic, value) -> {
                 if (Utils.uuidIsSame(characteristic,serviceUuid,chacUuid)){
                     if (chacChangedCallback.apply(value)){
-                        option.next();
+                        option.next(value);
                     }
                 }
             };
@@ -415,16 +426,23 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         });
     }
 
-    public BleChainBuilder acceptMultiPkg(Function<List<byte[]>, Boolean> chacChangedCallback) {
-        return acceptMultiPkg(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID, chacChangedCallback);
+    public InterruptChainBuilder<List<byte[]>> acceptMultiPkgNotify(Function<List<byte[]>, Boolean> chacChangedCallback) {
+        return acceptMultiPkgNotify(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID, chacChangedCallback);
     }
 
-    public BleChainBuilder acceptMultiPkg(UUID serviceUuid, UUID chacUuid, Function<List<byte[]>, Boolean> chacChangedCallback) {
+    /**
+     * 接收设备返回的数据,超过一个mtu大小的
+     * @param serviceUuid
+     * @param chacUuid
+     * @param chacChangedCallback 返回true表示返回了符合要求的数据,可以执行下一条链,false表示继续等待符合要求的数据
+     * @return
+     */
+    public InterruptChainBuilder<List<byte[]>> acceptMultiPkgNotify(UUID serviceUuid, UUID chacUuid, Function<List<byte[]>, Boolean> chacChangedCallback) {
         return interrupt((option) -> {
             IBleMultiPkgsCallback callback = (device, characteristic, value) -> {
                 if (Utils.uuidIsSame(characteristic,serviceUuid,chacUuid)){
                     if (chacChangedCallback.apply(value)){
-                        option.next();
+                        option.next(value);
                     }
                 }
             };
@@ -433,31 +451,27 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         });
     }
 
+    public BleChainBuilder together(@NonNull ReturnFunction<BleChainBuilder> createBuilder) {
+        return together(createBuilder.create());
+    }
+
     /**
      * 传入的链类似原子性,要么同时成功,要么同时失败,可以对传入的整条链设置操作符,比如retry操作
-     *
+     * 将一条链的逻辑单独拿出来嵌入到当前链中,可以对这段逻辑进行统一的重试或者超时等
+     * 传入的必须是一条新创建的链,传入当前链会报异常
      * @param builder
      * @return
      */
-    public BleChainBuilder together(@NonNull BleChainBuilder builder) {
-        BleChainBuilder bu = new BleChainBuilder(mac, chains) {
-            private TransactionChain chain = new TransactionChain(mac, builder.getChains());
-
-            @Override
-            public BleChain getBleChain() {
-                return chain;
-            }
-
-            @Override
-            public BleChain build() {
-                return chain;
-            }
-        };
+    public TogetherChainBuilder together(@NonNull BleChainBuilder builder) {
+        if (isSameRoot(builder)){
+            throw new IllegalArgumentException("must be introduced to a new BleChainBuilder object");
+        }
+        TogetherChainBuilder bu = new TogetherChainBuilder(mac, chains);
         chains.add(bu);
-        return this;
+        return bu;
     }
 
-    private InterruptChainBuilder interrupt(Function<InterruptChainBuilder.InterruptOption, Runnable> interrupt) {
+    public <E> InterruptChainBuilder<E> interrupt(Function<InterruptChainBuilder.InterruptOption<E>, Runnable> interrupt) {
         InterruptChainBuilder builder = new InterruptChainBuilder(mac, chains, interrupt);
         chains.add(builder);
         return builder;
@@ -530,6 +544,10 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         start(null, null);
     }
 
+    private boolean isSameRoot(BleChainBuilder builder) {
+        return chains.peek() == builder.chains.peek();
+    }
+
     /**
      * 由子类实现
      *
@@ -537,11 +555,11 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      */
     public abstract BleChain build();
 
-    private static class TransactionChain extends BleChain<Boolean> {
+    private static class TogetherChain extends BleChain<Boolean> {
         private Queue<BaseChain> chains;
         private ChainMessage message;
 
-        public TransactionChain(String mac, Queue<BaseChain> chains) {
+        public TogetherChain(String mac, Queue<BaseChain> chains) {
             super(mac);
             this.chains = chains;
         }
@@ -567,6 +585,10 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
             super.onDestroy();
             message.cancel();
         }
+    }
+
+    protected static void sendMessage(AbsMessage message){
+        QsBle.getInstance().sendMessage(message);
     }
 
 }

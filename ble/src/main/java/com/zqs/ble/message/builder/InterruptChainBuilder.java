@@ -1,18 +1,23 @@
-package com.zqs.ble;
+package com.zqs.ble.message.builder;
 
+import com.zqs.ble.BleChain;
+import com.zqs.ble.BleChainBuilder;
+import com.zqs.ble.QsBle;
 import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.fun.Function;
 
 import java.util.Queue;
+
+import androidx.annotation.Nullable;
 
 /*
  *   @author zhangqisheng
  *   @date 2022-08-01
  *   @description
  */
-public final class InterruptChainBuilder extends BleChainBuilder<InterruptChainBuilder, InterruptChainBuilder.InterruptChain,Boolean> {
+public final class InterruptChainBuilder<D> extends BleChainBuilder<InterruptChainBuilder, InterruptChainBuilder.InterruptChain,D> {
 
-    private InterruptChain chain = new InterruptChain(mac);
+    private InterruptChain<D> chain = new InterruptChain<D>(mac);
 
     public InterruptChainBuilder(String mac, Queue<BleChainBuilder> chains, Function<InterruptOption,Runnable> interrupt) {
         super(mac,chains);
@@ -44,7 +49,7 @@ public final class InterruptChainBuilder extends BleChainBuilder<InterruptChainB
         return chain;
     }
 
-    public static class InterruptChain extends BleChain<Boolean>{
+    public static class InterruptChain<D> extends BleChain<D>{
 
         public InterruptChain(String mac) {
             super(mac);
@@ -52,24 +57,25 @@ public final class InterruptChainBuilder extends BleChainBuilder<InterruptChainB
 
         private Function<InterruptOption,Runnable> interrupt;
         private Runnable destroyCallback;
+
         //闭包
-        private InterruptOption option = new InterruptOption() {
+        private InterruptOption<D> option = new InterruptOption<D>() {
             @Override
-            public void next() {
-                QsBle.getInstance().sendMessage(new AbsMessage() {
+            public void next(D data) {
+                sendMessage(new AbsMessage() {
                     @Override
                     public void onHandlerMessage() {
-                        InterruptChain.this.onSuccess(true);
+                        InterruptChain.this.onSuccess(data);
                     }
                 });
             }
 
             @Override
             public void cancel() {
-                QsBle.getInstance().sendMessage(new AbsMessage() {
+                sendMessage(new AbsMessage() {
                     @Override
                     public void onHandlerMessage() {
-                        InterruptChain.this.onFail(new IllegalStateException());
+                    InterruptChain.this.onFail(new IllegalStateException());
                     }
                 });
             }
@@ -90,8 +96,8 @@ public final class InterruptChainBuilder extends BleChainBuilder<InterruptChainB
     }
 
 
-    public interface InterruptOption {
-        void next();
+    public interface InterruptOption<D> {
+        void next(@Nullable D data);
 
         void cancel();
     }

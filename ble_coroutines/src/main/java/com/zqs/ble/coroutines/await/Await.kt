@@ -1,8 +1,8 @@
 package com.zqs.ble.coroutines.await
 
 import com.zqs.ble.BaseChain
-import com.zqs.ble.BleChain
 import com.zqs.ble.BleChainBuilder
+import com.zqs.ble.message.builder.InterruptChainBuilder
 import com.zqs.ble.message.builder.*
 import com.zqs.ble.message.pojo.Entry
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -630,6 +630,72 @@ suspend fun StartScanChainBuilder.await(): Entry<Int, ByteArray>? {
             last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
                 if (isSuccess) {
                     continuation.resume(data as Entry<Int, ByteArray>)
+                } else if (isDump) {
+                    continuation.resumeWithException(e!!)
+                } else{
+                    continuation.resume(null)
+                }
+            }
+            val option=prepare()
+            option.setHandleStatusCallback { isSuccess, e ->
+                if (!isSuccess){
+                    if (continuation.isActive){
+                        continuation.resumeWithException(e!!)
+                    }
+                }
+            }
+            option.start()
+            continuation.invokeOnCancellation {
+                option.cancel()
+            }
+        }
+    }
+}
+
+
+suspend fun <T> InterruptChainBuilder<T>.await(): T? {
+    return suspendCancellableCoroutine { continuation ->
+        getBuildChains(this).apply {
+            (last as StartScanChainBuilder.StartScanChain).isRecordDevice = true
+            last.isAsync=false
+            last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
+                if (isSuccess) {
+                    continuation.resume(data as T?)
+                } else if (isDump) {
+                    continuation.resumeWithException(e!!)
+                } else{
+                    continuation.resume(null)
+                }
+            }
+            val option=prepare()
+            option.setHandleStatusCallback { isSuccess, e ->
+                if (!isSuccess){
+                    if (continuation.isActive){
+                        continuation.resumeWithException(e!!)
+                    }
+                }
+            }
+            option.start()
+            continuation.invokeOnCancellation {
+                option.cancel()
+            }
+        }
+    }
+}
+
+/**
+ * 扫描指定mac的设备
+ * Entry<Int, ByteArray>:Int->rssi,ByteArray->广播的字节数据
+ * null:没有找到指定的设备
+ */
+suspend fun TogetherChainBuilder.await(): Boolean? {
+    return suspendCancellableCoroutine { continuation ->
+        getBuildChains(this).apply {
+            (last as StartScanChainBuilder.StartScanChain).isRecordDevice = true
+            last.isAsync=false
+            last.setChainHandleStatusCallback { isSuccess, isDump, data, e ->
+                if (isSuccess) {
+                    continuation.resume(data as Boolean)
                 } else if (isDump) {
                     continuation.resumeWithException(e!!)
                 } else{

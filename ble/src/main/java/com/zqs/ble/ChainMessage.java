@@ -41,45 +41,35 @@ public class ChainMessage extends AbsMessage {
     @Override
     public void onHandlerMessage() {
         if (chains!=null&&!chains.isEmpty()){
-            if (currentChain!=null){
-                if (currentChain.afterCallback!=null){
-                    if (currentChain.afterIsRunMain){
-                        sendMessageToMain(()->{
-                            currentChain.afterCallback.run();
-                            QsBle.getInstance().sendMessage(new AbsMessage() {
-                                @Override
-                                public void onHandlerMessage() {
-                                    pollChainsAndHandle();
-                                }
-                            });
-                        });
-                    }else{
+            if (currentChain!=null&&currentChain.afterCallback!=null){
+                if (currentChain.afterIsRunMain){
+                    sendMessageToMain(()->{
                         currentChain.afterCallback.run();
-                        pollChainsAndHandle();
-                    }
+                        QsBle.getInstance().sendMessage(new AbsMessage() {
+                            @Override
+                            public void onHandlerMessage() {
+                                pollChainsAndHandle();
+                            }
+                        });
+                    });
                 }else{
+                    currentChain.afterCallback.run();
                     pollChainsAndHandle();
                 }
             }else{
                 pollChainsAndHandle();
             }
         }else{
-            if (currentChain!=null){
-                if (currentChain.afterCallback!=null){
-                    if (currentChain.afterIsRunMain){
-                        sendMessageToMain(()->{
-                            currentChain.afterCallback.run();
-                            if (handleStatusCallback!=null){
-                                handleStatusCallback.onReport(true, null);
-                            }
-                        });
-                    }else{
+            if (currentChain!=null&&currentChain.afterCallback!=null){
+                if (currentChain.afterIsRunMain){
+                    sendMessageToMain(()->{
                         currentChain.afterCallback.run();
                         if (handleStatusCallback!=null){
                             handleStatusCallback.onReport(true, null);
                         }
-                    }
+                    });
                 }else{
+                    currentChain.afterCallback.run();
                     if (handleStatusCallback!=null){
                         handleStatusCallback.onReport(true, null);
                     }

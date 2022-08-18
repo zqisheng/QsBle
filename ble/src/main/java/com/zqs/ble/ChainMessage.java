@@ -41,44 +41,13 @@ public class ChainMessage extends AbsMessage {
     @Override
     public void onHandlerMessage() {
         if (chains!=null&&!chains.isEmpty()){
-            if (currentChain!=null&&currentChain.afterCallback!=null){
-                if (currentChain.afterIsRunMain){
-                    sendMessageToMain(()->{
-                        currentChain.afterCallback.run();
-                        QsBle.getInstance().sendMessage(new AbsMessage() {
-                            @Override
-                            public void onHandlerMessage() {
-                                pollChainsAndHandle();
-                            }
-                        });
-                    });
-                }else{
-                    currentChain.afterCallback.run();
-                    pollChainsAndHandle();
-                }
-            }else{
-                pollChainsAndHandle();
-            }
+            callAfterCallback(currentChain,()->pollChainsAndHandle());
         }else{
-            if (currentChain!=null&&currentChain.afterCallback!=null){
-                if (currentChain.afterIsRunMain){
-                    sendMessageToMain(()->{
-                        currentChain.afterCallback.run();
-                        if (handleStatusCallback!=null){
-                            handleStatusCallback.onReport(true, null);
-                        }
-                    });
-                }else{
-                    currentChain.afterCallback.run();
-                    if (handleStatusCallback!=null){
-                        handleStatusCallback.onReport(true, null);
-                    }
-                }
-            }else{
+            callAfterCallback(currentChain,()->{
                 if (handleStatusCallback!=null){
                     handleStatusCallback.onReport(true, null);
                 }
-            }
+            });
         }
     }
 
@@ -95,24 +64,7 @@ public class ChainMessage extends AbsMessage {
             callReport(chain,e,true);
             return;
         }
-        if (chain.beforeCallback!=null){
-            if (chain.beforeIsRunMain){
-                sendMessageToMain(()->{
-                    chain.beforeCallback.run();
-                    QsBle.getInstance().sendMessage(new AbsMessage() {
-                        @Override
-                        public void onHandlerMessage() {
-                            handleChainOption(chain);
-                        }
-                    });
-                });
-            }else{
-                chain.beforeCallback.run();
-                handleChainOption(chain);
-            }
-        }else{
-            handleChainOption(chain);
-        }
+        callBeforeCallback(chain,()->handleChainOption(chain));
     }
 
     private void handleChainOption(BaseChain chain){
@@ -165,24 +117,7 @@ public class ChainMessage extends AbsMessage {
             if (!chain.isDump()&&!chains.isEmpty()){
                 onHandlerMessage();
             }else{
-                if (e!=null&&chain.errorCallback!=null){
-                    if (chain.errorIsRunMain){
-                        sendMessageToMain(()->{
-                            chain.errorCallback.apply(e);
-                            QsBle.getInstance().sendMessage(new AbsMessage() {
-                                @Override
-                                public void onHandlerMessage() {
-                                    callReport(chain,e,false);
-                                }
-                            });
-                        });
-                    }else{
-                        chain.errorCallback.apply(e);
-                        callReport(chain,e,false);
-                    }
-                }else{
-                    callReport(chain,e,false);
-                }
+                callErrorCallback(chain,e,()->callReport(chain,e,false));
             }
         }
     }
@@ -205,21 +140,118 @@ public class ChainMessage extends AbsMessage {
         if (BleDebugConfig.isOpenChainHandleLog){
             BleLog.d(String.format("chain handle success:%s", chain.getClass().getName()));
         }
+        callDataCallback(chain,data,()->{
+            chain.onReport(true,chain.isDump(),data,null);
+            onHandlerMessage();
+        });
+    }
+
+    private void callBeforeCallback(BaseChain chain,Runnable callFinish) {
+        if (chain.beforeCallback!=null){
+            if (chain.beforeIsRunMain){
+                sendMessageToMain(()->{
+                    try{
+                        chain.beforeCallback.run();
+                    }catch (Exception e){
+                        chain.setRetry(0);
+                        onChainHandleFail(chain,e);
+                    }
+                    QsBle.getInstance().sendMessage(new AbsMessage() {
+                        @Override
+                        public void onHandlerMessage() {
+                           callFinish.run();
+                        }
+                    });
+                });
+            }else{
+                try{
+                    chain.beforeCallback.run();
+                }catch (Exception e){
+                    chain.setRetry(0);
+                    onChainHandleFail(chain,e);
+                }
+                callFinish.run();
+            }
+        }else{
+            callFinish.run();
+        }
+    }
+
+    private void callAfterCallback(BaseChain chain,Runnable callFinish) {
+        if (chain!=null&&chain.afterCallback!=null){
+            if (chain.afterIsRunMain){
+                sendMessageToMain(()->{
+                    try{
+                        chain.afterCallback.run();
+                    }catch (Exception e){
+                        chain.setRetry(0);
+                        onChainHandleFail(chain,e);
+                    }
+                    QsBle.getInstance().sendMessage(new AbsMessage() {
+                        @Override
+                        public void onHandlerMessage() {
+                            callFinish.run();
+                        }
+                    });
+                });
+            }else{
+                try{
+                    chain.afterCallback.run();
+                }catch (Exception e){
+                    chain.setRetry(0);
+                    onChainHandleFail(chain,e);
+                }
+                callFinish.run();
+            }
+        }else{
+            callFinish.run();
+        }
+    }
+
+    private void callDataCallback(BaseChain chain,Object data,Runnable callFinish){
         if (data!=null&&chain.acceptDataCallback!=null){
             if (chain.acceptDataIsRunMain){
                 sendMessageToMain(()->{
-                    chain.acceptDataCallback.apply(data);
-                    chain.onReport(true,chain.isDump(),data,null);
-                    onHandlerMessage();
+                    try{
+                        chain.acceptDataCallback.apply(data);
+                    }catch (Exception e){
+                        BleLog.d(String.format("message acceptDataCallback throw error:%s", e.toString()));
+                        cancel();
+                    }
+                    callFinish.run();
                 });
             }else{
-                chain.acceptDataCallback.apply(data);
-                chain.onReport(true,chain.isDump(),data,null);
-                onHandlerMessage();
+                try{
+                    chain.acceptDataCallback.apply(data);
+                }catch (Exception e){
+                    BleLog.d(String.format("message acceptDataCallback throw error:%s", e.toString()));
+                    cancel();
+                }
+                callFinish.run();
             }
         }else{
-            chain.onReport(true,chain.isDump(),data,null);
-            onHandlerMessage();
+            callFinish.run();
+        }
+    }
+
+    private void callErrorCallback(BaseChain chain,Exception e,Runnable callFinish){
+        if (e!=null&&chain.errorCallback!=null){
+            if (chain.errorIsRunMain){
+                sendMessageToMain(()->{
+                    chain.errorCallback.apply(e);
+                    QsBle.getInstance().sendMessage(new AbsMessage() {
+                        @Override
+                        public void onHandlerMessage() {
+                            callFinish.run();
+                        }
+                    });
+                });
+            }else{
+                chain.errorCallback.apply(e);
+                callFinish.run();
+            }
+        }else{
+            callFinish.run();
         }
     }
 

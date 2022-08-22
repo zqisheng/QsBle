@@ -1,8 +1,11 @@
 package com.zqs.ble;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.deamon.AbsMessage;
+import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.message.exception.ChainHandleTimeoutException;
 
+import java.util.Objects;
 import java.util.Queue;
 
 import androidx.annotation.Nullable;
@@ -156,6 +159,9 @@ public class ChainMessage extends AbsMessage {
     }
 
     public void onChainHandleFail(BaseChain chain, Exception e) {
+        if (BleDebugConfig.isOpenChainHandleLog){
+            BleLog.d(String.format("chain handle fail:%s,%s", chain.getClass().getName(), e));
+        }
         if (chain.getRetry()>0){
             chain.letRetryLess();
             QsBle.getInstance().sendMessageByDelay(new AbsMessage() {
@@ -169,21 +175,20 @@ public class ChainMessage extends AbsMessage {
             if (!chain.isDump()&&!chains.isEmpty()){
                 onHandlerMessage();
             }else{
-                if (e!=null){
-                    if (chain.errorCallback!=null){
-                        if (chain.errorIsRunMain){
-                            sendMessageToMain(()->{
-                                chain.errorCallback.apply(e);
-                                QsBle.getInstance().sendMessage(new AbsMessage() {
-                                    @Override
-                                    public void onHandlerMessage() {
-                                        callReport(chain,e,false);
-                                    }
-                                });
-                            });
-                        }else{
+                if (e!=null&&chain.errorCallback!=null){
+                    if (chain.errorIsRunMain){
+                        sendMessageToMain(()->{
                             chain.errorCallback.apply(e);
-                        }
+                            QsBle.getInstance().sendMessage(new AbsMessage() {
+                                @Override
+                                public void onHandlerMessage() {
+                                    callReport(chain,e,false);
+                                }
+                            });
+                        });
+                    }else{
+                        chain.errorCallback.apply(e);
+                        callReport(chain,e,false);
                     }
                 }else{
                     callReport(chain,e,false);
@@ -199,9 +204,17 @@ public class ChainMessage extends AbsMessage {
         if (handleStatusCallback!=null){
             handleStatusCallback.onReport(isSuccess, e);
         }
+        if (BleDebugConfig.isOpenChainHandleLog){
+            if (e!=null){
+                BleLog.e(String.format("handle chain message error:%s",e));
+            }
+        }
     }
 
     public void onChainHandleSuccess(BaseChain chain, Object data) {
+        if (BleDebugConfig.isOpenChainHandleLog){
+            BleLog.d(String.format("chain handle success:%s", chain.getClass().getName()));
+        }
         if (data!=null&&chain.acceptDataCallback!=null){
             if (chain.acceptDataIsRunMain){
                 sendMessageToMain(()->{

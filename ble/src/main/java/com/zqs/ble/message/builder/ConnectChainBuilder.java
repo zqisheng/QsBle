@@ -20,7 +20,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder, ConnectChainBuilder.ConnectChain,Boolean> {
+public final class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder, ConnectChainBuilder.ConnectChain,Boolean> {
 
     private ConnectChain chain = new ConnectChain(mac);
 
@@ -141,7 +141,13 @@ public class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuilder, Co
                 if (callback2!=null){
                     getBle().addServicesDiscoveredCallback(getMac(), callback2);
                 }
-                getBle().connect(getMac(),connectTimeout,reconnectCount,connectFailCallback);
+                Function3<Boolean /*isTimeout*/, Integer /*status*/, Integer/*profileState*/> innerConnectFailCallback = (isTimeout, status, profileState) -> {
+                    if (connectFailCallback!=null){
+                        connectFailCallback.onCallback(isTimeout,status,profileState);
+                    }
+                    onFail(new IllegalStateException("device connect fail"));
+                };
+                setMessageOption(getBle().connect(getMac(), connectTimeout, reconnectCount, innerConnectFailCallback));
             }
         }
 

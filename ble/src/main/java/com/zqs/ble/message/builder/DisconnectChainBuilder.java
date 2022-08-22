@@ -11,7 +11,7 @@ import java.util.Queue;
  *   @date 2022-08-01
  *   @description
  */
-public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuilder, DisconnectChainBuilder.DisconnectChain,Boolean> {
+public final class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuilder, DisconnectChainBuilder.DisconnectChain,Boolean> {
 
     private DisconnectChain chain = new DisconnectChain(mac);
 
@@ -59,7 +59,7 @@ public class DisconnectChainBuilder extends BleChainBuilder<DisconnectChainBuild
                     }
                 };
                 getBle().addConnectStatusChangeCallback(getMac(), connectStatusChangeCallback);
-                getBle().disconnect(getMac());
+                setMessageOption(getBle().disconnect(getMac()));
             }
         }
 

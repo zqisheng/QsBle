@@ -1,11 +1,9 @@
 package com.zqs.ble;
 
-import com.zqs.ble.core.utils.fun.Function1;
+import com.zqs.ble.core.BleDebugConfig;
+import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.core.utils.fun.VoidFunction;
 
-import java.util.function.Function;
-
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /*
@@ -173,6 +171,11 @@ public abstract class BaseChain<T> {
         onDestroy();
         parentMessage.onChainHandleFail(this, e);
         parentMessage = null;
+        if (BleDebugConfig.isOpenChainHandleLog){
+            if (e!=null){
+                BleLog.e(String.format("handle chain error:%s",e));
+            }
+        }
     }
 
     public void onCreate(){

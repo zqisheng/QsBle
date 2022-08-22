@@ -7,7 +7,7 @@ import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IScanCallback;
 import com.zqs.ble.core.callback.abs.IScanStatusCallback;
-import com.zqs.ble.core.callback.scan.WrapScanConfig;
+import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.deamon.AbsBleMessage;
 import com.zqs.ble.core.utils.BleLog;
 
@@ -21,7 +21,7 @@ import java.util.List;
 public class StartScanMessage extends AbsBleMessage implements IBleScanMessage {
 
     private List<ScanFilter> filters;
-    private WrapScanConfig wrapFilter;
+    private SimpleScanConfig wrapFilter;
     private ScanSettings settings;
     private IScanCallback callback;
     private long scanTime = BleGlobalConfig.scanTime;
@@ -32,7 +32,7 @@ public class StartScanMessage extends AbsBleMessage implements IBleScanMessage {
         this.scanTime = scanTime;
     }
 
-    public void setWrapFilter(WrapScanConfig wrapFilter) {
+    public void setWrapFilter(SimpleScanConfig wrapFilter) {
         this.wrapFilter = wrapFilter;
     }
 

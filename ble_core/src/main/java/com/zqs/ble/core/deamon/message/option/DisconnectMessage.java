@@ -1,5 +1,7 @@
 package com.zqs.ble.core.deamon.message.option;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -19,10 +21,13 @@ public class DisconnectMessage extends AbsBleMessage implements IFrontMessage {
     @Override
     public void onHandlerMessage() {
         assertCurrentIsSenderThread();
+        boolean oldConnect = getSimpleBle().isConnect(getMac());
         BluetoothGatt gatt = getGatt();
         if (gatt!=null){
             gatt.disconnect();
         }
-        getSimpleBle().updateConnectStatus(getMac(), false, 0, 0);
+        if (oldConnect){
+            getSimpleBle().updateConnectStatus(getMac(), false, 0, 0, "app");
+        }
     }
 }

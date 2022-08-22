@@ -45,6 +45,12 @@ class BleDeviceInfoActivity : AppCompatActivity() {
         setServiceValue()
         macaddress.text=mac
         connect_status.text = if (ble.isConnect(mac)) "连接状态:连接" else "连接状态:断开"
+        disconnec_auto_reconnect_count_btn.setOnClickListener {
+            if (!disconnec_auto_reconnect_count.text.toString().isNullOrEmpty()){
+                ble.setAutoReconnectCount(mac,disconnec_auto_reconnect_count.text.toString().toInt())
+                Toast.makeText(this@BleDeviceInfoActivity, "设置断开自动重连次数成功", Toast.LENGTH_SHORT).show()
+            }
+        }
         connect.setOnClickListener {
             if (ble.isConnect(mac)){
                 Toast.makeText(this, "已经被连接", Toast.LENGTH_SHORT).show()
@@ -110,7 +116,7 @@ class BleDeviceInfoActivity : AppCompatActivity() {
                         BleLog.d("操作错误:${it.message}")
                     }.data(true) {
                         BleLog.d("操作数据:${it}")
-                    }.await()
+                    }.start(lifecycle)
                 }else{
                     ble.chain(mac).connect().writeByLock(
                         UUID.fromString(suuid),
@@ -350,7 +356,6 @@ class BleDeviceInfoActivity : AppCompatActivity() {
             val result:Int?=ble.chain(mac).readRssi().await()
             read_rssi_tv.text="rssi=${result}"
         }
-
     }
 
     //简单的设置一下

@@ -38,7 +38,7 @@ public class OnCharacteristicReadMessage extends AbsBleMessage implements ICallb
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnCharacteristicReadMessage:mac=%s,chac=%s,value=%s", device.getAddress(), characteristic.getUuid().toString(), Utils.bytesToHexStr(value)));
+            BleLog.d(String.format("BleCallback OnCharacteristicReadMessage:mac=%s,chac=%s,value=%s", device.getAddress(), characteristic.getUuid().toString(), Utils.bytesToHexStr(value)));
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){

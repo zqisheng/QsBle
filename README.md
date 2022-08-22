@@ -9,6 +9,7 @@
 * 完全函数式编程,所有的Ble回调都是函数式的
 * 支持所有的Ble操作的回调
 * 发送的数据超过mtu,QsBle也有完善的分包组包机制
+* 支持断开自动重连
 * 支持Kotlin协程,让你用同步的方式操作异步的代码,不用再为蓝牙的各种回调地狱而烦恼
 * 支持Flow
 * 支持链式编程,让你对蓝牙的各种操作能够顺序执行,以前几百行代码才能实现的逻辑,QsBle只需要一行代码
@@ -30,9 +31,9 @@ allprojects {
 
 dependencies {
     //QsBle必须添加的依赖
-   implementation 'com.github.zqisheng.QsBle:ble:1.1.0'
+   implementation 'com.github.zqisheng.QsBle:ble:1.2.1'
     //如果要使用kotlin协程功能的话,就要添加下面的依赖,非必须
-   //implementation 'com.github.zqisheng.QsBle:ble_coroutines:1.1.0'
+   //implementation 'com.github.zqisheng.QsBle:ble_coroutines:1.2.1'
 }
 ```
 
@@ -60,7 +61,7 @@ QsBle.getInstance().init(Context context,Handler handler);
 ```
 *注1:QsBle的所有对Ble的操作和回调都是在一个线程中执行的,方式1的初始化是默认使用框架实现的线程对Ble进行操作.但是如果你想让Ble的所有操作都在自己指定的线程中执行,你也可以传入Handler,这样所有Ble的操作和回调都会在这个指定的Handler中调用了<br/>比如你想让所有的操作都在主线程中回调,你可以传一个主线程的Handler,这样所有Ble的操作和回调都是在主线程中回调了,**但是作者强烈不建议这样做***
 
-*注2:QsBle的初始化获取任何用户手机的隐私信息,所以放心在任何时候初始化*
+*注2:QsBle的初始化不会获取任何用户手机的隐私信息,所以放心在任何时候初始化*
 
 
 ### 简单使用
@@ -362,7 +363,7 @@ public class BleGlobalConfig {
     public static int connectTimeout = 7000;
     //默认的重连次数
     public static int reconnectCount = 0;
-    //默认的单个mtu包的写特征值超时时间
+    //默认的单个mtu包的写特征值失败重写次数
     public static int singlePkgWriteTimeout = 200;
     //最大的连接数量,当连接的设备超过最大连接设备数时,会按照设备连接时间断开最远的设备
     public static int maxConnectCount = 7;
@@ -370,6 +371,11 @@ public class BleGlobalConfig {
     public static int otaSingleRewriteCount = 3;
     //ota发送的段尺寸,比如文件大小1000b,otaSegmentSize=200b,那么每发200个长度就会回调一下progress
     public static int otaSegmentSize = 200;
+    //全局的扫描配置
+    public static SimpleScanConfig globalScanConfig;
+    //默认的断开自动重连次数,默认是0,不自动重连
+    public static int autoReconnectCount = 0;
+
 }
 ```
 ### Ble回调的监听

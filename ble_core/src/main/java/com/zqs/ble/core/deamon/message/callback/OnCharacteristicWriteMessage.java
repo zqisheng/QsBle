@@ -36,7 +36,7 @@ public class OnCharacteristicWriteMessage extends AbsBleMessage implements ICall
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnCharacteristicWriteMessage:mac=%s,status=%d,chac=%s,value=%s", device.getAddress(), status, characteristic.getUuid().toString(), Utils.bytesToHexStr(value)));
+            BleLog.d(String.format("BleCallback OnCharacteristicWriteMessage:mac=%s,status=%d,chac=%s,value=%s", device.getAddress(), status, characteristic.getUuid().toString(), Utils.bytesToHexStr(value)));
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){

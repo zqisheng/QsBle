@@ -28,11 +28,11 @@ public class BleLollipopScanCallback extends ScanCallback {
 
     IScanCallback scanCallback;
     SimpleBle simpleBle;
-    private WrapScanConfig config;
+    private SimpleScanConfig config;
 
     private Map<String, Boolean> record;
 
-    public void setConfig(WrapScanConfig config) {
+    public void setConfig(SimpleScanConfig config) {
         this.config = config;
         if (config ==null){
             record = null;

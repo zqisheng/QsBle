@@ -17,7 +17,7 @@ import androidx.annotation.RequiresApi;
  *   @description
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnectionPriorityChainBuilder, SetConnectionPriorityChainBuilder.SetConnectionPriorityChain,int[]> {
+public final class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnectionPriorityChainBuilder, SetConnectionPriorityChainBuilder.SetConnectionPriorityChain,int[]> {
 
     private SetConnectionPriorityChain chain = new SetConnectionPriorityChain(mac);
 
@@ -75,11 +75,11 @@ public class SetConnectionPriorityChainBuilder extends BleChainBuilder<SetConnec
             };
             getBle().addConnectionUpdatedCallback(getMac(),connectionUpdatedCallback);
             if (mode==0){
-                getBle().requestConnectionToHigh(getMac());
+                setMessageOption(getBle().requestConnectionToHigh(getMac()));
             }else if (mode==1){
-                getBle().requestConnectionToBalanced(getMac());
+                setMessageOption(getBle().requestConnectionToBalanced(getMac()));
             }else if (mode==2){
-                getBle().requestConnectionToLowPower(getMac());
+                setMessageOption(getBle().requestConnectionToLowPower(getMac()));
             }
         }
 

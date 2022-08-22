@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.os.Build;
 
+import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.callback.BleGattCallback;
 import com.zqs.ble.core.deamon.AbsBleMessage;
@@ -105,7 +106,7 @@ public class ConnectMessage extends AbsBleMessage implements IOptionMessage {
                             //连接超时
                             connectFailCallback.onCallback(true, -1, -1);
                         }else{
-                            int[] codes = getSimpleBle().getConnectErrorCode(getMac());
+                            int[] codes = getSimpleBle().getConnectCode(getMac());
                             if (codes!=null){
                                 connectFailCallback.onCallback(false, codes[0], codes[1]);
                             }
@@ -121,6 +122,9 @@ public class ConnectMessage extends AbsBleMessage implements IOptionMessage {
 
     protected void handleConnectOption(BluetoothDevice bluetoothDevice){
         BluetoothGatt bluetoothGatt;
+        if (BleDebugConfig.isDebug){
+            BleLog.d(String.format("try create a new gatt connect:%s",getMac()));
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             bluetoothGatt=bluetoothDevice.connectGatt(getSimpleBle().getContext(), false, getBluetoothGattCallbackImpl(),BluetoothDevice.TRANSPORT_LE);
         }else{

@@ -40,7 +40,7 @@ import com.zqs.ble.core.callback.abs.IScanErrorCallback;
 import com.zqs.ble.core.callback.abs.IScanStatusCallback;
 import com.zqs.ble.core.callback.abs.IServicesDiscoveredCallback;
 import com.zqs.ble.core.callback.scan.BleScanOption;
-import com.zqs.ble.core.callback.scan.WrapScanConfig;
+import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.deamon.AbsBleMessage;
 import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.core.deamon.message.callback.OnBlueStatusChangedMessage;
@@ -49,6 +49,7 @@ import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.core.utils.fun.BooleanFunction;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
+import com.zqs.ble.core.utils.fun.IMessageOption;
 
 import java.util.HashMap;
 import java.util.List;
@@ -83,10 +84,7 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     private static Map<String, IMultiPackageAssembly> chacAssembly = new HashMap<>();
 
     private Map<String, BluetoothGatt> gatts = new HashMap<>();
-    private Map<String, Boolean> connectStatus = new HashMap<>();
-    private Map<String, Long> connectStatusUpdateTime = new HashMap<>();
-    private Map<String, int[]> connectErrorCode = new HashMap<>();
-    private int currentConnectCount = 0;
+    private Map<String, BleDevice> bleDevices = new HashMap<>();
 
     private BroadcastReceiver blueStatusReceiver = new BroadcastReceiver() {
         @Override
@@ -225,8 +223,7 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
 
     public void clearConnectStatus(){
         assertCurrentIsSenderThread();
-        connectStatus.clear();
-        connectStatusUpdateTime.clear();
+        bleDevices.clear();
         if (!gatts.isEmpty()) {
             for (String mac : gatts.keySet()) {
                 BluetoothGatt gatt = gatts.get(mac);
@@ -238,42 +235,54 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
         }
     }
 
-    public void updateConnectStatus(String mac, boolean isConnect, int status, int profileState){
+    public void setAutoReconnectCount(String mac,int autoReconnectCount){
+        assertCurrentIsSenderThread();
+        mac = mac.toUpperCase();
+        BleDevice bleDevice = bleDevices.get(mac);
+        if (bleDevice==null){
+            bleDevice = new BleDevice(mac, false);
+        }
+        bleDevice.setAutoConnectCount(autoReconnectCount);
+    }
+
+    public void updateConnectStatus(String mac, boolean isConnect, int status, int profileState,String disconnecter){
         assertCurrentIsSenderThread();
         if (!isConnect){
             currentMtu = 20;
         }
-        if (isConnect(mac)&&!isConnect){
-            currentConnectCount--;
-        }else if (!isConnect(mac)&&isConnect){
-            currentConnectCount++;
+        BleDevice bleDevice = bleDevices.get(mac);
+        if (bleDevice==null){
+            bleDevice = new BleDevice(mac, isConnect);
+            bleDevices.put(mac, bleDevice);
         }
-        if (currentConnectCount<0){
-            currentConnectCount = 0;
-        }else if (currentConnectCount>7){
-            currentConnectCount = 7;
-        }
-        connectStatusUpdateTime.put(mac, System.currentTimeMillis());
-        connectStatus.put(mac.toUpperCase(), isConnect);
-        if (!isConnect) {
-            connectErrorCode.put(mac, new int[]{status, profileState});
-        }else{
-            connectErrorCode.remove(mac);
+        bleDevice.setLastGattCode(new int[]{status, profileState});
+        bleDevice.setConnect(isConnect);
+        bleDevice.setConnectStatusUpdateTime(System.currentTimeMillis());
+        bleDevice.setDisconnecter(disconnecter);
+        if (bleDevice.getAutoConnectCount() > 0 && disconnecter != null && disconnecter.equals("device")) {
+            connect(mac, BleGlobalConfig.connectTimeout, bleDevice.getAutoConnectCount(), null);
         }
     }
 
-    public int[] getConnectErrorCode(String mac){
-        return connectErrorCode.get(mac);
+    public List<BluetoothDevice> getConnectDevices(){
+        BluetoothManager manager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        return manager.getConnectedDevices(BluetoothProfile.GATT);
+    }
+
+    public int[] getConnectCode(String mac){
+        BleDevice bleDevice = bleDevices.get(mac.toUpperCase());
+        if (bleDevice==null) return null;
+        return bleDevice.getLastGattCode();
     }
 
     public Boolean isConnect(String mac){
-        Boolean connect = connectStatus.get(mac.toUpperCase());
-        if (connect==null) return false;
-        return connect;
+        BleDevice bleDevice = bleDevices.get(mac.toUpperCase());
+        if (bleDevice==null) return false;
+        return bleDevice.isConnect();
     }
 
     public int getConnectCount(){
-        return currentConnectCount;
+        return getConnectDevices().size();
     }
 
     public void handleLruDisconnect(){
@@ -282,12 +291,10 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
             public void onHandlerMessage() {
                 String lruMac = null;
                 long time = 0;
-                for (String mac:connectStatus.keySet()){
-                    if (connectStatus.get(mac)==true){
-                        if (connectStatusUpdateTime.get(mac)<time){
-                            time = connectStatusUpdateTime.get(mac);
-                            lruMac = mac;
-                        }
+                for (BleDevice bleDevice:bleDevices.values()){
+                    if (bleDevice.isConnect()&&bleDevice.getConnectStatusUpdateTime()<time){
+                        time = bleDevice.getConnectStatusUpdateTime();
+                        lruMac = bleDevice.getMac();
                     }
                 }
                 if (lruMac!=null){
@@ -297,23 +304,10 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
         });
     }
 
-    @Deprecated
-    public void updateConnectStatusFromGatt(){
-        assertCurrentIsSenderThread();
-        BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bluetoothManager!=null){
-            List<BluetoothDevice> connectDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
-            connectStatus.clear();
-            for (BluetoothDevice device:connectDevices){
-                connectStatus.put(device.getAddress().toUpperCase(), true);
-            }
-        }
-    }
-
     public Long getConnectStatusUpdateTime(String mac){
-        Long time=connectStatusUpdateTime.get(mac);
-        if (time==null) return 0L;
-        return time;
+        BleDevice bleDevice = bleDevices.get(mac.toUpperCase());
+        if (bleDevice==null) return 0L;
+        return bleDevice.getConnectStatusUpdateTime();
     }
 
     public IBleCallback getCallbackManage() {
@@ -346,98 +340,98 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     }
 
     @Override
-    public void connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
-        bleOption.connect(mac, timeout, reconnectCount,connectFailCallback);
+    public IMessageOption connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
+        return bleOption.connect(mac, timeout, reconnectCount,connectFailCallback);
     }
 
     @Override
-    public void disconnect(String mac) {
-        bleOption.disconnect(mac);
+    public IMessageOption disconnect(String mac) {
+        return bleOption.disconnect(mac);
     }
 
     @Override
-    public void write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
-        bleOption.write(mac, serviceUuid, chacUuid, value, retryWriteCount);
+    public IMessageOption write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
+        return bleOption.write(mac, serviceUuid, chacUuid, value, retryWriteCount);
     }
 
     @Override
-    public void writeNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
-        bleOption.writeNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount);
+    public IMessageOption writeNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
+        return bleOption.writeNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount);
     }
 
     @Override
-    public void writeByLock(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
-        bleOption.writeByLock(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
+    public IMessageOption writeByLock(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
+        return bleOption.writeByLock(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
     }
 
     @Override
-    public void writeByLockNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
-        bleOption.writeByLockNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
+    public IMessageOption writeByLockNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
+        return bleOption.writeByLockNoRsp(mac, serviceUuid, chacUuid, value, retryWriteCount,writeCallback);
     }
 
     @Override
-    public void writeDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value) {
-       bleOption.writeDesc(mac, serviceUuid, chacUuid, descUuid, value);
+    public IMessageOption writeDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value) {
+        return bleOption.writeDesc(mac, serviceUuid, chacUuid, descUuid, value);
     }
 
     @Override
-    public void read(String mac, UUID serviceUuid, UUID chacUuid) {
-        bleOption.read(mac, serviceUuid, chacUuid);
+    public IMessageOption read(String mac, UUID serviceUuid, UUID chacUuid) {
+        return bleOption.read(mac, serviceUuid, chacUuid);
     }
 
     @Override
-    public void readDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid) {
-        bleOption.readDesc(mac, serviceUuid, chacUuid, descUuid);
+    public IMessageOption readDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid) {
+        return bleOption.readDesc(mac, serviceUuid, chacUuid, descUuid);
     }
 
     @Override
-    public void openNotify(String mac, UUID serviceUuid, UUID chacUuid) {
-        bleOption.openNotify(mac, serviceUuid, chacUuid);
+    public IMessageOption openNotify(String mac, UUID serviceUuid, UUID chacUuid) {
+        return bleOption.openNotify(mac, serviceUuid, chacUuid);
     }
 
     @Override
-    public void cancelNotify(String mac, UUID serviceUuid, UUID chacUuid) {
-        bleOption.cancelNotify(mac, serviceUuid, chacUuid);
+    public IMessageOption cancelNotify(String mac, UUID serviceUuid, UUID chacUuid) {
+        return bleOption.cancelNotify(mac, serviceUuid, chacUuid);
     }
 
     @Override
-    public void setMtu(String mac, int mtu) {
-        bleOption.setMtu(mac, mtu);
+    public IMessageOption setMtu(String mac, int mtu) {
+        return bleOption.setMtu(mac, mtu);
     }
 
     @Override
-    public void readRssi(String mac) {
-        bleOption.readRssi(mac);
+    public IMessageOption readRssi(String mac) {
+        return bleOption.readRssi(mac);
     }
 
     @Override
-    public void readPhy(String mac) {
-        bleOption.readPhy(mac);
+    public IMessageOption readPhy(String mac) {
+        return bleOption.readPhy(mac);
     }
 
     @Override
-    public void requestConnectionPriority(String mac, int connectionPriority) {
-        bleOption.requestConnectionPriority(mac, connectionPriority);
+    public IMessageOption requestConnectionPriority(String mac, int connectionPriority) {
+        return bleOption.requestConnectionPriority(mac, connectionPriority);
     }
 
     @Override
-    public void setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions) {
-        bleOption.setPreferredPhy(mac, txPhy, rxPhy, phyOptions);
+    public IMessageOption setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions) {
+        return  bleOption.setPreferredPhy(mac, txPhy, rxPhy, phyOptions);
     }
 
     @Override
-    public void startScan(long time, IScanCallback callback, WrapScanConfig config) {
-        bleOption.startScan(time, callback,config);
+    public IMessageOption startScan(long time, IScanCallback callback, SimpleScanConfig config) {
+        return bleOption.startScan(time, callback,config);
     }
 
     @Override
-    public void startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
-        bleOption.startScanOnlyLollipop(time, filters, settings, callback);
+    public IMessageOption startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
+        return bleOption.startScanOnlyLollipop(time, filters, settings, callback);
     }
 
     @Override
-    public void stopScan() {
-        bleOption.stopScan();
+    public IMessageOption stopScan() {
+        return bleOption.stopScan();
     }
 
     @Override

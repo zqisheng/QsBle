@@ -7,7 +7,7 @@ import android.bluetooth.le.ScanSettings;
 import com.zqs.ble.core.api.IBleMessageSender;
 import com.zqs.ble.core.api.IBleOption;
 import com.zqs.ble.core.callback.abs.IScanCallback;
-import com.zqs.ble.core.callback.scan.WrapScanConfig;
+import com.zqs.ble.core.callback.scan.SimpleScanConfig;
 import com.zqs.ble.core.deamon.AbsBleMessage;
 import com.zqs.ble.core.deamon.AbsMessage;
 import com.zqs.ble.core.deamon.message.option.ConnectMessage;
@@ -29,7 +29,9 @@ import com.zqs.ble.core.deamon.message.scan.StartScanMessage;
 import com.zqs.ble.core.deamon.message.scan.StopScanMessage;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
+import com.zqs.ble.core.utils.fun.IMessageOption;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.UUID;
 
@@ -51,53 +53,88 @@ public class DefaultBleOption implements IBleOption {
     }
 
     @Override
-    public void connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
+    public IMessageOption connect(String mac, long timeout, int reconnectCount, Function3<Boolean /*isTimeout*/,Integer /*status*/,Integer/*profileState*/> connectFailCallback) {
         ConnectMessage message = new ConnectMessage(mac, reconnectCount);
         message.setConnectTimeout(timeout);
         message.setConnectFailCallback(connectFailCallback);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void disconnect(String mac) {
+    public IMessageOption disconnect(String mac) {
+        DisconnectMessage message = new DisconnectMessage(mac);
         sendMessage(new FrontMessage(){
             @Override
             public void onHandlerMessage() {
-                DisconnectMessage message = new DisconnectMessage(mac);
                 sender.clearMessageIf((msg)-> msg instanceof IOptionMessage
                         && ((AbsBleMessage) msg).getMac().equalsIgnoreCase(message.getMac())
                         && this.getAddQueueTime() > msg.getAddQueueTime(),()->sendMessage(message));
             }
         });
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
+    public IMessageOption write(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
         WriteChacMessage message = new WriteChacMessage(mac, serviceUuid, chacUuid, value);
         message.setRetryWriteCount(retryWriteCount);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void writeNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
+    public IMessageOption writeNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount) {
         WriteChacMessage message = new WriteChacMessage(mac, serviceUuid, chacUuid, value);
         message.setRetryWriteCount(retryWriteCount);
         message.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void writeByLock(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
+    public IMessageOption writeByLock(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
         WriteChacLockMessage message = new WriteChacLockMessage(mac, serviceUuid, chacUuid, value);
         message.setRetryWriteCount(retryWriteCount);
         if (writeCallback!=null){
             message.setWriteCallback(writeCallback);
         }
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void writeByLockNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
+    public IMessageOption writeByLockNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallback) {
         WriteChacLockMessage message = new WriteChacLockMessage(mac, serviceUuid, chacUuid, value);
         message.setRetryWriteCount(retryWriteCount);
         message.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
@@ -105,83 +142,185 @@ public class DefaultBleOption implements IBleOption {
             message.setWriteCallback(writeCallback);
         }
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void writeDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value) {
+    public IMessageOption writeDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid, byte[] value) {
         WriteDescMessage message = new WriteDescMessage(mac, serviceUuid, chacUuid, descUuid, value);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void read(String mac, UUID serviceUuid, UUID chacUuid) {
+    public IMessageOption read(String mac, UUID serviceUuid, UUID chacUuid) {
         ReadChacMessage message = new ReadChacMessage(mac, serviceUuid, chacUuid);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void readDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid) {
+    public IMessageOption readDesc(String mac, UUID serviceUuid, UUID chacUuid, UUID descUuid) {
         ReadDescMessage message = new ReadDescMessage(mac, serviceUuid, chacUuid, descUuid);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void openNotify(String mac, UUID serviceUuid, UUID chacUuid) {
+    public IMessageOption openNotify(String mac, UUID serviceUuid, UUID chacUuid) {
         SetNotificationMessage message = new SetNotificationMessage(mac, serviceUuid, chacUuid, true);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void cancelNotify(String mac, UUID serviceUuid, UUID chacUuid) {
+    public IMessageOption cancelNotify(String mac, UUID serviceUuid, UUID chacUuid) {
         SetNotificationMessage message = new SetNotificationMessage(mac, serviceUuid, chacUuid, false);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void setMtu(String mac,int mtu){
+    public IMessageOption setMtu(String mac,int mtu){
         RequestMtuMessage message = new RequestMtuMessage(mac, mtu);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void readRssi(String mac) {
+    public IMessageOption readRssi(String mac) {
         ReadRssiMessage message = new ReadRssiMessage(mac);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void readPhy(String mac) {
-        sendMessage(new ReadPhyMessage(mac));
+    public IMessageOption readPhy(String mac) {
+        ReadPhyMessage message = new ReadPhyMessage(mac);
+        sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void requestConnectionPriority(String mac, int connectionPriority) {
-        sendMessage(new SetConnectionPriorityMessage(mac, connectionPriority));
+    public IMessageOption requestConnectionPriority(String mac, int connectionPriority) {
+        SetConnectionPriorityMessage message = new SetConnectionPriorityMessage(mac, connectionPriority);
+        sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions) {
-        sendMessage(new SetPhyMessage(mac, txPhy, rxPhy, phyOptions));
+    public IMessageOption setPreferredPhy(String mac, int txPhy, int rxPhy, int phyOptions) {
+        SetPhyMessage message = new SetPhyMessage(mac, txPhy, rxPhy, phyOptions);
+        sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void startScan(long time, IScanCallback callback, WrapScanConfig filter) {
+    public IMessageOption startScan(long time, IScanCallback callback, SimpleScanConfig filter) {
         StartScanMessage message = new StartScanMessage(callback, time);
         message.setWrapFilter(filter);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
+    public IMessageOption startScanOnlyLollipop(long time, List<ScanFilter> filters, ScanSettings settings, IScanCallback callback) {
         StartScanMessage message = new StartScanMessage(callback, time);
         message.setFilters(filters);
         message.setSettings(settings);
         sendMessage(message);
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
     @Override
-    public void stopScan() {
-        sender.clearMessageIf((msg)->msg instanceof StopScanMessage,()->sendMessage(new StopScanMessage()));
+    public IMessageOption stopScan() {
+        StopScanMessage message = new StopScanMessage();
+        sender.clearMessageIf((msg)->msg instanceof StopScanMessage,()->sendMessage(message));
+        WeakReference<AbsMessage> weakReference = new WeakReference<>(message);
+        return () -> {
+            AbsMessage msg = weakReference.get();
+            if (msg!=null){
+                sender.rmMessage(msg);
+            }
+        };
     }
 
 }

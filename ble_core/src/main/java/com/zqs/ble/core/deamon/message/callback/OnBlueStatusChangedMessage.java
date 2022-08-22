@@ -31,7 +31,7 @@ public class OnBlueStatusChangedMessage extends AbsBleMessage implements ICallba
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnBlueStatusChangedMessage:isOpen=%s", isOpen));
+            BleLog.d(String.format("BleCallback OnBlueStatusChangedMessage:isOpen=%s", isOpen));
         }
         if (!isOpen){
             getSimpleBle().clearMessageIf((msg)->true, null);

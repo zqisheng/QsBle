@@ -39,7 +39,7 @@ public class OnServicesDiscoveredMessage extends AbsBleMessage implements ICallb
                 sb.append(service.getUuid().toString() + ",");
             }
             sb.append("]");
-            BleLog.d(String.format("OnServicesDiscoveredMessage:mac=%s,status=%d,services=%s", device.getAddress(), status, sb.toString()));
+            BleLog.d(String.format("BleCallback OnServicesDiscoveredMessage:mac=%s,status=%d,services=%s", device.getAddress(), status, sb.toString()));
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){

@@ -32,7 +32,7 @@ public class OnPhyUpdateMessage extends AbsBleMessage implements ICallbackMessag
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnPhyUpdateMessage:mac=%s,txPhy=%d,rxPhy=%d,status=%d", device.getAddress(), txPhy, rxPhy, status));
+            BleLog.d(String.format("BleCallback OnPhyUpdateMessage:mac=%s,txPhy=%d,rxPhy=%d,status=%d", device.getAddress(), txPhy, rxPhy, status));
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){

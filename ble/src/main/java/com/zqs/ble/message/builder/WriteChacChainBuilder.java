@@ -6,6 +6,8 @@ import com.zqs.ble.BleChain;
 import com.zqs.ble.BleChainBuilder;
 import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.callback.abs.IChacWriteCallback;
+import com.zqs.ble.core.deamon.message.option.WriteChacLockMessage;
+import com.zqs.ble.core.deamon.message.option.WriteChacMessage;
 import com.zqs.ble.core.utils.Utils;
 
 import java.util.Arrays;
@@ -17,7 +19,7 @@ import java.util.UUID;
  *   @date 2022-08-01
  *   @description
  */
-public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder, WriteChacChainBuilder.WriteChacChain,Boolean> {
+public final class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder, WriteChacChainBuilder.WriteChacChain,Boolean> {
 
     private WriteChacChain chain = new WriteChacChain(mac);
     public WriteChacChainBuilder(String mac, UUID serviceUuid, UUID chacUuid,byte[] value, Queue<BleChainBuilder> chains) {
@@ -85,12 +87,10 @@ public class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainBuilder
                     if (Arrays.equals(value,WriteChacChain.this.value)){
                         onSuccess(true);
                     }
-                }else{
-                    onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
                 }
             };
             getBle().addChacWriteCallback(getMac(), chacWriteCallback);
-            getBle().write(getMac(),serviceUuid,chacUuid,value,retryWriteCount);
+            setMessageOption(getBle().write(getMac(), serviceUuid, chacUuid, value, retryWriteCount));
         }
 
         @Override

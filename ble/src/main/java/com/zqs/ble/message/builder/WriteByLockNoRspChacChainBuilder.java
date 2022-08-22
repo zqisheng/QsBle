@@ -1,19 +1,25 @@
 package com.zqs.ble.message.builder;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+
 import com.zqs.ble.BleChain;
 import com.zqs.ble.BleChainBuilder;
+import com.zqs.ble.QsBle;
 import com.zqs.ble.core.BleGlobalConfig;
+import com.zqs.ble.core.deamon.message.option.WriteChacLockMessage;
 import com.zqs.ble.core.utils.fun.Function2;
 
 import java.util.Queue;
 import java.util.UUID;
+
+import androidx.annotation.NonNull;
 
 /*
  *   @author zhangqisheng
  *   @date 2022-08-01
  *   @description
  */
-public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLockNoRspChacChainBuilder, WriteByLockNoRspChacChainBuilder.WriteByLockNoRspChacChain,Boolean> {
+public final class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLockNoRspChacChainBuilder, WriteByLockNoRspChacChainBuilder.WriteByLockNoRspChacChain,Boolean> {
 
     private WriteByLockNoRspChacChain chain = new WriteByLockNoRspChacChain(mac);
 
@@ -74,16 +80,16 @@ public class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<WriteByLoc
                 onFail(new IllegalStateException(String.format("%s device not connect",getMac())));
                 return;
             }
-            getBle().writeByLockNoRsp(getMac(),serviceUuid,chacUuid,value,retryWriteCount,(isSuccess,status)->{
-                if (callback!=null){
+            setMessageOption(QsBle.getInstance().writeByLockNoRsp(getMac(), serviceUuid, chacUuid, value, retryWriteCount, (isSuccess, status) -> {
+                if (callback != null) {
                     callback.onCallback(isSuccess, status);
                 }
-                if (isSuccess){
+                if (isSuccess) {
                     onSuccess(true);
-                }else{
+                } else {
                     onFail(new IllegalStateException(String.format("%s write chac %s,status=%d", getMac(), chacUuid.toString(), status)));
                 }
-            });
+            }));
         }
 
         @Override

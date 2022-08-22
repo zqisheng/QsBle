@@ -37,20 +37,26 @@ public class OnConnectionStateMessage extends AbsBleMessage implements ICallback
     public final void onHandlerMessage() {
         assertCurrentIsSenderThread();
         if (BleDebugConfig.isOpenGattCallbackLog){
-            BleLog.d(String.format("OnConnectionStateMessage:mac=%s,status=%s,profileState=%s", device.getAddress(), status, profileState));
+            BleLog.d(String.format("BleCallback OnConnectionStateMessage:mac=%s,status=%s,profileState=%s", device.getAddress(), status, profileState));
         }
         boolean isConnect = profileState == BluetoothProfile.STATE_CONNECTED;
-        getSimpleBle().updateConnectStatus(getMac(), isConnect,status,profileState);
+        boolean oldConnectStatus = getSimpleBle().isConnect(getMac());
+        String disconnecter = null;
         if (isConnect){
             clearBeforeOption();
             getSimpleBle().sendMessage(new DiscoverServiceMessage(getMac(), BleGlobalConfig.discoveryServiceFailRetryCount));
         }else{
+            //老的连接状态为连接,新的连接状态为断开,说明是从系统一侧断开连接,非代码主动断开
+            if (oldConnectStatus){
+                disconnecter = "device";
+            }
             BluetoothGatt gatt = getGatt();
             if (gatt!=null){
                 gatt.close();
             }
             getSimpleBle().setGatt(getMac(), null);
         }
+        getSimpleBle().updateConnectStatus(getMac(), isConnect,status,profileState,disconnecter);
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
             globalBleCallback.onConnectionStateChange(device.getAddress(),status,profileState);

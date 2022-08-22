@@ -27,7 +27,7 @@ public class BleScanOption {
         startScan(null,null);
     }
 
-    public void startScan(IScanCallback callback, WrapScanConfig config) {
+    public void startScan(IScanCallback callback, SimpleScanConfig config) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             BleLollipopScanCallback c = BleLollipopScanCallback.INSTANCE;
             c.setSimpleBle(simpleBle);

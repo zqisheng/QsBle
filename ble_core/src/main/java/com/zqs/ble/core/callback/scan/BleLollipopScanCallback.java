@@ -7,6 +7,7 @@ import android.bluetooth.le.ScanResult;
 import com.zqs.ble.core.BleDebugConfig;
 import com.zqs.ble.core.SimpleBle;
 import com.zqs.ble.core.api.IBleCallback;
+import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IScanCallback;
 import com.zqs.ble.core.callback.abs.IScanErrorCallback;
 import com.zqs.ble.core.deamon.AbsMessage;
@@ -81,6 +82,10 @@ public class BleLollipopScanCallback extends ScanCallback {
                 if (BleDebugConfig.isOpenScanLog){
                     BleLog.d(String.format("scan device mac=%s,rssi=%d,scanRecord=%s", result.getDevice().getAddress(), result.getRssi(), Utils.bytesToHexStr(result.getScanRecord().getBytes())));
                 }
+                GlobalBleCallback globalBleGattCallback = getSimpleBle().getGlobalBleGattCallback();
+                if (globalBleGattCallback!=null){
+                    globalBleGattCallback.onLeScan(result.getDevice(), result.getRssi(), result.getScanRecord().getBytes());
+                }
                 List<IScanCallback> scanCallbacks = c2.getScanCallbacks();
                 if (scanCallbacks != null) {
                     for (IScanCallback callback : scanCallbacks) {
@@ -104,6 +109,10 @@ public class BleLollipopScanCallback extends ScanCallback {
         simpleBle.sendMessage(new AbsMessage() {
             @Override
             public void onHandlerMessage() {
+                GlobalBleCallback globalBleGattCallback = getSimpleBle().getGlobalBleGattCallback();
+                if (globalBleGattCallback!=null){
+                    globalBleGattCallback.onScanError(errorCode);
+                }
                 List<IScanErrorCallback> scanCallbacks = simpleBle.getScanErrorCallbacks();
                 if (scanCallbacks != null) {
                     for (IScanErrorCallback callback : scanCallbacks) {

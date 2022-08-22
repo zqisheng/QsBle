@@ -42,7 +42,7 @@ public class OnCharacteristicReadMessage extends AbsBleMessage implements ICallb
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onCharacteristicRead(device, characteristic, status);
+            globalBleCallback.onCharacteristicRead(device.getAddress(), characteristic, status);
         }
         List<IChacReadCallback> callbacks = getSimpleBle().getCallbackManage().getChacReadCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){

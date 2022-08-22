@@ -23,6 +23,7 @@ import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.SimpleBle;
 import com.zqs.ble.core.api.IBleMessageSender;
 import com.zqs.ble.core.api.IMultiPackageAssembly;
+import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IBleMultiPkgsCallback;
 import com.zqs.ble.core.callback.abs.IBlueStatusCallback;
 import com.zqs.ble.core.callback.abs.IChacChangeCallback;
@@ -44,7 +45,6 @@ import com.zqs.ble.core.callback.abs.IScanStatusCallback;
 import com.zqs.ble.core.callback.abs.IServicesDiscoveredCallback;
 import com.zqs.ble.core.callback.scan.WrapScanConfig;
 import com.zqs.ble.core.deamon.AbsMessage;
-import com.zqs.ble.core.deamon.message.order.IFrontMessage;
 import com.zqs.ble.core.utils.Utils;
 import com.zqs.ble.core.utils.fun.Function2;
 import com.zqs.ble.core.utils.fun.Function3;
@@ -145,6 +145,15 @@ public final class QsBle {
         BleDebugConfig.isOpenBleLooperLog = isDebug;
         BleDebugConfig.isOpenWriteLog = isDebug;
         BleDebugConfig.isOpenGattCallbackLog = isDebug;
+    }
+
+    /**
+     * 所有的ble设备的gatt的回调,扫描的回调
+     * 这里面的回调会比addxxxCallback的回调更先执行
+     * @param bleGlobalGattCallback
+     */
+    public void setGlobalGattCallback(GlobalBleCallback bleGlobalGattCallback) {
+        ble.setGlobalGattCallback(bleGlobalGattCallback);
     }
 
     public void setMultiPackageAssembly(@NonNull String mac, @NonNull IMultiPackageAssembly parser){

@@ -39,7 +39,7 @@ public class OnCharacteristicChangedMessage extends AbsBleMessage implements ICa
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onCharacteristicChanged(device, characteristic);
+            globalBleCallback.onCharacteristicChanged(device.getAddress(), characteristic);
         }
         IMultiPackageAssembly parser = getSimpleBle().getMultiPackageAssembly(getMac());
         if (parser != null) {

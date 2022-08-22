@@ -40,7 +40,7 @@ public class OnCharacteristicWriteMessage extends AbsBleMessage implements ICall
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onCharacteristicWrite(device,characteristic,status);
+            globalBleCallback.onCharacteristicWrite(device.getAddress(),characteristic,status);
         }
         IChacWriteCallback lockCallback = getSimpleBle().getCallbackManage().getLockWriteChacCallback(getMac());
         if (lockCallback!=null){

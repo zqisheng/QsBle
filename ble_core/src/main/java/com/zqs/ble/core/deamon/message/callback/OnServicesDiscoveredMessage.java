@@ -43,7 +43,7 @@ public class OnServicesDiscoveredMessage extends AbsBleMessage implements ICallb
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onServicesDiscovered(device,status);
+            globalBleCallback.onServicesDiscovered(device.getAddress(),services,status);
         }
         List<IServicesDiscoveredCallback> callbacks = getSimpleBle().getCallbackManage().getServicesDiscoveredCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){

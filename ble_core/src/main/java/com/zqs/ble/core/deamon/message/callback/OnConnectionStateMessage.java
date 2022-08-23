@@ -59,7 +59,7 @@ public class OnConnectionStateMessage extends AbsBleMessage implements ICallback
         getSimpleBle().updateConnectStatus(getMac(), isConnect,status,profileState,disconnecter);
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onConnectionStateChange(device,status,profileState);
+            globalBleCallback.onConnectionStateChange(device.getAddress(),status,profileState);
         }
         List<IConnectStatusChangeCallback> callbacks = getSimpleBle().getCallbackManage().getConnectStatusChangeCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){

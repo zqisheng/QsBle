@@ -36,7 +36,7 @@ public class OnReadRemoteRssiMessage extends AbsBleMessage implements ICallbackM
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onReadRemoteRssi(device,rssi,status);
+            globalBleCallback.onReadRemoteRssi(device.getAddress(),rssi,status);
         }
         List<IReadRssiCallback> callbacks = getSimpleBle().getCallbackManage().getReadRssiCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){

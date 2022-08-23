@@ -23,6 +23,7 @@ import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.SimpleBle;
 import com.zqs.ble.core.api.IBleMessageSender;
 import com.zqs.ble.core.api.IMultiPackageAssembly;
+import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IBleMultiPkgsCallback;
 import com.zqs.ble.core.callback.abs.IBlueStatusCallback;
 import com.zqs.ble.core.callback.abs.IChacChangeCallback;
@@ -146,6 +147,15 @@ public final class QsBle {
         BleDebugConfig.isOpenWriteLog = isDebug;
         BleDebugConfig.isOpenGattCallbackLog = isDebug;
         BleDebugConfig.isOpenChainHandleLog = isDebug;
+    }
+
+    /**
+     * 所有的ble设备的gatt的回调,扫描的回调
+     * 这里面的回调会比addxxxCallback的回调更先执行
+     * @param bleGlobalGattCallback
+     */
+    public void setGlobalGattCallback(GlobalBleCallback bleGlobalGattCallback) {
+        ble.setGlobalGattCallback(bleGlobalGattCallback);
     }
 
     /**
@@ -561,8 +571,8 @@ public final class QsBle {
      * @param serviceUuid
      * @param chacUuid
      * @param value 这个value的大小不限制,内部所有发送的带lock的消息都是进入一个写队列中,一个一个排队发送,收到操作系统发送成功的回调
-                    后会继续发送下一个数据包,我建议只要你向该特征值发送的包有大于一个mtu的,都使用带lock的方法,能够避免很多问题,比如撞包,除非你的
-                    数据都是不超过一个mtu的,带lock的方法我建议使用带norsp的,发送速度会较快
+    后会继续发送下一个数据包,我建议只要你向该特征值发送的包有大于一个mtu的,都使用带lock的方法,能够避免很多问题,比如撞包,除非你的
+    数据都是不超过一个mtu的,带lock的方法我建议使用带norsp的,发送速度会较快
      * @param retryWriteCount 一个mtu包失败重写次数
      * @param writeCallback 所有数据发送完成或者没有发送完成,都会回调该方法,这个方法主要是发送该数据包的状态回调,该方法能确保被回调
      */
@@ -696,9 +706,9 @@ public final class QsBle {
      *      *             or {@link android.bluetooth.BluetoothDevice#PHY_LE_CODED_MASK} 信道编码方式,Android5.0以下或者不支持ble5.0的硬件不支持设置
      * @param phyOptions {@link android.bluetooth.BluetoothDevice#PHY_OPTION_NO_PREFERRED}  默认的编码方式,android5.0以下和不支持ble5.0的设备
      *                  or {@link android.bluetooth.BluetoothDevice#PHY_OPTION_S2} ble5.0的,收发距离相较于ble4.x,远2倍 功耗较高
-                        or {@link android.bluetooth.BluetoothDevice#PHY_OPTION_S8} ble5.0的,收发距离相较于ble4.x,远4倍 功耗特别高
-                    注:除了你手机支持ble5.0的,你连接的设备也需要支持ble5.0才能设置成功,所有这条设置对于不是特别了解ble的不需要关注,全部默认就行,因为各个手机各个设备
-                        所支持的硬件也是不同的
+    or {@link android.bluetooth.BluetoothDevice#PHY_OPTION_S8} ble5.0的,收发距离相较于ble4.x,远4倍 功耗特别高
+    注:除了你手机支持ble5.0的,你连接的设备也需要支持ble5.0才能设置成功,所有这条设置对于不是特别了解ble的不需要关注,全部默认就行,因为各个手机各个设备
+    所支持的硬件也是不同的
      */
     @NonNull
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

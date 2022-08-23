@@ -36,7 +36,7 @@ public class OnPhyUpdateMessage extends AbsBleMessage implements ICallbackMessag
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onPhyUpdate(device,txPhy,rxPhy,status);
+            globalBleCallback.onPhyUpdate(device.getAddress(),txPhy,rxPhy,status);
         }
         List<IPhyUpdateCallback> callbacks = getSimpleBle().getCallbackManage().getPhyUpdateCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){

@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 
 import com.zqs.ble.core.SimpleBle;
 import com.zqs.ble.core.api.IBleCallback;
+import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IScanCallback;
 import com.zqs.ble.core.deamon.AbsMessage;
 
@@ -37,7 +38,7 @@ public class BleJellyBeanScanCallback implements BluetoothAdapter.LeScanCallback
         return scanCallback;
     }
 
-    public IBleCallback getSimpleBle() {
+    public SimpleBle getSimpleBle() {
         return simpleBle;
     }
 
@@ -74,6 +75,10 @@ public class BleJellyBeanScanCallback implements BluetoothAdapter.LeScanCallback
                 }
                 IBleCallback c2 = simpleBle;
                 if (c2==null) return;
+                GlobalBleCallback globalBleGattCallback = getSimpleBle().getGlobalBleGattCallback();
+                if (globalBleGattCallback!=null){
+                    globalBleGattCallback.onLeScan(device, rssi, scanRecord);
+                }
                 List<IScanCallback> scanCallbacks = c2.getScanCallbacks();
                 if (scanCallbacks != null) {
                     for (IScanCallback callback : scanCallbacks) {

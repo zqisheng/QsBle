@@ -49,7 +49,7 @@ public class OnMtuChangedMessage extends AbsBleMessage implements ICallbackMessa
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback != null) {
-            globalBleCallback.onMtuChanged(device, mtu, status);
+            globalBleCallback.onMtuChanged(device.getAddress(), mtu, status);
         }
         List<IMtuChangeCallback> callbacks = getSimpleBle().getCallbackManage().getMtuChangeCallbacks(getMac());
         if (callbacks != null && !callbacks.isEmpty()) {

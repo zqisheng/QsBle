@@ -4,6 +4,7 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 
 import com.zqs.ble.core.BleGlobalConfig;
+import com.zqs.ble.core.callback.GlobalBleCallback;
 import com.zqs.ble.core.callback.abs.IScanCallback;
 import com.zqs.ble.core.callback.abs.IScanStatusCallback;
 import com.zqs.ble.core.callback.scan.SimpleScanConfig;
@@ -64,6 +65,10 @@ public class StartScanMessage extends AbsBleMessage implements IBleScanMessage {
         }
         getSimpleBle().getBleScanOption().onScanStart();
         getSimpleBle().setScanState(true);
+        GlobalBleCallback globalBleGattCallback = getSimpleBle().getGlobalBleGattCallback();
+        if (globalBleGattCallback!=null){
+            globalBleGattCallback.onScanStatusChanged(true);
+        }
         List<IScanStatusCallback> callbacks = getSimpleBle().getCallbackManage().getScanStatusCallbacks();
         for (IScanStatusCallback callback : callbacks) {
             callback.onScanStatusChanged(true);

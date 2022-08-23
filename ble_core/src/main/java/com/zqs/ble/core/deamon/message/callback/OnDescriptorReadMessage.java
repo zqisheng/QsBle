@@ -43,7 +43,7 @@ public class OnDescriptorReadMessage extends AbsBleMessage implements ICallbackM
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback!=null){
-            globalBleCallback.onDescriptorRead(device,descriptor,status);
+            globalBleCallback.onDescriptorRead(device.getAddress(),descriptor,status);
         }
         List<IDescReadCallback> callbacks = getSimpleBle().getCallbackManage().getDescReadCallbacks(getMac());
         if (callbacks!=null&&!callbacks.isEmpty()){

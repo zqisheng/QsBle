@@ -179,7 +179,7 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
         isScaning = scaning;
     }
 
-    public void setBleGlobalGattCallback(GlobalBleCallback bleGlobalGattCallback) {
+    public void setGlobalGattCallback(GlobalBleCallback bleGlobalGattCallback) {
         this.bleGlobalGattCallback = bleGlobalGattCallback;
     }
 

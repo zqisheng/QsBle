@@ -39,7 +39,7 @@ public final class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLo
     }
 
     @Override
-    public WriteByLockChacChain getBleChain() {
+    public WriteByLockChacChain getBaseChain() {
         return chain;
     }
 
@@ -48,7 +48,7 @@ public final class WriteByLockChacChainBuilder extends BleChainBuilder<WriteByLo
         return chain;
     }
 
-    public class WriteByLockChacChain extends BleChain<Boolean> {
+    protected class WriteByLockChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;

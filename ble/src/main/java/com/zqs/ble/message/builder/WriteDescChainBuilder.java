@@ -33,7 +33,7 @@ public final class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainB
 
 
     @Override
-    public WriteDescChain getBleChain() {
+    public WriteDescChain getBaseChain() {
         return chain;
     }
 
@@ -42,7 +42,7 @@ public final class WriteDescChainBuilder extends BleChainBuilder<WriteDescChainB
         return chain;
     }
 
-    public static class WriteDescChain extends BleChain<Boolean>{
+    protected static class WriteDescChain extends BleChain<Boolean>{
 
         private UUID serviceUuid;
         private UUID chacUuid;

@@ -30,7 +30,7 @@ public final class StopScanChainBuilder extends BleChainBuilder<StopScanChainBui
     }
 
     @Override
-    public StopScanChain getBleChain() {
+    public StopScanChain getBaseChain() {
         return chain;
     }
 
@@ -39,7 +39,7 @@ public final class StopScanChainBuilder extends BleChainBuilder<StopScanChainBui
         return chain;
     }
 
-    public static class StopScanChain extends BleChain<Boolean> {
+    protected static class StopScanChain extends BleChain<Boolean> {
 
         private IScanStatusCallback scanStatusCallback;
         private IScanStatusCallback callback;

@@ -368,7 +368,7 @@ public final class QsBle {
     public BleChainBuilder chain(@NonNull String mac){
         return new BleChainBuilder(mac.toUpperCase(), new LinkedList<>()) {
             @Override
-            public BleChain getBleChain() {
+            public BleChain getBaseChain() {
                 return null;
             }
 

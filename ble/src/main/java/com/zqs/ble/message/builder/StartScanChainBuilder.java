@@ -64,7 +64,7 @@ public final class StartScanChainBuilder extends BleChainBuilder<StartScanChainB
     }
 
     @Override
-    public StartScanChain getBleChain() {
+    public StartScanChain getBaseChain() {
         return chain;
     }
 
@@ -76,7 +76,7 @@ public final class StartScanChainBuilder extends BleChainBuilder<StartScanChainB
         return chain;
     }
 
-    public static class StartScanChain extends BleChain<Entry<Integer,byte[]>> {
+    protected static class StartScanChain extends BleChain<Entry<Integer,byte[]>> {
 
         private long scanTime = BleGlobalConfig.scanTime;
 

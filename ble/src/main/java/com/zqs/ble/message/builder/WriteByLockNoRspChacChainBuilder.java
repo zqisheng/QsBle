@@ -46,7 +46,7 @@ public final class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<Writ
     }
 
     @Override
-    public WriteByLockNoRspChacChain getBleChain() {
+    public WriteByLockNoRspChacChain getBaseChain() {
         return chain;
     }
 
@@ -55,7 +55,7 @@ public final class WriteByLockNoRspChacChainBuilder extends BleChainBuilder<Writ
         return chain;
     }
 
-    public class WriteByLockNoRspChacChain extends BleChain<Boolean> {
+    protected class WriteByLockNoRspChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;

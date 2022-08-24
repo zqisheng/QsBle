@@ -66,7 +66,7 @@ public final class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuild
     }
 
     @Override
-    public ConnectChain getBleChain() {
+    public ConnectChain getBaseChain() {
         return chain;
     }
 
@@ -75,7 +75,7 @@ public final class ConnectChainBuilder extends BleChainBuilder<ConnectChainBuild
         return chain;
     }
 
-    public static class ConnectChain extends BleChain<Boolean>{
+    protected static class ConnectChain extends BleChain<Boolean>{
         private long connectTimeout = BleGlobalConfig.connectTimeout;
         private int reconnectCount=0;
         private Map<String, Boolean> uuids;

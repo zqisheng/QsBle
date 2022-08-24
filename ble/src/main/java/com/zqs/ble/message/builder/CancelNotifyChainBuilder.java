@@ -39,7 +39,7 @@ public final class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotify
     }
 
     @Override
-    public CancelNotifyChain getBleChain() {
+    public CancelNotifyChain getBaseChain() {
         return chain;
     }
 
@@ -48,7 +48,7 @@ public final class CancelNotifyChainBuilder extends BleChainBuilder<CancelNotify
         return chain;
     }
 
-    public class CancelNotifyChain extends BleChain<String> {
+    protected class CancelNotifyChain extends BleChain<String> {
         private UUID serviceUuid;
         private UUID notifyUuid;
         private INotifyStatusChangedCallback notifyStatusChangedCallback;

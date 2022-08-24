@@ -32,7 +32,7 @@ public final class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChai
     }
 
     @Override
-    public RequestMtuChain getBleChain() {
+    public RequestMtuChain getBaseChain() {
         return chain;
     }
 
@@ -41,7 +41,7 @@ public final class RequestMtuChainBuilder extends BleChainBuilder<RequestMtuChai
         return chain;
     }
 
-    public static class RequestMtuChain extends BleChain<Integer>{
+    protected static class RequestMtuChain extends BleChain<Integer>{
         private int mtu;
         private IMtuChangeCallback mtuChangeCallback;
         private IMtuChangeCallback callback;

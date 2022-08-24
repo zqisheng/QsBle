@@ -30,7 +30,7 @@ public final class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuild
     }
 
     @Override
-    public ReadPhyChain getBleChain() {
+    public ReadPhyChain getBaseChain() {
         return chain;
     }
 
@@ -39,7 +39,7 @@ public final class ReadPhyChainBuilder extends BleChainBuilder<ReadPhyChainBuild
         return chain;
     }
 
-    public static class ReadPhyChain extends BleChain<int[]>{
+    protected static class ReadPhyChain extends BleChain<int[]>{
 
         private IPhyReadCallback phyReadCallback;
         private IPhyReadCallback callback;

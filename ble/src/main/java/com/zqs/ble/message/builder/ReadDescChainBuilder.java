@@ -31,7 +31,7 @@ public final class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBui
     }
 
     @Override
-    public ReadDescChain getBleChain() {
+    public ReadDescChain getBaseChain() {
         return chain;
     }
 
@@ -40,7 +40,7 @@ public final class ReadDescChainBuilder extends BleChainBuilder<ReadDescChainBui
         return chain;
     }
 
-    public static class ReadDescChain extends BleChain<byte[]>{
+    protected static class ReadDescChain extends BleChain<byte[]>{
 
         private UUID serviceUuid;
         private UUID chacUuid;

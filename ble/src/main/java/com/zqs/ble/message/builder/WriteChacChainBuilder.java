@@ -40,7 +40,7 @@ public final class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainB
     }
 
     @Override
-    public WriteChacChain getBleChain() {
+    public WriteChacChain getBaseChain() {
         return chain;
     }
 
@@ -49,7 +49,7 @@ public final class WriteChacChainBuilder extends BleChainBuilder<WriteChacChainB
         return chain;
     }
 
-    public class WriteChacChain extends BleChain<Boolean> {
+    protected class WriteChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;

@@ -35,7 +35,7 @@ public final class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder
 
 
     @Override
-    public SetPhyChain getBleChain() {
+    public SetPhyChain getBaseChain() {
         return chain;
     }
 
@@ -44,7 +44,7 @@ public final class SetPhyChainBuilder extends BleChainBuilder<SetPhyChainBuilder
         return chain;
     }
 
-    public static class SetPhyChain extends BleChain<int[]>{
+    protected static class SetPhyChain extends BleChain<int[]>{
         private int txPhy;
         private int rxPhy;
         private int phyOptions;

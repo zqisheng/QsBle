@@ -41,7 +41,7 @@ public final class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRsp
     }
 
     @Override
-    public WriteNoRspChacChain getBleChain() {
+    public WriteNoRspChacChain getBaseChain() {
         return chain;
     }
 
@@ -50,7 +50,7 @@ public final class WriteNoRspChacChainBuilder extends BleChainBuilder<WriteNoRsp
         return chain;
     }
 
-    public class WriteNoRspChacChain extends BleChain<Boolean> {
+    protected class WriteNoRspChacChain extends BleChain<Boolean> {
         private UUID serviceUuid;
         private UUID chacUuid;
         private byte[] value;

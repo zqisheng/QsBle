@@ -26,7 +26,7 @@ public final class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBui
     }
 
     @Override
-    public ReadRssiChain getBleChain() {
+    public ReadRssiChain getBaseChain() {
         return chain;
     }
 
@@ -35,7 +35,7 @@ public final class ReadRssiChainBuilder extends BleChainBuilder<ReadRssiChainBui
         return chain;
     }
 
-    public static class ReadRssiChain extends BleChain<Integer>{
+    protected static class ReadRssiChain extends BleChain<Integer>{
 
         private IReadRssiCallback readRssiCallback;
         private IReadRssiCallback callback;

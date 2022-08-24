@@ -7,6 +7,7 @@ import com.zqs.ble.core.BleGlobalConfig;
 import com.zqs.ble.core.callback.abs.IBleMultiPkgsCallback;
 import com.zqs.ble.core.callback.abs.IChacChangeCallback;
 import com.zqs.ble.core.deamon.AbsMessage;
+import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.core.utils.Utils;
 import com.zqs.ble.core.utils.fun.ReturnFunction;
 import com.zqs.ble.core.utils.fun.VoidFunction;
@@ -73,7 +74,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         this.mac = mac;
     }
 
-    public abstract BaseChain getBleChain();
+    public abstract BaseChain<D> getBaseChain();
 
     /**
      * 切换下游及当前链操作的设备mac地址
@@ -93,7 +94,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T delay(long delay) {
-        getBleChain().setDelay(delay);
+        getBaseChain().setDelay(delay);
         return (T) this;
     }
 
@@ -104,7 +105,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T retry(int retry) {
-        getBleChain().setRetry(retry);
+        getBaseChain().setRetry(retry);
         return (T) this;
     }
 
@@ -115,7 +116,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T timeout(long timeout) {
-        getBleChain().setTimeout(timeout);
+        getBaseChain().setTimeout(timeout);
         return (T) this;
     }
 
@@ -125,7 +126,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T async() {
-        getBleChain().setAsync(true);
+        getBaseChain().setAsync(true);
         return (T) this;
     }
 
@@ -136,7 +137,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T dump(boolean dump) {
-        getBleChain().setDump(dump);
+        getBaseChain().setDump(dump);
         return (T) this;
     }
 
@@ -148,8 +149,8 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T before(boolean isRunOnMain, @NonNull Runnable before) {
-        getBleChain().beforeIsRunMain = isRunOnMain;
-        getBleChain().setBeforeCallback(before);
+        getBaseChain().beforeIsRunMain = isRunOnMain;
+        getBaseChain().setBeforeCallback(before);
         return (T) this;
     }
 
@@ -165,8 +166,8 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T after(boolean isRunOnMain, @NonNull Runnable after) {
-        getBleChain().afterIsRunMain = isRunOnMain;
-        getBleChain().setAfterCallback(after);
+        getBaseChain().afterIsRunMain = isRunOnMain;
+        getBaseChain().setAfterCallback(after);
         return (T) this;
     }
 
@@ -182,8 +183,8 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T data(boolean isRunOnMain, @NonNull VoidFunction<D> acceptData) {
-        getBleChain().acceptDataIsRunMain = isRunOnMain;
-        getBleChain().setAcceptDataCallback(acceptData);
+        getBaseChain().acceptDataIsRunMain = isRunOnMain;
+        getBaseChain().setAcceptDataCallback(acceptData);
         return (T) this;
     }
 
@@ -199,8 +200,8 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public T error(boolean isRunOnMain, @NonNull VoidFunction<Exception> error) {
-        getBleChain().errorIsRunMain = isRunOnMain;
-        getBleChain().errorCallback = error;
+        getBaseChain().errorIsRunMain = isRunOnMain;
+        getBaseChain().errorCallback = error;
         return (T) this;
     }
 
@@ -466,7 +467,7 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
         if (isSameRoot(builder)){
             throw new IllegalArgumentException("must be introduced to a new BleChainBuilder object");
         }
-        TogetherChainBuilder bu = new TogetherChainBuilder(mac, chains);
+        TogetherChainBuilder bu = new TogetherChainBuilder(mac, chains,builder);
         chains.add(bu);
         return bu;
     }
@@ -554,38 +555,6 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
      * @return
      */
     public abstract BleChain build();
-
-    private static class TogetherChain extends BleChain<Boolean> {
-        private Queue<BaseChain> chains;
-        private ChainMessage message;
-
-        public TogetherChain(String mac, Queue<BaseChain> chains) {
-            super(mac);
-            this.chains = chains;
-        }
-
-        @Override
-        public void handle() {
-            message = new ChainMessage(chains);
-            message.setHandleStatusCallback(new ChainMessage.ChainHandleStatusCallback() {
-                @Override
-                public void onReport(Boolean isSuccess, @Nullable Exception e) {
-                    if (isSuccess) {
-                        onSuccess(true);
-                    } else {
-                        onFail(e);
-                    }
-                }
-            });
-            QsBle.getInstance().sendMessage(message);
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            message.cancel();
-        }
-    }
 
     protected static void sendMessage(AbsMessage message){
         QsBle.getInstance().sendMessage(message);

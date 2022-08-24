@@ -5,7 +5,10 @@ import com.zqs.ble.BleChain;
 import com.zqs.ble.BleChainBuilder;
 import com.zqs.ble.ChainMessage;
 import com.zqs.ble.QsBle;
+import com.zqs.ble.core.utils.BleLog;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Queue;
 
 import androidx.annotation.Nullable;
@@ -19,12 +22,18 @@ public final class TogetherChainBuilder extends BleChainBuilder<TogetherChainBui
 
     private TogetherChain chain = new TogetherChain(mac);
 
-    public TogetherChainBuilder(String mac, Queue<BleChainBuilder> chains) {
+    public TogetherChainBuilder(String mac, Queue<BleChainBuilder> chains,BleChainBuilder builder) {
         super(mac,chains);
+        LinkedList<BaseChain> chainQueue = new LinkedList<>();
+        Queue<BleChainBuilder> builderQueue=builder.getChains();
+        while (!builderQueue.isEmpty()) {
+            chainQueue.add(builderQueue.poll().build());
+        }
+        chain.chains = chainQueue;
     }
 
     @Override
-    public BaseChain getBleChain() {
+    public BaseChain getBaseChain() {
         return chain;
     }
 
@@ -33,29 +42,22 @@ public final class TogetherChainBuilder extends BleChainBuilder<TogetherChainBui
         return chain;
     }
 
-    public static class TogetherChain extends BleChain<Boolean> {
-        private Queue<BaseChain> chains;
+    protected static class TogetherChain extends BleChain<Boolean> {
         private ChainMessage message;
-
+        private LinkedList<BaseChain> chains;
         public TogetherChain(String mac) {
             super(mac);
         }
 
-        public void setChains(Queue<BaseChain> chains){
-            this.chains = chains;
-        }
-
         @Override
         public void handle() {
-            message = new ChainMessage(chains);
-            message.setHandleStatusCallback(new ChainMessage.ChainHandleStatusCallback() {
-                @Override
-                public void onReport(Boolean isSuccess, @Nullable Exception e) {
-                    if (isSuccess) {
-                        onSuccess(true);
-                    } else {
-                        onFail(e);
-                    }
+            LinkedList<BaseChain> tempBaseChain = new LinkedList<>(chains);
+            message = new ChainMessage(tempBaseChain);
+            message.setHandleStatusCallback((isSuccess, e) -> {
+                if (isSuccess){
+                    onSuccess(true);
+                }else{
+                    onFail(e);
                 }
             });
             sendMessage(message);
@@ -64,7 +66,11 @@ public final class TogetherChainBuilder extends BleChainBuilder<TogetherChainBui
         @Override
         public void onDestroy() {
             super.onDestroy();
-            message.cancel();
+            chains.clear();
+            if (message!=null){
+                message.cancel();
+                message = null;
+            }
         }
     }
 

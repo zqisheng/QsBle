@@ -32,7 +32,7 @@ public final class SetConnectionPriorityChainBuilder extends BleChainBuilder<Set
     }
 
     @Override
-    public SetConnectionPriorityChain getBleChain() {
+    public SetConnectionPriorityChain getBaseChain() {
         return chain;
     }
 
@@ -41,7 +41,7 @@ public final class SetConnectionPriorityChainBuilder extends BleChainBuilder<Set
         return chain;
     }
 
-    public static class SetConnectionPriorityChain extends BleChain<int[]>{
+    protected static class SetConnectionPriorityChain extends BleChain<int[]>{
         private int mode;
         private IConnectionUpdatedCallback connectionUpdatedCallback;
         private IConnectionUpdatedCallback callback;

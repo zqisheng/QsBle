@@ -25,7 +25,7 @@ public final class DisconnectChainBuilder extends BleChainBuilder<DisconnectChai
     }
 
     @Override
-    public DisconnectChain getBleChain() {
+    public DisconnectChain getBaseChain() {
         return chain;
     }
 
@@ -34,7 +34,7 @@ public final class DisconnectChainBuilder extends BleChainBuilder<DisconnectChai
         return chain;
     }
 
-    public static class DisconnectChain extends BleChain<Boolean>{
+    protected static class DisconnectChain extends BleChain<Boolean>{
 
         private IConnectStatusChangeCallback connectStatusChangeCallback;
         private IConnectStatusChangeCallback callback;

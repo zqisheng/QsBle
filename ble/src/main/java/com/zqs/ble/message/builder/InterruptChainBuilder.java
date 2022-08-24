@@ -4,6 +4,7 @@ import com.zqs.ble.BleChain;
 import com.zqs.ble.BleChainBuilder;
 import com.zqs.ble.QsBle;
 import com.zqs.ble.core.deamon.AbsMessage;
+import com.zqs.ble.core.utils.BleLog;
 import com.zqs.ble.fun.Function;
 
 import java.util.Queue;
@@ -40,7 +41,7 @@ public final class InterruptChainBuilder<D> extends BleChainBuilder<InterruptCha
     }
 
     @Override
-    public InterruptChain getBleChain() {
+    public InterruptChain getBaseChain() {
         return chain;
     }
 
@@ -49,7 +50,7 @@ public final class InterruptChainBuilder<D> extends BleChainBuilder<InterruptCha
         return chain;
     }
 
-    public static class InterruptChain<D> extends BleChain<D>{
+    protected static class InterruptChain<D> extends BleChain<D>{
 
         public InterruptChain(String mac) {
             super(mac);
@@ -83,6 +84,7 @@ public final class InterruptChainBuilder<D> extends BleChainBuilder<InterruptCha
 
         @Override
         public void handle() {
+            BleLog.d("消息状态Interrupt handle");
             destroyCallback = interrupt.apply(option);
         }
 

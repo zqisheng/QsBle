@@ -28,17 +28,17 @@ public final class OpenNotifyChainBuilder extends BleChainBuilder<OpenNotifyChai
     }
 
     public OpenNotifyChainBuilder retry(int retry){
-        getBleChain().setRetry(retry);
+        getBaseChain().setRetry(retry);
         return this;
     }
 
     public OpenNotifyChainBuilder delay(long delay) {
-        getBleChain().setDelay(delay);
+        getBaseChain().setDelay(delay);
         return this;
     }
 
     public OpenNotifyChainBuilder timeout(long timeout) {
-        getBleChain().setTimeout(timeout);
+        getBaseChain().setTimeout(timeout);
         return this;
     }
 
@@ -53,7 +53,7 @@ public final class OpenNotifyChainBuilder extends BleChainBuilder<OpenNotifyChai
     }
 
     @Override
-    public OpenNotifyChain getBleChain() {
+    public OpenNotifyChain getBaseChain() {
         return chain;
     }
 
@@ -62,7 +62,7 @@ public final class OpenNotifyChainBuilder extends BleChainBuilder<OpenNotifyChai
         return chain;
     }
 
-    public static class OpenNotifyChain extends BleChain<String>{
+    protected static class OpenNotifyChain extends BleChain<String>{
 
         private UUID serviceUuid;
         private UUID notifyUuid;

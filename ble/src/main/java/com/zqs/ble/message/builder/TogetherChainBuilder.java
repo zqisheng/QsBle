@@ -30,6 +30,8 @@ public final class TogetherChainBuilder extends BleChainBuilder<TogetherChainBui
             chainQueue.add(builderQueue.poll().build());
         }
         chain.chains = chainQueue;
+        //timeout default 60s
+        timeout(60000);
     }
 
     @Override
@@ -66,7 +68,6 @@ public final class TogetherChainBuilder extends BleChainBuilder<TogetherChainBui
         @Override
         public void onDestroy() {
             super.onDestroy();
-            chains.clear();
             if (message!=null){
                 message.cancel();
                 message = null;

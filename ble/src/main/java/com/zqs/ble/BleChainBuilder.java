@@ -403,20 +403,21 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
     }
 
     public InterruptChainBuilder<byte[]> acceptNotify(Function<byte[], Boolean> chacChangedCallback) {
+        QsBle.getInstance().verifyDefaultNotifyUuid();
         return acceptNotify(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID, chacChangedCallback);
     }
 
     /**
      * 接收设备返回的数据,一个mtu大小的
      * @param serviceUuid
-     * @param chacUuid
+     * @param notifyUuid
      * @param chacChangedCallback 返回true表示返回了符合要求的数据,可以执行下一条链,false表示继续等待符合要求的数据
      * @return
      */
-    public InterruptChainBuilder<byte[]> acceptNotify(UUID serviceUuid, UUID chacUuid, Function<byte[], Boolean> chacChangedCallback) {
+    public InterruptChainBuilder<byte[]> acceptNotify(UUID serviceUuid, UUID notifyUuid, Function<byte[], Boolean> chacChangedCallback) {
         return interrupt((option) -> {
             IChacChangeCallback callback = (device, characteristic, value) -> {
-                if (Utils.uuidIsSame(characteristic,serviceUuid,chacUuid)){
+                if (Utils.uuidIsSame(characteristic,serviceUuid,notifyUuid)){
                     if (chacChangedCallback.apply(value)){
                         option.next(value);
                     }
@@ -428,27 +429,28 @@ public abstract class BleChainBuilder<T extends BleChainBuilder, C extends BleCh
     }
 
     public InterruptChainBuilder<List<byte[]>> acceptMultiPkgNotify(Function<List<byte[]>, Boolean> chacChangedCallback) {
+        QsBle.getInstance().verifyDefaultNotifyUuid();
         return acceptMultiPkgNotify(BleGlobalConfig.serviceUUID, BleGlobalConfig.notifyUUID, chacChangedCallback);
     }
 
     /**
      * 接收设备返回的数据,超过一个mtu大小的
      * @param serviceUuid
-     * @param chacUuid
+     * @param notifyUuid
      * @param chacChangedCallback 返回true表示返回了符合要求的数据,可以执行下一条链,false表示继续等待符合要求的数据
      * @return
      */
-    public InterruptChainBuilder<List<byte[]>> acceptMultiPkgNotify(UUID serviceUuid, UUID chacUuid, Function<List<byte[]>, Boolean> chacChangedCallback) {
+    public InterruptChainBuilder<List<byte[]>> acceptMultiPkgNotify(UUID serviceUuid, UUID notifyUuid, Function<List<byte[]>, Boolean> chacChangedCallback) {
         return interrupt((option) -> {
             IBleMultiPkgsCallback callback = (device, characteristic, value) -> {
-                if (Utils.uuidIsSame(characteristic,serviceUuid,chacUuid)){
+                if (Utils.uuidIsSame(characteristic,serviceUuid,notifyUuid)){
                     if (chacChangedCallback.apply(value)){
                         option.next(value);
                     }
                 }
             };
-            QsBle.getInstance().addBleMultiPkgsCallback(mac,chacUuid, callback);
-            return () -> QsBle.getInstance().rmBleMultiPkgsCallback(mac,chacUuid,callback);
+            QsBle.getInstance().addBleMultiPkgsCallback(mac,notifyUuid, callback);
+            return () -> QsBle.getInstance().rmBleMultiPkgsCallback(mac,notifyUuid,callback);
         });
     }
 

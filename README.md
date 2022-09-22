@@ -1,25 +1,26 @@
-**QsBle是一款Android Ble框架**
+**QsBle is an Android Ble framework**
 
-[github链接](https://github.com/zqisheng/QsBle)
+[中文文档](https://github.com/zqisheng/QsBle/blob/master/README_CN.md)
 
-[点击下载演示demo](https://raw.githubusercontent.com/zqisheng/QsBle/master/screen/app-debug.apk)
+[English Document](https://github.com/zqisheng/QsBle/blob/master/README.md)
 
-**特点**
-* 相比老的Ble框架,更契合现在Android开发人员的代码风格
-* 完全函数式编程,所有的Ble回调都是函数式的
-* 支持所有的Ble操作的回调
-* 发送的数据超过mtu,QsBle也有完善的分包组包机制
-* 支持断开自动重连
-* 支持Kotlin协程,让你用同步的方式操作异步的代码,不用再为蓝牙的各种回调地狱而烦恼
-* 支持Flow
-* 支持链式编程,让你对蓝牙的各种操作能够顺序执行,以前几百行代码才能实现的逻辑,QsBle只需要一行代码
-* 完善的ota支持,你只需提供你的ota文件,其它所有的操作都交给QsBle
-* 完善的异常处理机制,让你出现异常能够及时的定位问题
-* 核心代码都是使用Java编写,使用Java开发的人也不需要为Java不能使用而担心,并且Kotlin调用Java代码也提供了各种判空机制,让你不用为Kotlin调用Java代码的空指针而担心
-* 其它Ble框架有的,QsBle也都有
-* **最重要的一个特点是,作者这段时间是会一直维护的**
+[Click to download demo](https://raw.githubusercontent.com/zqisheng/QsBle/master/screen/app-debug.apk)
 
-### 添加依赖
+**Features**
+* Compared with the old Ble framework, it is more in line with the code style of current Android developers
+* Fully functional programming, all Ble callbacks are functional
+* Supports callbacks for all Ble operations
+* The data sent exceeds mtu, and QsBle also has a perfect packet grouping mechanism
+* Support disconnection and automatic reconnection
+* Supports Kotlin coroutines, allowing you to operate asynchronous code in a synchronous way without worrying about the various callback hells of Bluetooth
+* Support Flow
+* Supports chain programming, allowing you to perform various operations on Bluetooth sequentially. The logic that could only be implemented in hundreds of lines of code before, QsBle only needs one line of code
+* Perfect ota support, you only need to provide your ota file, all other operations are handed over to QsBle
+* The perfect exception handling mechanism allows you to locate the problem in time when an exception occurs.
+* The core code is written in Java, and people who develop in Java do not need to worry about the inability to use Java, and Kotlin calls Java code also provides various nullability mechanisms, so that you don't have to worry about the null pointer of Kotlin calling Java code
+* Other Ble frameworks have some, and QsBle also has them
+
+### Add dependencies
 [![](https://jitpack.io/v/zqisheng/QsBle.svg)](https://jitpack.io/#zqisheng/QsBle)
 ```
 allprojects {
@@ -30,42 +31,42 @@ allprojects {
 
 
 dependencies {
-    //QsBle必须添加的依赖
+    //Dependencies that QsBle must add
    implementation 'com.github.zqisheng.QsBle:ble:<new version>'
-    //如果要使用kotlin协程功能的话,就要添加下面的依赖,非必须
+    //If you want to use the kotlin coroutine function, you must add the following dependencies, not required
    //implementation 'com.github.zqisheng.QsBle:ble_coroutines:<new version>'
 }
 ```
 
-### 使用前
-添加蓝牙扫描需要添加的权限,并且在运行时申请权限
+### Before use
+Adding permissions for Bluetooth scanning needs to be added, and apply for permissions at runtime
 ```xml
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 ```
-对于Android12的蓝牙适配,框架中已经默认添加了以下三样权限,所以无须手动添加,但是这三个权限是动态申请权限,在Android12版本及以上,必须在代码中动态申请
+For the Bluetooth adaptation of Android 12, the following three permissions have been added by default in the framework, so there is no need to add them manually, but these three permissions are dynamically applied for permissions. In Android 12 and above, they must be dynamically applied in the code.
 ```xml
 <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 ```
 
-### 初始化
-**方式1(推荐):**
+### Initialization
+**Usage 1(Recommend):**
 ```java
 QsBle.getInstance().init(Context context);
 ```
-**方式2:**
+**Usage 2:**
 ```java
 QsBle.getInstance().init(Context context,Handler handler);
 ```
-*注1:QsBle的所有对Ble的操作和回调都是在一个线程中执行的,方式1的初始化是默认使用框架实现的线程对Ble进行操作.但是如果你想让Ble的所有操作都在自己指定的线程中执行,你也可以传入Handler,这样所有Ble的操作和回调都会在这个指定的Handler中调用了<br/>比如你想让所有的操作都在主线程中回调,你可以传一个主线程的Handler,这样所有Ble的操作和回调都是在主线程中回调了,**但是作者强烈不建议这样做***
+*Note 1: All operations and callbacks of QsBle to Ble are executed in one thread. The initialization of mode 1 is to use the thread implemented by the framework to operate Ble by default. But if you want all operations of Ble to be specified by yourself You can also pass in a Handler, so that all Ble operations and callbacks will be called in the specified Handler <br/>For example, if you want all operations to be called back in the main thread, you can pass a The Handler of the main thread, so that all Ble operations and callbacks are called back in the main thread, **but the author strongly does not recommend doing this***
 
-*注2:QsBle的初始化不会获取任何用户手机的隐私信息,所以放心在任何时候初始化*
+*Note 2: The initialization of QsBle will not obtain any private information of the user's mobile phone, so rest assured to initialize at any time*
 
 
-### 简单使用
-**使用方式1:**
+### Simple to use
+**Usage 1:**
 ```java
 QsBle.getInstance().startScan();
 QsBle.getInstance().connect(mac);
@@ -75,7 +76,7 @@ QsBle.getInstance().writeByLock(mac,serviceUuid,writeUuid,value)
 ....
 ```
 
-**使用方式2(链式操作)(Java推荐):**
+**Usage 2(Chain)(Java Recommended):**
 ```java
 QsBle.getInstance().chain(mac)
     .connect()...
@@ -88,111 +89,111 @@ QsBle.getInstance().chain(mac)
     ...
     .start()
 ```
-*注:以上的链式操作流程是:先连接地址为mac的设备,连接成功后,会打开该设备的notify,打开notify成功后,会设置Connection参数,参数设置成功后,会向特征写数据,框架确认数据写成功后,会断开该设备的连接,其中任何一环没有达到预期结果都不会继续执行*
+*Note: The above chain operation process is: first connect to the device whose address is mac. After the connection is successful, the notify of the device will be opened. After the notify is opened successfully, the Connection parameter will be set. After the parameter is set successfully, data will be written to the feature. , After the framework confirms that the data is written successfully, it will disconnect the connection of the device, and any part of the link will not continue to execute if it does not achieve the expected result*
 
-**使用方式3(kotlin协程)(kotlin推荐)**
+**Usage 3(Kotlin coroutines)(Kotlin Recommended)**
 ```kotlin
-//使用kotlin协程实现方式2的操作
+//Use kotlin coroutine to implement the operation of mode 2
 bleLifeScope.launch ({
     val chain = ble.chain(mac)
-    //true:连接成功
+    //true:connection succeeded
     val isConnect:Boolean=chain.connect().reConnectCount(3).connectTimeout(7000).dump(false).await()
-    //三种值:notification,indication,disable,前两种都是通知已经打开
+    //Three values: notification, indication, disable, the first two are notifications already turned on
     val notifyStatus1:String?=chain.openNotify(serviceUuid,notifyUuid).dump(false).retry(3).await()
     val notifyStatus2:String?=chain.cancelNotify().await()
     //new int[]{interval, latency, timeout}
-    //只要不空都是设置成功
+    //As long as it is not empty, the setting is successful
     val status1:IntArray?=chain.requestConnectionToLowPower().dump(false).await()
     val status2:IntArray?=chain.requestConnectionToBalanced().dump(false).await()
     val status3:IntArray?=chain.requestConnectionToHigh().dump(false).await()
-    //true:写成功 false:写失败
+    //true: write successfully false: write failed
     val status4:Boolean=chain.writeByLock(serviceUuid,writeUuid,value).dump(false).await()
-    //true:写成功 false:写失败
-    //norsp的速度比没有norsp发送速度快大概3-30倍,和设备的连接参数有关
+    //true: write successfully false: write failed
+    //The speed of norsp is about 3-30 times faster than that without norsp, which is related to the connection parameters of the device
     val status5:Boolean=chain.writeByLockNoRsp(serviceUuid,writeUuid,value).dump(false).await()
-    //返回该特征值在设备中的值
+    //Returns the value of the characteristic value in the device
     val readValue:ByteArray?=chain.read(serviceUuid,readUuid).dump(false).await()
-    //返回该描述在设备中的值
+    //Returns the value of the description in the device
     val readDescValue:ByteArray?=chain.readDesc(serviceUuid,readUuid,descUuid).dump(false).await()
     //new int[]{txPhy,rxPhy}
     val phy:IntArray?=chain.readPhy().await()
-    //直接返回rssi
+    //return rssi
     val rssi:Int?=chain.readRssi().await()
-    //返回设置成功的mtu,为null就是设置失败
+    //Returns the mtu that has been successfully set, and if it is null, the setting fails.
     val mtu:Int?=chain.requestMtu(517).await()
-    //断开连接
+    //Disconnect
     chain.disconnect().await()
 },onError = {
-    //协程执行错误会调用,回调在主线程中
+    //The coroutine execution error will be called, and the callback will be in the main thread
 },onStart = {
-   //协程执行开始之前会调用,回调在主线程中
+   //Called before the execution of the coroutine starts, the callback is in the main thread
 },onFinally = {
-    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+    //Regardless of the success or failure of the coroutine execution, this method will eventually be called, and the callback is in the main thread
 })
 ```
-*注:bleLifeScope是Lifecycle对象的扩展对象,在Lifecycle销毁时,bleLifeScope会自动中断内部的蓝牙协程操作,并且将协程销毁*
-### 关于协程和链式操作几个公共操作符的说明
-**这几个操作符的特点是所有链式操作都支持的,将各个操作符一起使用,能解决一些很复杂的场景**
+*Note: bleLifeScope is an extension object of the Lifecycle object. When the Lifecycle is destroyed, bleLifeScope will automatically interrupt the internal Bluetooth coroutine operation and destroy the coroutine*
+### Description of public operators
+**The characteristics of these operators are that all chained operations are supported. Using each operator together can solve some very complex scenarios.**
 
-**操作符1:dump(boolean dump)**<br/>
-**含义:当前的链式段在执行失败时是否结束整条执行链,默认是true,结束整条链**<br/>
-**链式操作**:
+**Operator1:dump(boolean dump)**<br/>
+**Explanation:Whether the current chained segment ends the whole execution chain when the execution fails. The default value is true, which ends the whole chain**<br/>
+**Chain**:
 ```java
-//直接通过链式连接5个设备
+//Connect 5 devices directly by chain
 QsBle.getInstance().chain()
     .connect(mac1)...
     .connect(mac2).dump(false)...
-    .connect(mac3).dump(true)...//默认就是true,可以不设置
+    .connect(mac3).dump(true)...//The default is true, which can not be set
     .connect(mac4)
     .connect(mac5)
     .start()
 ```
-**说明:mac1连接成功后会去连接mac2,如果mac2连接失败,比如连接超时或者系统返回错误,那么mac3是否是否会继续连接,答案是会继续连接,因为mac2这条链的dump=false,即使连接失败也不会中断整条链,mac3会在mac2连接失败后继续执行连接操作,如果mac3也连接失败了呢?因为dump=true,直接中断整条链的执行,后面mac4和mac5就不会执行连接操作了**<br/>
-**协程:**
+**Explanation:After the connection of mac1 is successful, it will connect to mac2. If the connection of mac2 fails, such as the connection timeout or the system returns an error, will mac3 continue to connect? The answer is whether it will continue to connect. Because the dump of mac2 chain is false, even if the connection fails, it will not interrupt the whole chain. Mac3 will continue to connect after the connection of mac2 fails. If the connection of mac3 fails, it will also fail? Because dump=true, the execution of the whole chain is interrupted directly, and mac4 and mac5 will not perform connection operations later**<br/>
+**Coroutine:**
 ```kotlin
 bleLifeScope.launch ({
-    //直接通过链式连接5个设备
+    //Connect 5 devices directly by chain
     QsBle.getInstance().chain().apply{
         connect(mac1).await()
         connect(mac2).dump(false).await()
-        connect(mac3).dump(true).await()//默认就是true,可以不设置
+        connect(mac3).dump(true).await()//The default is true, which can not be set
         connect(mac4).await()
         connect(mac5).await()
     }
 },onError = {
-    //协程执行错误会调用,回调在主线程中
+    //The coroutine execution error will be called, and the callback will be in the main thread
 },onStart = {
-   //协程执行开始之前会调用,回调在主线程中
+   //Called before the execution of the coroutine starts, the callback is in the main thread
 },onFinally = {
-    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+    //Regardless of the success or failure of the coroutine execution, this method will eventually be called, and the callback is in the main thread
 })
 ```
-**说明:和上面链式执行流程是一样的,在协程中唯一不一样的就是,当这条链的dump=true时,发生连接失败,协程中会直接抛出异常,所以在执行到mac3连接失败时,会回调onErro函数,想要执行失败不抛出异常,那执行设备dump=false即可**<br/>
+**Explanation:The chain execution process is the same as that above. The only difference in the collaboration process is that when the dump of this chain=true, the connection failure occurs, and an exception will be thrown directly in the collaboration process. Therefore, when the connection to the mac3 fails, the onErro function will be called back. If you want to fail without throwing an exception, the execution device dump=false**<br/>
 
-**操作符2:async())**<br/>
-**含义:用过kotlin协程的应该都清楚这个操作符的作用,这个操作符的作用和协程的很相似,它的作用是将当前链异步执行,执行这条链的时候立刻返回成功执行下一条链,而不等待这条链的返回结果**<br/>
-**链式操作**:
+**Operator2:async())**<br/>
+**Explanation:Those who have used the kotlin coroutine should know the role of this operator. The role of this operator is very similar to that of the coroutine. It is used to asynchronously execute the current chain. When executing this chain, the next chain will be returned successfully without waiting for the return result of this chain**<br/>
+**Chain**:
 ```java
-//通过链式同时连接5个设备
+//Connect 5 devices simultaneously by chain
 QsBle.getInstance().chain()
     .connect(mac1).async()...
     .connect(mac2).async().dump(false)...
-    //由于async是直接返回成功的,不存在失败,故dump的值多少对整条链的执行没有任何影响
-    .connect(mac3).async().dump(true)...//默认就是true,可以不设置
+    //Since async returns success directly and there is no failure, the value of dump has no effect on the execution of the whole chain
+    .connect(mac3).async().dump(true)...//The default is true, which can not be set
     .connect(mac4).async()
     .connect(mac5).async()
     .start()
 ```
-**协程:**
+**Coroutine:**
 ```kotlin
 bleLifeScope.launch ({
-    //协程中使用需要注意,即使你调用了async()操作符
-    //但是后面接着调用了await()
-    //那async()操作符将会失效
+    //It should be noted that even if you call the async() operator
+    //But then I call await()
+    //Then the async() operator will become invalid
     /**
-     * 所以执行流程是先等mac1连接成功
-     * 当然mac1连接失败会直接抛出异常,因为dump默认为true
-     * 接着同时连接后面的四个设备
+     * So the execution process is to wait for the connection of mac1 to succeed
+*Of course, an exception will be thrown directly if the connection to the mac1 fails, because dump defaults to true
+*Then connect the following four devices at the same time
      * */
     QsBle.getInstance().chain().apply{
         connect(mac1).async().await()
@@ -202,63 +203,63 @@ bleLifeScope.launch ({
         connect(mac5).async().start()
     }
 },onError = {
-    //协程执行错误会调用,回调在主线程中
+    //The coroutine execution error will be called, and the callback will be in the main thread
 },onStart = {
-   //协程执行开始之前会调用,回调在主线程中
+   //Called before the execution of the coroutine starts, the callback is in the main thread
 },onFinally = {
-    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+    //Regardless of the success or failure of the coroutine execution, this method will eventually be called, and the callback is in the main thread
 })
 ```
-**操作符3:delay(long delay)**<br/>
-**含义:当前的链式段会延迟delay ms执行,注意指是当前链**<br/>
-**链式操作**:
+**Operator3:delay(long delay)**<br/>
+**Explanation:The current chain segment will delay the execution of delay ms. Note that only the current chain**<br/>
+**Chain**:
 ```java
 QsBle.getInstance().chain()
     .connect(mac1)...
     .connect(mac2).delay(1000).dump(false)...
-    .connect(mac3).delay(2000).dump(true)...//默认就是true,可以不设置
+    .connect(mac3).delay(2000).dump(true)...//The default is true, which can not be set
     .connect(mac4).delay(3000)
     .connect(mac5).delay(4000)
     .start()
 ```
-**协程:**
+**Coroutine:**
 ```kotlin
 bleLifeScope.launch ({
     QsBle.getInstance().chain().apply{
         connect(mac1).await()
         connect(mac2).await()
-        //这个用的是kotlin协程提供的阻塞函数
+        //This uses the blocking function provided by the kotlin coprogram
         delay(1000)
-        //这个使用的是框架自己实现的delay()操作符
-        //虽然它们执行的结果和时间都是一样的,但是要区分
+        //This uses the delay () operator implemented by the framework itself
+        //Although their execution results and time are the same, we should distinguish
         connect(mac3).delay(2000).await()
         connect(mac4).await()
         delay(3000)
         connect(mac5).delay(4000).await()
     }
 },onError = {
-    //协程执行错误会调用,回调在主线程中
+    //The coroutine execution error will be called, and the callback will be in the main thread
 },onStart = {
-   //协程执行开始之前会调用,回调在主线程中
+   //Called before the execution of the coroutine starts, the callback is in the main thread
 },onFinally = {
-    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+    //Regardless of the success or failure of the coroutine execution, this method will eventually be called, and the callback is in the main thread
 })
 ```
 
-**操作符4:retry(int retry)**<br/>
-**含义:当前的链式段执行失败重写执行次数**<br/>
-**链式操作**:
+**Operator4:retry(int retry)**<br/>
+**Explanation:Current chain segment execution failure and re execution times**<br/>
+**Chain**:
 ```java
 QsBle.getInstance().chain()
     .connect(mac1)...
-    //retry操作符作用的是当前的链
-    //如果mac2连接全部失败,会尝试重写连接3次
+    //The retry operator works on the current chain
+    //If all mac2 connections fail, the connection will be rewritten 3 times
     .connect(mac2).retry(3)...
-    //这里是对mac3重连3*3=9次,retry操作符是对当前链式段的重试
-    .connect(mac3).reConnectCount(3).retry(3)...//默认就是true,可以不设置
+    //Here, the mac3 is reconnected 3 * 3=9 times. The retry operator is a retry of the current chained segment
+    .connect(mac3).reConnectCount(3).retry(3)...//The default is true, which can not be set
     .start()
 ```
-**协程:**
+**Coroutine:**
 ```kotlin
 bleLifeScope.launch ({
     QsBle.getInstance().chain().apply{
@@ -267,125 +268,125 @@ bleLifeScope.launch ({
         connect(mac3).reConnectCount(3).retry(3).await()
     }
 },onError = {
-    //协程执行错误会调用,回调在主线程中
+    //The coroutine execution error will be called, and the callback will be in the main thread
 },onStart = {
-   //协程执行开始之前会调用,回调在主线程中
+   //Called before the execution of the coroutine starts, the callback is in the main thread
 },onFinally = {
-    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+    //Regardless of the success or failure of the coroutine execution, this method will eventually be called, and the callback is in the main thread
 })
 ```
-**操作符5:timeout(long timeout)**<br/>
-**含义:当前的链式段在最大执行的时间,也就是超时时间**<br/>
-**链式操作**:
+**Operator5:timeout(long timeout)**<br/>
+**Explanation:The maximum execution time of the current chain segment, that is, the timeout**<br/>
+**Chain**:
 ```java
 QsBle.getInstance().chain()
     /**
-     *假设连接设备花费了5000ms,timeout=4000ms,那么这条链就会被判断执行失败,但是设备的状态是连接的
-     *只是这条链是执行失败的
+     *If it takes 5000ms and timeout=4000ms to connect the device, the chain will be judged as failed, but the device is connected
+     *This chain failed to execute
     **/
     .connect(mac1).connectTimeout(7000).timeout(4000)...
     .start()
 ```
-**协程:**
+**Coroutine:**
 ```kotlin
 bleLifeScope.launch ({
     QsBle.getInstance().chain().apply{
-        //该协程最长会等待多久?
-        //最长的情况下等待4000ms,只要超过了timeout的时间,还没有结果,就判断执行失败
+        //How long will the tour wait?
+        //In the longest case, wait for 4000ms. If the timeout period is exceeded and there is no result, the execution will be judged as failed
         connect(mac1).timeout(4000).retry(3).await()
     }
 },onError = {
-    //协程执行错误会调用,回调在主线程中
+    //The coroutine execution error will be called, and the callback will be in the main thread
 },onStart = {
-   //协程执行开始之前会调用,回调在主线程中
+   //Called before the execution of the coroutine starts, the callback is in the main thread
 },onFinally = {
-    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+    //Regardless of the success or failure of the coroutine execution, this method will eventually be called, and the callback is in the main thread
 })
 ```
-**操作符6:withMac(String mac)**<br/>
-**含义:当前的链式段及其后面执行的链对应的设备mac地址,这个参数除了扫描的链不是必须,其它的链都是必须的,只不过有的是隐式有的是显式**<br/>
+**Operator6:withMac(String mac)**<br/>
+**Explanation:The MAC address of the device corresponding to the current chain segment and the chain executed after it. This parameter is not required except for the scanned chain. Other chains are required, but some are implicit and some are explicit**<br/>
 
-**链式操作**:
+**Chain**:
 ```java
-//以下面一个不恰当的例子为例
+//Take the following inappropriate example
 QsBle.getInstance().chain()
-            //假设将下面的注释去掉,这条链执行到这会直接报错,因为没有默认的mac传入
+            //If the following comments are removed, an error will be reported directly when the chain is executed here, because there is no default mac incoming
             //.connect()
             .connect(mac1)
             .connect(mac2)
-            //value0是发给mac2的,因为上游传入的是mac2
+            //The value0 is sent to mac2, because the upstream incoming is mac2
             .writeByLock(serviceUuid,chacUuid,value0).
-            //value1是发给mac1的
+            //Value1 is sent to mac1
             .writeByLock(serviceUuid,chacUuid,value1).withMac(mac1)
-            //value2是发给mac1的
+            //Value2 is sent to mac1
             .writeByLock(serviceUuid,chacUuid,value2)
-            //value3是发给mac1的
+            //Value3 is sent to mac1
             .writeByLock(serviceUuid,chacUuid,value3)
-            //value4是发给mac2的,因为切换了mac的值
+            //Value4 is sent to mac2 because the mac value is switched
             .writeByLock(serviceUuid,chacUuid,value4).withMac(mac2)
-            //value5是发给mac2的
+            //Value5 is sent to mac2
             .writeByLock(serviceUuid,chacUuid,value5)
-            //连接mac3
+            //Connect mac3
             .connect().withMac(mac3)
-            //value6是发给mac3的
+            //Value6 is sent to mac3
             .writeByLock(serviceUuid,chacUuid,value6)
-            //value7是发给mac3的
+            //Value7 is sent to mac3
             .writeByLock(serviceUuid,chacUuid,value7)
-            //断开mac3,因为上游传入的是mac3
+            //Disconnect mac3, because the upstream incoming is mac3
             .disconnect()
-            //断开mac2
+            //Disconnect mac2
             .disconnect(mac2)
-            //断开mac3
+            //Disconnect mac3
             .disconnect(mac3)
             .start()
 ```
-**协程:**
+**Coroutine:**
 ```kotlin
-参考上面提供的样例
+Refer to the example provided above
 ```
-### 全局默认配置
-*改变默认的全局配置,直接设置对应的值就行*
+### Global default configuration
+*Change the default global configuration and set the corresponding value directly*
 ```java
 public class BleGlobalConfig {
-    //默认的扫描时间
+    //Default scan time
     public static long scanTime = 20000;//ms
-    //默认的写特征值重写次数
+    //Default rewrite times of write characteristic value
     public static int rewriteCount = 3;
-    //默认的发现服务失败重新发现的次数
+    //The number of times the default discovery service fails to rediscover
     public static int discoveryServiceFailRetryCount = 3;
-    //默认的服务uuid
+    //Default service uuid
     public static UUID serviceUUID;
-    //默认的写特特征uuid
+    //Default write feature uuid
     public static UUID writeUUID;
-    //默认的通知uuid
+    //Default notification uuid
     public static UUID notifyUUID;
-    //默认的连接超时时间
+    //Default connection timeout
     public static int connectTimeout = 7000;
-    //默认的重连次数
+    //Default reconnection times
     public static int reconnectCount = 0;
-    //默认的单个mtu包的写特征值失败重写次数
+    //The default number of times a single mtu packet fails to rewrite its write eigenvalue
     public static int singlePkgWriteTimeout = 200;
-    //最大的连接数量,当连接的设备超过最大连接设备数时,会按照设备连接时间断开最远的设备
+    //The maximum number of connections. When the number of connected devices exceeds the maximum number of connected devices, the farthest device will be disconnected according to the device connection time
     public static int maxConnectCount = 7;
-    //默认的单个mtu包的ota写特征值失败重写次数
+    //The default number of times a single mtu package fails to rewrite its ota write eigenvalue
     public static int otaSingleRewriteCount = 3;
-    //ota发送的段尺寸,比如文件大小1000b,otaSegmentSize=200b,那么每发200个长度就会回调一下progress
+    //The segment size sent by ota, such as the file size of 1000b, otaSegmentSize=200b, will be recalled every 200 timesprogress
     public static int otaSegmentSize = 200;
-    //全局的扫描配置
+    //Global scan configuration
     public static SimpleScanConfig globalScanConfig;
-    //默认的断开自动重连次数,默认是0,不自动重连
+    //The default number of disconnection and automatic reconnection is 0. No automatic reconnection
     public static int autoReconnectCount = 0;
 
 }
 ```
-### Ble回调的监听
-所有通过addXXXCallback形式添加的函数,必须在适当的时机调用对应的rmXXXCallback方法将其移除,不然会造成内存泄漏<br/>例如:我在activity的onCreate方法中添加了一个扫描的监听和设备连接状态的监听
+### Listen to Ble callback
+All functions added in the form of addXXXCallback must be removed by calling the corresponding rmXXXCallback method at an appropriate time, or memory leaks will occur
 ```java
     IConnectStatusChangeCallback connectStatusChangeCallback = (device, isConnect, status, profileState) -> {
-        //设备连接状态回调
+        //Device connection status callback
     };
     IScanCallback scanCallback = (device, rssi, scanRecord) -> {
-        //扫描到设备回调
+        //Scan to device callback
     };
 
     @Override
@@ -394,7 +395,7 @@ public class BleGlobalConfig {
         QsBle.getInstance().addConnectStatusChangeCallback(mac,connectStatusChangeCallback);
     }
 ```
-那在这个activity销毁的时候,你必须要将这个回调移除,不然会造成内存泄漏甚至app闪退
+When the activity is destroyed, you must remove the callback, or memory leaks or even app flashbacks will occur
 ```java
     @Override
     protected void onDestroy() {
@@ -402,51 +403,51 @@ public class BleGlobalConfig {
         QsBle.getInstance().rmConnectStatusChangeCallback(mac,connectStatusChangeCallback);
     }
 ```
-对于和某个Lifecycle生命周期绑定的回调,QsBle也提供了更好的添加方式
-例如在activity中,某些activity实现了Lifecycle类的接口,你只需调用addXXXCallback方法,传入Lifecycle参数,这个生命周期对象被销毁的时候会自动移除回调
+QsBle also provides a better way to add callbacks bound to a lifecycle
+For example, in activity, some activities implement the interface of the Lifecycle class. You just call the addXXXCallback method and pass in the Lifecycle parameter. When the lifecycle object is destroyed, the callback will be automatically removed
 ```java
-//kotlin方式
+//Kotlin mode
 QsBle.getInstance().addConnectStatusChangeCallback(mac,this.lifecycle, IConnectStatusChangeCallback { device, isConnect, status, profileState -> 
-        //连接状态回调
+        //Connection status callback
  })
 QsBle.getInstance().addScanCallback(this.lifecycle, IScanCallback { device, rssi, scanRecord -> 
-        //扫描回调
+        //Scan callback
 })
-//java方式
+//java mode
 QsBle.getInstance().addConnectStatusChangeCallback(mac,this.getLifecycle(), (device, isConnect, status, profileState) ->{
-        //连接状态回调
+        //Connection status callback
 });
 QsBle.getInstance().addScanCallback(this.getLifecycle(), (device, rssi, scanRecord) ->{
-        //扫描回调
+        //Scan callback
 });
 ```
 
-### 超过Mtu的分包和组包情况
-Android Ble的默认mtu是20byte长度,对于大于20byte的数据,需要app和设备开发人员确定分包的协议,一般分包协议将一个mtu数据分为包头和数据位,包头中规定了这个数据的序号等数据,设备收到一个mtu去掉包头,拼装数据,形成一个完整的包
+### Subcontracting and packaging beyond Mtu
+The default mtu of Android Ble is 20 bytes long. For data larger than 20 bytes, app and device developers need to determine the subcontracting protocol. Generally, the subcontracting protocol divides an mtu data into packet header and data bits. The packet header specifies the serial number of this data and other data. The device receives an mtu to remove the packet header and assemble the data to form a complete packet
 
-**1.分包的情况**
+**1.Subcontracting**
 
-在QsBle中写特征值分为两种,一种是写一个mtu长度的数据,一种是写超过一个mtu长度的数据
+There are two ways to write eigenvalues in QsBle: one is to write data of one mtu length, and the other is to write data of more than one mtu length
 
-**写一个mtu长度的数据的方法:**
+**Method of writing mtu length data:**
 ```java
 void write(String mac,UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount);
 void writeNoRsp(String mac,UUID serviceUuid, UUID chacUuid, byte[] value,int retryWriteCount);
 ```
-**写超过一个mtu长度的数据的方法:**
+**A method for writing data longer than one mtu:**
 ```java
 void writeByLock(String mac,UUID serviceUuid, UUID chacUuid, byte[] value, int retryWriteCount, Function2<Boolean,Integer> writeCallbac);
 void writeByLockNoRsp(String mac,UUID serviceUuid, UUID chacUuid, byte[] value,int retryWriteCount, Function2<Boolean,Integer> writeCallback);
 ```
 
-**处理这两种情况有以下需要注意的情况**
-<br/>注:这两种方法在一个类型的设备中最好指使用其中一个,**作者建议所有的写特征值都使用writeByLock和writeByLockNoRsp两个方法**,方法中带Lock的,都是指向这个设备的特征中写的数据都会进入write队列中,后面的消息会等收到系统的write成功回调或者触发超时后再发送下一个消息,由于不带Lock的方法都是直接发送的,不需要排队,如果你发送了一个长数据,长数据没有一下子发送完,后面又调用write方法发送了一个mtu数据,在设备端就会出现撞包现象,导致这该长数据将在设备端无法识别,除非你们的包头中包含了长数据的标志位或者你们的数据不需要分包
-所以作者强烈建议<br/>**所有的写特征值都使用writeByLock和writeByLockNoRsp两个方法**
+**The following situations should be noted when dealing with these two situations**
+<br/>Note: It is better to use one of these two methods in a type of device. * * The author suggests that all write characteristic values use two methods: writeByLock and writeByLockNoRsp * *. The method with Lock refers to that the data written in the device's characteristics will enter the write queue, and subsequent messages will be sent after receiving a successful write callback from the system or triggering a timeout, Since the methods without lock are sent directly, there is no need to queue. If you send a long data, and the long data is not sent all at once, and then you call the write method to send a mtu data, packet collision will occur on the device side, causing the long data to be unrecognized on the device side, unless your packet header contains the flag bit of the long data or your data does not need to be subcontracted
+So the author strongly suggests<br/>**All write eigenvalues use two methods: writeByLock and writeByLockNoRsp**
 
-**2.组包的情况**
+**2.Packaging**
 
-对于设备端响应的消息大于一个mtu长度,QsBle也提供了组包的接口
-你只需实现组包的抽象类BaseMultiPackageAssembly<br/>下面是例子
+QsBle also provides an interface for packaging when the device side responds to messages that are longer than one mtu
+You only need to implement the abstract class BaseMultiPackageAssembly<br/>Here's an example
 ```kotlin
 class MyMulitPkgParser :
     BaseMultiPackageAssembly(){
@@ -459,66 +460,66 @@ class MyMulitPkgParser :
     }
 
     override fun isLastPkg(value: ByteArray): Boolean {
-        //通过判断这个返回的mtu数据是否是最后一个包来判断是否组装成功
-        //如果返回true,说明数据全部接受
-        //如果返回false,说明还有下一个包,不能判断组装完成
+        //Determine whether the returned mtu data is the last package to determine whether the assembly is successful
+        //If true is returned, all data are accepted
+        //If false is returned, it indicates that there is another package and the assembly cannot be determined
     }
 
     override fun getPkgIndex(value: ByteArray): Int {
-        //从这个返回的mtu数据中取得这个包再整个数据中的包序号
+        //Obtain the package serial number of the whole data from the returned mtu data
     }
 }
 ```
-实现了组包类后,你需要调用
+After implementing the package class, you need to call
 ```kotlin
 QsBle.getInstance().setMultiPackageAssembly(mac, MyMulitPkgParser())
 ```
-设置这个设备的全局组包解析器
-设置成功后,你只需在需要获得数据时添加一个组包回调监听就可以获得组装成功的包了
+Set the global package parser for this device
+After the settings are successful, you only need to add a package callback listener when you need to obtain data to obtain the successfully assembled package
 ```kotlin
 ble.addBleMultiPkgsCallback(mac,MainActivity.nUuid, IBleMultiPkgsCallback { device, characteristic, result ->
-    //所以的包组包成功后会回调
-    //result是一个List<byte[]>类型,里面是组装后的所有结果
+    //All packages will be called back after successful packaging
+    //The result is a List<byte []>type, which contains all the results after assembly
 })
 ```
-*注:这个也需要再合适的时候调用rmBleMultiPkgsCallback将回调移除*
+*Note: This also requires calling rmBleMultiPkgsCallback when appropriate to remove the callback*
 
 
-### Ota升级
-Ota对app的开发人员来说,就是如何把一个文件传给设备,QsBle提供了完善的Ota升级支持
-**方式1:**
-调用QsBle的writeFile方法:
+### Ota Upgrade
+For app developers, Ota is how to transfer a file to the device. QsBle provides complete Ota upgrade support
+**Usage 1:**
+Call QsBle's writeFile method:
 ```java
  QsBle.getInstance()
      .writeFileNoRsp(String mac, UUID serviceUuid, UUID chacUuid, byte[] fileBytes, IOtaUpdateCallback otaUpdateCallback);
  QsBle.getInstance()
      .writeFileNoRsp(String mac, UUID serviceUuid, UUID chacUuid, File file, IOtaUpdateCallback otaUpdateCallback)
-//上面所有的方法都是对下面writeFileNoRsp方法的封装,QsBle只关注你传进来的io流
+//All the methods above encapsulate the writeFileNoRsp method below. QsBle only focuses on the IO stream you send in
  QsBle.getInstance()
      .writeFileNoRsp(String mac, UUID serviceUuid,UUID chacUuid, int fileByteCount, int segmentLength,InputStream datasource,IOtaUpdateCallback otaUpdateCallback);
 ```
-参数说明:
-fileByteCount:要发送ota文件的字节总长度
-segmentLength:段长度,发送多少长度回调回调一下文件发送的进度
-datasource:传入的ota文件流
-otaUpdateCallback:ota升级的回调
+Parameter Description:
+fileByteCount:Total byte length of ota file to be sent
+segmentLength:Segment length, how many length callbacks are sent to recall the file sending progress
+datasource:Incoming ota file stream
+otaUpdateCallback:Callback of ota upgrade
 ```java
 public interface IOtaUpdateCallback {
-    //开始发送文件之前会回调
+    //A callback will be made before the file is sent
     void onStart();
-    //文件已经成功发送给设备
+    //The file has been successfully sent to the device
     void onSuccess();
-    //发送文件的过程中出现错误会回调
+    //If an error occurs during file sending, a callback will be made
     void onError(Exception e);
-    //发送文件进度
+    //Send File Progress
     void onProgress(int progress);
 
 }
 ```
 
-**方式2(仅支持kotlin):**
-使用框架提供的协程操作发送ota文件,相比方式1,这种方式性能较差,但是可以开发人员灵活操作,应对各种复杂ota场景
-协程思路:<br/>使用kotlin协程实现方式2的操作<br/>**伪代码**
+**Usage 2(Only kotlin is supported):**
+Sending ota files by using the cooperative process operation provided by the framework. Compared with Mode 1, this mode has poor performance, but developers can flexibly operate to cope with various complex ota scenarios
+Coroutine idea:<br/>Operation of mode 2 using kotlin coprocess<br/>**Pseudo code**
 ```kotlin
 bleLifeScope.launch ({
     val datasource:InputStream = ...
@@ -527,33 +528,33 @@ bleLifeScope.launch ({
     while(datasource.available()>0){
         datasource.read(value)
         chain.writeByLock().await()
-        //写成功一段数据后处理你的逻辑,比如每个ota包中包括包头,包尾,数据部分
+        //Write a piece of data and then process your logic. For example, each ota package includes the header, footer, and data
     }
     
 },onError = {
-    //协程执行错误会调用,回调在主线程中
+    //The coroutine execution error will be called, and the callback will be in the main thread
 },onStart = {
-   //协程执行开始之前会调用,回调在主线程中
+   //Called before the execution of the coroutine starts, the callback is in the main thread
 },onFinally = {
-    //不管协程执行成功还是失败,这个方法最终都会调用,回调在主线程中
+    //Regardless of the success or failure of the coroutine execution, this method will eventually be called, and the callback is in the main thread
 })
 ```
 
-**方式3:**
-使用链式操作递归发送文件<br/>链式递归思路:<br/>**伪代码**
+**Usage 3:**
+Use chained operation to recursively send files<br/>chained recursion idea:<br/>**Pseudo code***
 ```java
 public void writeFile(byte[] value){
    QsBle.getInstance().chain(mac).writeByLockNoRsp(value).start((isSuccess, e) -> {
             if (isSuccess){
-                //填充字节数组
+                //Fill byte array
                 writeFile(value)
             }
     });
 }
 ```
 ### TODO
-- [ ] 制作文档
-- [ ] Android Ble教程
-- [ ] 经典蓝牙接入
-- [ ] Ble外设功能支持
-- [ ] 敬请期待
+- [ ] Documentation
+- [ ] Android Ble Tutorial
+- [ ] Classic Bluetooth access
+- [ ] Ble peripheral function support
+- [ ] Coming soon

@@ -2,6 +2,10 @@
 
 [github链接](https://github.com/zqisheng/QsBle)
 
+[中文文档](https://github.com/zqisheng/QsBle/blob/master/README_CN.md)
+
+[English Document](https://github.com/zqisheng/QsBle/blob/master/README.md)
+
 [点击下载演示demo](https://raw.githubusercontent.com/zqisheng/QsBle/master/screen/app-debug.apk)
 
 **特点**

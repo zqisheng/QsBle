@@ -150,6 +150,15 @@ public final class QsBle {
     }
 
     /**
+     * 是否启用严格模式 默认值:false
+     * @param isStrictMode true:框架线程报错会将异常直接抛出
+     *                     false:框架线程报错会拦截异常,只打印异常
+     */
+    public void setStrictMode(boolean isStrictMode){
+        ble.setStrictMode(isStrictMode);
+    }
+
+    /**
      * 所有的ble设备的gatt的回调,扫描的回调
      * 这里面的回调会比addxxxCallback的回调更先执行
      * @param bleGlobalGattCallback

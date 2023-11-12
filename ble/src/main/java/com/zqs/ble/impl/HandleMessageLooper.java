@@ -22,7 +22,7 @@ public class HandleMessageLooper extends DefaultMessageLooper {
 
    @Override
    public void block(long awaitTime) {
-      if (awaitTime!=Long.MAX_VALUE&&awaitTime>=0){
+      if (awaitTime!=Long.MAX_VALUE){
          handler.removeCallbacks(startLooper);
          Message message = Message.obtain(handler, startLooper);
          message.what = 1;

@@ -110,21 +110,13 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     public void awake(Thread thread){
         try {
+            lock.lock();
             if (thread.getState() == Thread.State.TIMED_WAITING) {
-                lock.lock();
-                if (thread.getState() == Thread.State.TIMED_WAITING) {
-                    condition.signal();
-                }
+                condition.signal();
             } else if (thread.getState() == Thread.State.WAITING) {
-                lock.lock();
-                if (thread.getState() == Thread.State.WAITING) {
-                    condition.signal();
-                }
+                condition.signal();
             }else if (thread.getState() == Thread.State.NEW) {
-                lock.lock();
-                if (thread.getState() == Thread.State.NEW) {
-                    thread.start();
-                }
+                thread.start();
             }
         } catch (Exception e) {
             if (AbsBleMessage.simpleBle.isStrictMode()){

@@ -27,7 +27,7 @@ public class WriteChacMessage extends AbsBleMessage implements IOptionMessage  {
         super(mac);
         this.serviceUuid = serviceUuid;
         this.chacUuid = chacUuid;
-        sendPkg=Utils.expandBytes(value, (byte) 0, getSimpleBle().getCurrentMtu());
+        sendPkg=Utils.expandBytes(value, (byte) 0, getSimpleBle().getCurrentMtu(mac));
     }
 
     public int getWriteType() {

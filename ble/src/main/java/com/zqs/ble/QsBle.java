@@ -179,9 +179,21 @@ public final class QsBle {
     /**
      * 当前的mtu
      * @return
+     * 使用 {@link com.zqs.ble.QsBle#getCurrentMtu(java.lang.String)} 替代
+     * 因为之前只支持一种设备的mtu改变
+     * 现在支持多个不同设备的mtu,比如A类型设备mtu是40,B设备类型mtu是100,这个在以前是无法实现的,现在加了通过mac地址区分不同设备mtu变化的功能
      */
+    @Deprecated
     public int getCurrentMtu(){
         return ble.getCurrentMtu();
+    }
+
+    /**
+     * 当前的mtu
+     * @return
+     */
+    public int getCurrentMtu(String mac){
+        return ble.getCurrentMtu(mac);
     }
 
     /**
@@ -311,11 +323,24 @@ public final class QsBle {
      * @param serviceUuid
      * @param notifyUuid
      * @return
+     * 不要使用这个方法,这个方法之前写的时候将通知状态判断反了,后面判断通知是否打开使用
+     * {@link com.zqs.ble.QsBle#notifyIsEnable(java.lang.String, java.util.UUID, java.util.UUID)}
      */
+    @Deprecated
     public boolean notifyIsOpen(@NonNull String mac,@NonNull UUID serviceUuid,@NonNull UUID notifyUuid){
         return getNotifyType(mac, serviceUuid, notifyUuid).equals("disable");
     }
 
+    /**
+     * 通知是否是打开的
+     * @param mac
+     * @param serviceUuid
+     * @param notifyUuid
+     * @return
+     */
+    public boolean notifyIsEnable(@NonNull String mac,@NonNull UUID serviceUuid,@NonNull UUID notifyUuid) {
+        return !getNotifyType(mac, serviceUuid, notifyUuid).equals("disable");
+    }
     @Nullable
     public List<BluetoothGattService> getGattService(@NonNull String mac){
         return ble.getGattService(mac);

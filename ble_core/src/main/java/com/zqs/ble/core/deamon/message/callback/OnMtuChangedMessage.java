@@ -40,12 +40,13 @@ public class OnMtuChangedMessage extends AbsBleMessage implements ICallbackMessa
             BleLog.d(String.format("BleCallback OnMtuChangedMessage:mac=%s,status=%d,mtu=%d", device.getAddress(), status, mtu));
         }
         if (status == BluetoothGatt.GATT_SUCCESS) {
-            if (getSimpleBle().getCurrentMtu() != mtu) {
+            if (getSimpleBle().getCurrentMtu(getMac()) != mtu) {
                 clearBeforeMessageIf(msg ->
                         (msg instanceof AbsBleMessage) && ((AbsBleMessage) msg).getMac().equals(getMac())
                          && ((msg instanceof WriteChacLockMessage) || msg instanceof WriteChacMessage));
             }
             getSimpleBle().setCurrentMtu(mtu);
+            getSimpleBle().setCurrentMtu(getMac(),mtu);
         }
         GlobalBleCallback globalBleCallback = getSimpleBle().getGlobalBleGattCallback();
         if (globalBleCallback != null) {

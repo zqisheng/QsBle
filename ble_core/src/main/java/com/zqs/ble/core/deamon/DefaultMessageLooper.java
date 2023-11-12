@@ -28,7 +28,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     private Thread thread;
-    private volatile boolean isPrepareWait = false;
     protected Runnable startLooper = this::loop;
 
     public DefaultMessageLooper(){
@@ -72,8 +71,6 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
 
     public final void block(){
         try {
-            //阻塞
-            isPrepareWait = true;
             lock.lock();
             if (!callbackMessages.isEmpty() || !optionMessages.isEmpty() || !frontMessages.isEmpty()) {
                 lock.unlock();
@@ -96,8 +93,10 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } finally {
-            isPrepareWait = false;
+        }finally {
+            while (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
     }
 
@@ -121,9 +120,6 @@ public class DefaultMessageLooper implements IMessageLooper, IBleMessageSender {
                 if (thread.getState() == Thread.State.WAITING) {
                     condition.signal();
                 }
-            } else if (isPrepareWait) {
-                lock.lock();
-                awake(thread);
             }else if (thread.getState() == Thread.State.NEW) {
                 lock.lock();
                 if (thread.getState() == Thread.State.NEW) {

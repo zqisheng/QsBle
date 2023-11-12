@@ -77,7 +77,10 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
 
     private boolean isScaning = false;
 
+    @Deprecated
     private int currentMtu = 20;
+
+    private HashMap<String, Integer> currentMtu2 = new HashMap<>();
     //是否启用严格模式
     private boolean isStrictMode = false;
 
@@ -162,13 +165,24 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
         return null;
     }
 
+    @Deprecated
     public int getCurrentMtu() {
         return currentMtu;
     }
 
+    @Deprecated
     public void setCurrentMtu(int currentMtu) {
         assertCurrentIsSenderThread();
         this.currentMtu = currentMtu;
+    }
+
+    public int getCurrentMtu(String mac) {
+        return currentMtu2.get(mac);
+    }
+
+    public void setCurrentMtu(String mac,int mtu) {
+        assertCurrentIsSenderThread();
+        this.currentMtu2.put(mac, mtu);
     }
 
     public boolean isScaning() {

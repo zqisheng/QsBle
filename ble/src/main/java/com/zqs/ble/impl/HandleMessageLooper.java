@@ -33,8 +33,6 @@ public class HandleMessageLooper extends DefaultMessageLooper {
 
    @Override
    public void awake(Thread thread) {
-      if (!handler.hasMessages(1,token)){
-         handler.post(startLooper);
-      }
+      handler.post(startLooper);
    }
 }

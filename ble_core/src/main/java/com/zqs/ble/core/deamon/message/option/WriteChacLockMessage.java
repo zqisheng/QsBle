@@ -52,7 +52,7 @@ public class WriteChacLockMessage extends AbsBleMessage implements IOptionMessag
         this.serviceUuid = serviceUuid;
         this.chacUuid = chacUuid;
         writeKey=getMac() + chacUuid.toString();
-        mtu=getSimpleBle().getCurrentMtu();
+        mtu=getSimpleBle().getCurrentMtu(getMac());
         this.value = Utils.expandBytes(value, (byte) 0,mtu);
         pkgCount = value.length / mtu + (value.length % mtu == 0 ? 0 : 1);
     }

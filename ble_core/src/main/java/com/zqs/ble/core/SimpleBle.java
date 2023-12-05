@@ -177,7 +177,11 @@ public class SimpleBle implements IBleMessageSender, IBleOption,IBleCallback {
     }
 
     public int getCurrentMtu(String mac) {
-        return currentMtu2.get(mac);
+        Integer mtu = currentMtu2.get(mac);
+        if (mtu==null){
+            mtu = 20;
+        }
+        return mtu;
     }
 
     public void setCurrentMtu(String mac,int mtu) {

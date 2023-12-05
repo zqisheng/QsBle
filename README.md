@@ -32,9 +32,9 @@ allprojects {
 
 dependencies {
     //Dependencies that QsBle must add
-   implementation 'com.github.zqisheng.QsBle:ble:1.2.5
+   implementation 'com.github.zqisheng.QsBle:ble:1.2.6
     //If you want to use the kotlin coroutine function, you must add the following dependencies, not required
-   //implementation 'com.github.zqisheng.QsBle:ble_coroutines:1.2.5
+   //implementation 'com.github.zqisheng.QsBle:ble_coroutines:1.2.6
 }
 ```
 
